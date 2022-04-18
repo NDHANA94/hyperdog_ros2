@@ -19,11 +19,10 @@ class InvKin_Node(Node):
         self.prev_joint_angs = None
         super().__init__('IK_node')
         self.sub_ = self.create_subscription(Geometry, 'hyperdog_geometry', self.sub_callback, 30)
-        # self.pub_ = self.create_publisher(Float64MultiArray, 'gazebo_joint_controller/commands', 30)
         self.pub2STM = self.create_publisher(Float32MultiArray, 'hyperdog_jointController/commands', 30)
         timer_period = 0.02
         # self.timerPub = self.create_timer(timer_period, callback =self.pub_callback1 )
-        self.timerPub = self.create_timer(timer_period, self.pub_callback2)
+        self.timerPub = self.create_timer(timer_period, self.pub_callback)
         
 
 
@@ -53,18 +52,16 @@ class InvKin_Node(Node):
                                 ang_BL[0], ang_BL[1], ang_BL[1]+ang_BL[2]
                                 ] 
             self.prev_joint_angs = self.joint_angs.data
+            # self.pub2STM.publish(self.joint_angs) 
         elif not self.prev_joint_angs == None:
             self.joint_angs.data = self.prev_joint_angs
+        
             
 
 
-
-    def pub_callback1(self):
-        if not np.any(self.joint_angs.data) == None:
-            self.pub_.publish(self.joint_angs)
-
-    def pub_callback2(self):
-        if not np.any(self.joint_angs.data) == None:
+    def pub_callback(self):
+        if np.any(self.joint_angs.data) != None:
+            pass
             self.pub2STM.publish(self.joint_angs)    
     
 
