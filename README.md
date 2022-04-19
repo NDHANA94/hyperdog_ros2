@@ -37,13 +37,51 @@ packages are :
             - publisher  : `/hyperdog_jointController/commands`
   
   4. **`uros`** : this is the micro_ros package from its official git. this package is used to launch `micro_ros_agent` to communicate with micro-controllers which run micro_ros via ROS2
+  
+  5. **`hyperdog_launch`** : This contains the launch file for all the above nodes and `micro_ros_agent`
 
 
 ## Building
 
- Create a ROS2 workspace and build this package for ROS2 foxy
- 'mkdir hyperdog_ws/src
+ 1. Create a ROS2 workspace and build this package for ROS2 foxy
+ ```
+ # make the workspace
+ mkdir hyperdog_ws/src 
  cd hyperdog_ws/src
- git clone 
+ 
+ # download the pkg
+ git clone https://github.com/NDHANA94/hyperdog_ros2.git
+ 
+ # build the pkg
+ cd .. 
+ colcon build
+ ```
+ 
+ 2. build `micro_ros_agent`  in hyperdog_ws from the git repository https://github.com/micro-ROS/micro_ros_setup/tree/foxy. follow instuction and build the micro_ros_agent.
+ 3. edit line 41 in hyperdog_ros2/src/hyperdog_launch/launch/hyperdog.launch.py script to configure your serial port.
+ 4. go to `hyperdog_ws` directory and build all the packages again
+ 
+ 
+ # Launching
+ source the workspace  
+ ```
+ source hyperdog_ws/install/setup.bash
+ ```
+ to add workspace source permenently to .bashrc DO:
+  ```
+    cd /home/$USER/
+    sudo nano .bashrc
+    
+    # add following code to the end of the script and save
+    source /home/$USER/hyperdog_ws/install/setup.bash
+  ```
+  
+  to launch run following 
+  ```
+  ros2 launch hyperdog_launch hyperdog.launch.py
+  ```
+
+ 
+ 
             
         
