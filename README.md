@@ -39,6 +39,13 @@ packages are :
   4. **`uros`** : this is the micro_ros package from its official git. this package is used to launch `micro_ros_agent` to communicate with micro-controllers which run micro_ros via ROS2
   
   5. **`hyperdog_launch`** : This contains the launch file for all the above nodes and `micro_ros_agent`
+  
+  6. **`hyperdog_gazebo_sim`** : Gazebo simmulation 
+  
+  7. **`hyperdog_gazebo_joint_cmd`** : this pkg contains the node `/hyperdog_gazebo_joint_cmd` to send joint angles to gazebo
+        - Node : `/hyperdog_gazebo_joint_cmd`
+            - subscriber : `/hyperdog_jointController/commands`
+            - publisher : '/gazebo_joint_controller/commands`
 
 
 ## Building
@@ -79,7 +86,12 @@ packages are :
   to launch run following 
   ```
   ros2 launch hyperdog_launch hyperdog.launch.py
+ 
   ```
+  
+  to launch gazebo with hyperdog
+  ```
+  ros2 launch hypedog_gazebo_sim hyperdog_gazebo_sim.launch.py
 
  
  
