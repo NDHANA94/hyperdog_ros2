@@ -74,7 +74,7 @@ packages are :
  ```
  source hyperdog_ws/install/setup.bash
  ```
- to add workspace source permenently to .bashrc DO:
+ to add workspace source permenently to .bashrc:
   ```
     cd /home/$USER/
     sudo nano .bashrc
