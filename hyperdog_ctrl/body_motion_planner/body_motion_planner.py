@@ -42,8 +42,9 @@ class BodyMotionPlanner():
     def run(self):
         while True:
             self.cmd.leg.foot_zero_pnt[:,2] = np.array(self.cmd.body.height) 
-            self.cmd.leg.foot_zero_pnt[::2,:2] = np.array([0,self.__L1]) + self.cmd.body.slant[:2]
-            self.cmd.leg.foot_zero_pnt[1::2,:2] = np.array([0,self.__L1]) + self.cmd.body.slant[:2]*np.array([1,-1])
+            """ uncomment below 2 lines to activate slant from joystick"""
+            # self.cmd.leg.foot_zero_pnt[::2,:2] = np.array([0,self.__L1]) + self.cmd.body.slant[:2]
+            # self.cmd.leg.foot_zero_pnt[1::2,:2] = np.array([0,self.__L1]) + self.cmd.body.slant[:2]*np.array([1,-1])
             self.body.roll = self.cmd.body.roll
             self.body.pitch = self.cmd.body.pitch
             self.body.yaw = self.cmd.body.yaw

@@ -16,7 +16,7 @@ cmd = Cmds()
 # leg.foot_zero_pnt[:,2] = body.height  = cmd.body.height
 
 cmd.gait.cycle_time = 0.5
-cmd.gait.swing_time = 0.2
+cmd.gait.swing_time = 0.25
 cmd.leg.foot_zero_pnt[0,0] = -40
 cmd.leg.foot_zero_pnt[1,0] = -40
 cmd.leg.foot_zero_pnt[2,0] = -70
