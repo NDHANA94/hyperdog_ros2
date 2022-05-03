@@ -15,22 +15,22 @@ cmd = Cmds()
 # lilnk  objects
 # leg.foot_zero_pnt[:,2] = body.height  = cmd.body.height
 
-cmd.gait.cycle_time = 0.5
-cmd.gait.swing_time = 0.25
-cmd.leg.foot_zero_pnt[0,0] = -40
-cmd.leg.foot_zero_pnt[1,0] = -40
-cmd.leg.foot_zero_pnt[2,0] = -70
-cmd.leg.foot_zero_pnt[3,0] = -70
+cmd.gait.cycle_time = 1.6
+cmd.gait.swing_time = 0.2
+cmd.leg.foot_zero_pnt[0,0] = -10
+cmd.leg.foot_zero_pnt[1,0] = -10
+cmd.leg.foot_zero_pnt[2,0] = -60
+cmd.leg.foot_zero_pnt[3,0] = -60
 cmd.gait.stance_step_h = 0
 
+cmd_manager = CmdManager_ROS(set_msgs=cmd, send_msgs=[leg, body])
+gait_planner = GaitPlanner(cmd, leg, body)
+bmp = BodyMotionPlanner(cmd, leg, body, gait_planner)
+
+gait_planner.len_zmp_wavegait = 50
 
 def main(args=None):
     print('starting')
-
-    cmd_manager = CmdManager_ROS(set_msgs=cmd, send_msgs=[leg, body])
-    gait_planner = GaitPlanner(cmd, leg)
-    bmp = BodyMotionPlanner(cmd, leg, body, gait_planner)
-
 
     thread_cmd_manager = threading.Thread(target=cmd_manager.start)
     thread_gait_planner = threading.Thread(target=gait_planner.run)

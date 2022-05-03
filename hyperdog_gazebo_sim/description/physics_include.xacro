@@ -51,7 +51,7 @@
     <!--  BODY -->
     <xacro:macro name="inertial_body">
         <inertial>
-            <origin xyz="-0.006 -0.00233 0.0214" rpy="0 0 0"/>
+            <origin xyz="-0.006 0.00633 0.00214" rpy="0 0 0"/> <!-- 0.006, -0.000233, 0.00214 -->
             <mass value="2.0" />
             <inertia ixx="0.00728" ixy="0.00003" ixz="0.00073" iyy="0.01641" iyz="0.00013" izz="0.01965" />
         </inertial>

@@ -70,15 +70,15 @@ def generate_launch_description():
                 ]
             )
         ),
-        RegisterEventHandler(
-            OnProcessStart(
-            target_action=node_IK_node,
-            on_start=[
-                    LogInfo(msg='IK_node started, starting uros agent'),
-                    node_uros_agent
-                ]
-            )
-        ),
+        # RegisterEventHandler(
+        #     OnProcessStart(
+        #     target_action=node_IK_node,
+        #     on_start=[
+        #             LogInfo(msg='IK_node started, starting uros agent'),
+        #             node_uros_agent
+        #         ]
+        #     )
+        # ),
         # RegisterEventHandler(
         #     OnShutdown(
         #         on_shutdown=[LogInfo(
