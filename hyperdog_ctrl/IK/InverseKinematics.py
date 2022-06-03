@@ -46,9 +46,11 @@ class InverseKinematics():
         M11 = np.cos(eularAng[1])*np.cos(eularAng[2])
         M12 = np.sin(eularAng[0])*np.sin(eularAng[1])*np.cos(eularAng[2]) - np.cos(eularAng[0])*np.sin(eularAng[2])
         M13 = np.cos(eularAng[0])*np.sin(eularAng[1])*np.cos(eularAng[2]) + np.sin(eularAng[0])*np.sin(eularAng[2])
+
         M21 = np.cos(eularAng[1])*np.sin(eularAng[2])
         M22 = np.sin(eularAng[0])*np.sin(eularAng[1])*np.sin(eularAng[2]) + np.cos(eularAng[0])*np.cos(eularAng[2])
         M23 = np.cos(eularAng[0])*np.sin(eularAng[1])*np.sin(eularAng[2]) - np.sin(eularAng[0])*np.cos(eularAng[2])
+        
         M31 = -np.sin(eularAng[1])
         M32 = np.sin(eularAng[0])*np.cos(eularAng[1])
         M33 = np.cos(eularAng[0])*np.cos(eularAng[1])

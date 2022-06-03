@@ -198,9 +198,9 @@
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <!-- <surface>
+            <surface>
                 <xacro:foot_surface></xacro:foot_surface>
-            </surface> -->
+            </surface>
         </collision>
         <xacro:inertial_right_lleg></xacro:inertial_right_lleg>
 
@@ -220,6 +220,9 @@
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
+            <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface>
         </collision>
         <xacro:inertial_left_hip></xacro:inertial_left_hip>
 
@@ -240,6 +243,9 @@
             <geometry>
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
+            <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface>
         </collision>
         <xacro:inertial_left_uleg></xacro:inertial_left_uleg>
     </link>
@@ -258,9 +264,9 @@
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <!-- <surface>
+            <surface>
                 <xacro:foot_surface></xacro:foot_surface>
-            </surface> -->
+            </surface>
         </collision>
         <xacro:inertial_left_lleg></xacro:inertial_left_lleg>
     </link>

@@ -5,7 +5,7 @@
 #define ROLL_RANGE    45
 #define YAW_RANGE     50
 
-#define MIN_HEIGHT    80
+#define MIN_HEIGHT    90
 #define MAX_HEIGHT    250
 
 #define SLANT_X_MIN   -150

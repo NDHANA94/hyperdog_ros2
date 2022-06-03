@@ -15,10 +15,10 @@ cmd = Cmds()
 # lilnk  objects
 # leg.foot_zero_pnt[:,2] = body.height  = cmd.body.height
 
-cmd.gait.cycle_time = 1.6
+cmd.gait.cycle_time = 0.8
 cmd.gait.swing_time = 0.2
-cmd.leg.foot_zero_pnt[0,0] = -10
-cmd.leg.foot_zero_pnt[1,0] = -10
+cmd.leg.foot_zero_pnt[0,0] = -20
+cmd.leg.foot_zero_pnt[1,0] = -20
 cmd.leg.foot_zero_pnt[2,0] = -60
 cmd.leg.foot_zero_pnt[3,0] = -60
 cmd.gait.stance_step_h = 0

@@ -30,12 +30,12 @@
             </plane>
           </geometry>
           <surface>
-              <bounce>100</bounce>
+              <bounce>100000</bounce>
             <friction>
               <ode>
-                <bounce>100</bounce>
-                <mu>100000000000000000</mu>
-                <mu2>100000000000000000</mu2>
+                <bounce>100000</bounce>
+                <mu>50</mu>
+                <mu2>50</mu2>
                 <slip>0</slip>
                 <slip>0</slip>
                 <fdir1>0 0 0</fdir1>

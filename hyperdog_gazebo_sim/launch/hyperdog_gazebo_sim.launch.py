@@ -31,6 +31,10 @@ pkg_hyperdog_gazebo = FindPackageShare(package='hyperdog_gazebo_sim').find('hype
 # Set the path to the world file
 world_file_name = 'test_world.world'
 world_path = os.path.join(pkg_hyperdog_gazebo, 'worlds', world_file_name)
+# world_path = os.path.join(pkg_hyperdog_gazebo, 'worlds', 'contact.world')
+
+# world_path = "/usr/share/gazebo-11/worlds/friction_demo.world"
+
 
 # configure hyperdog teleop
 teleop_pkg_name = 'hyperdog_teleop'

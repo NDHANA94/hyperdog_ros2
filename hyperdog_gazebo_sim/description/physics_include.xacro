@@ -32,16 +32,16 @@
     <xacro:macro name="foot_surface">
         <!-- <friction>
         <mu1>10.0</mu1><mu2>10.0</mu2>
-        </friction>
+        </friction>-->
         <contact>
-            <min_depth>0.003</min_depth>
-        </contact> -->
+            <min_depth>0.001</min_depth>
+        </contact> 
         <mu1>100.0</mu1>
-        <mu2>50.0</mu2>
+        <mu2>100.0</mu2>
         <kp>1e13</kp>
         <kd>1.0</kd>
-        <minDepth>0.003</minDepth>
-        <bounce_threshold>1</bounce_threshold>
+        <minDepth>0.001</minDepth>
+        <bounce_threshold>10000000</bounce_threshold>
         <maxVel>0.1</maxVel>
         <fdir1>0 0 0</fdir1>
     </xacro:macro>

@@ -15,49 +15,49 @@
 
 
     <gazebo reference="rob_link">
-        <material>Gazebo/Green</material>
+        <material>Gazebo/DarkGrey  </material>
     </gazebo>
     <gazebo reference="FR_hip_link">
-        <material>Gazebo/Blue</material>
+        <material>Gazebo/PioneerBody</material>
     </gazebo>   
     <gazebo reference="FL_hip_link">
-        <material>Gazebo/Blue</material>
+        <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="BR_hip_link">
-        <material>Gazebo/Blue</material>
+        <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="BL_hip_link">
-        <material>Gazebo/Blue</material>
+        <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="FR_uleg_link">
-        <material>Gazebo/Orange</material>
+        <material>Gazebo/Orange     </material>
     </gazebo>   
     <gazebo reference="FL_uleg_link">
-        <material>Gazebo/Orange</material>
+        <material>Gazebo/Orange   </material>
     </gazebo> 
     <gazebo reference="BR_uleg_link">
-        <material>Gazebo/Orange</material>
+        <material>Gazebo/Orange   </material>
     </gazebo>
     <gazebo reference="BL_uleg_link">
-        <material>Gazebo/Orange</material>
+        <material>Gazebo/Orange </material>
     </gazebo>
     
     <gazebo reference="FR_lleg_link">
-        <material>Gazebo/Red</material>
+        <material>Gazebo/DarkYellow  </material>
         <xacro:foot_surface></xacro:foot_surface>
 
     </gazebo>
     <gazebo reference="FL_lleg_link">
-        <material>Gazebo/Red</material>
+        <material>Gazebo/DarkYellow  </material>
         <xacro:foot_surface></xacro:foot_surface>
 
     </gazebo>
     <gazebo reference="BR_lleg_link">
-        <material>Gazebo/Red</material>
+        <material>Gazebo/DarkYellow  </material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
     <gazebo reference="BL_lleg_link">
-        <material>Gazebo/Red</material>
+        <material>Gazebo/DarkYellow  </material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
 
