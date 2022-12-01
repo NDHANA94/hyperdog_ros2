@@ -8,10 +8,10 @@ import math
 # from cmd_manager.hyperdog_variables import Body, Leg, Cmds
 
 class GaitPlanner():
-    def __init__(self, cmd, leg):
+    def __init__(self, cmd, leg, body):
         self.cmd = cmd
         self.leg = leg
-        # self.body = body
+        self.body = body
 
         self.gnd_touched = np.ones([4]) #fr,fl,br,bl
         self.sample_time = 0.001
@@ -26,6 +26,15 @@ class GaitPlanner():
         self.br_traj = []
         self.bl_traj = []
 
+        self.t_zmp_wavegait = 0.5
+        self.len_zmp_wavegait = 50
+
+        self.wavegait_cycle_time = 1
+        self.trot_gait_cycle_time = 0.5
+        self.trot_gait_swing_time = self.cmd.gait.cycle_time/4
+
+        
+
 
     def swing_FR(self, t):
         traj_pnt = np.zeros([3])
@@ -35,8 +44,9 @@ class GaitPlanner():
             self.leg.FR.gait.swing.end_pnt[2] = self.leg.FR.pose.cur_coord[2]
             # set start point
             if self.leg.FR.gait.swing.start == False:
+                self.leg.FR.gait.stance.start = False
                 self.leg.FR.gait.swing.start = True
-                self.leg.FR.gait.swing.start_pnt[:2] = self.leg.FR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[0,:2]
+                self.leg.FR.gait.swing.start_pnt[:2] = self.leg.FR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[0,:2] - self.body.ZMP_handler[0,:2]
                 self.leg.FR.gait.swing.start_pnt[2] = self.leg.FR.pose.cur_coord[2]
             # make trajectory
             T = self.leg.FR.gait.swing.time
@@ -48,6 +58,7 @@ class GaitPlanner():
                 traj_pnt[:2] = np.array(self.leg.FR.gait.swing.end_pnt)[:2]
                 traj_pnt[2] = 0
                 self.leg.FR.gait.swing.start = False
+                
         else:
             traj_pnt[:2] = self.leg.FR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[0,:2]
             traj_pnt[2] = 0
@@ -63,7 +74,7 @@ class GaitPlanner():
             # set start point
             if self.leg.FR.gait.stance.start == False:
                 self.leg.FR.gait.stance.start = True
-                self.leg.FR.gait.stance.start_pnt[:2] = self.leg.FR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[0,:2]
+                self.leg.FR.gait.stance.start_pnt[:2] = self.leg.FR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[0,:2] - self.body.ZMP_handler[0,:2]
                 self.leg.FR.gait.stance.start_pnt[2] = self.leg.FR.pose.cur_coord[2]
             # make trajectory
             
@@ -89,8 +100,9 @@ class GaitPlanner():
             self.leg.FL.gait.swing.end_pnt[2] = self.leg.FL.pose.cur_coord[2]
 
             if self.leg.FL.gait.swing.start == False:
+                self.leg.FL.gait.stance.start = False
                 self.leg.FL.gait.swing.start = True
-                self.leg.FL.gait.swing.start_pnt[:2] = self.leg.FL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[1,:2]
+                self.leg.FL.gait.swing.start_pnt[:2] = self.leg.FL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[1,:2] - self.body.ZMP_handler[1,:2]
                 self.leg.FL.gait.swing.start_pnt[2] = self.leg.FL.pose.cur_coord[2]
             # make trajectory
             T = self.leg.FL.gait.swing.time
@@ -101,6 +113,7 @@ class GaitPlanner():
                 traj_pnt[:2] = np.array(self.leg.FL.gait.swing.end_pnt)[:2]
                 traj_pnt[2] = 0
                 self.leg.FL.gait.swing.start = False
+                
         else:
             traj_pnt[:2] = self.leg.FL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[1,:2]
             traj_pnt[2] = 0
@@ -116,7 +129,7 @@ class GaitPlanner():
             # set start point
             if self.leg.FL.gait.stance.start == False:
                 self.leg.FL.gait.stance.start = True
-                self.leg.FL.gait.stance.start_pnt[:2] = self.leg.FL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[1,:2]
+                self.leg.FL.gait.stance.start_pnt[:2] = self.leg.FL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[1,:2] - self.body.ZMP_handler[1,:2]
                 self.leg.FL.gait.stance.start_pnt[2] = self.leg.FL.pose.cur_coord[2]
 
             # make trajectory
@@ -138,12 +151,16 @@ class GaitPlanner():
         traj_pnt = np.zeros([3])
         self.leg.BR.gait.swing.time =  self.cmd.gait.swing_time
         if self.cmd.mode.walk:
-            self.leg.BR.gait.swing.end_pnt[:2] = np.array(self.cmd.gait.step_len)/2
+            if (self.cmd.mode.side_walk_mode == 0):
+                self.leg.BR.gait.swing.end_pnt[:2] = np.array(self.cmd.gait.step_len)/2
+            else: 
+                self.leg.BR.gait.swing.end_pnt[:2] = np.array(self.cmd.gait.step_len)/2 * np.array([1,-1])
             self.leg.BR.gait.swing.end_pnt[2] = self.leg.BR.pose.cur_coord[2]
             # set start point
             if self.leg.BR.gait.swing.start == False:
+                self.leg.BR.gait.stance.start = False
                 self.leg.BR.gait.swing.start = True
-                self.leg.BR.gait.swing.start_pnt[:2] = self.leg.BR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[2,:2]
+                self.leg.BR.gait.swing.start_pnt[:2] = self.leg.BR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[2,:2]  - self.body.ZMP_handler[2,:2]
                 self.leg.BR.gait.swing.start_pnt[2] = self.leg.BR.pose.cur_coord[2]
             # make trajectory
             T = self.leg.BR.gait.swing.time
@@ -154,6 +171,7 @@ class GaitPlanner():
                 traj_pnt[:2] = np.array(self.leg.BR.gait.swing.end_pnt)[:2]
                 traj_pnt[2] = 0
                 self.leg.BR.gait.swing.start = False
+                
         else:
             traj_pnt[:2] = self.leg.BR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[2,:2]
             traj_pnt[2] = 0
@@ -164,12 +182,15 @@ class GaitPlanner():
         traj_pnt = np.zeros([3])
         self.leg.BR.gait.stance.time = self.cmd.gait.cycle_time - self.cmd.gait.swing_time
         if self.cmd.mode.walk:
-            self.leg.BR.gait.stance.end_pnt[:2] = - np.array(self.cmd.gait.step_len)/2
+            if (self.cmd.mode.side_walk_mode == 0):
+                self.leg.BR.gait.stance.end_pnt[:2] = - np.array(self.cmd.gait.step_len)/2
+            else:
+                self.leg.BR.gait.stance.end_pnt[:2] = - np.array(self.cmd.gait.step_len)/2 * np.array([1,-1])
             self.leg.BR.gait.stance.end_pnt[2] = self.leg.BR.pose.cur_coord[2]
             # set start point
             if self.leg.BR.gait.stance.start == False:
                 self.leg.BR.gait.stance.start = True
-                self.leg.BR.gait.stance.start_pnt[:2] = self.leg.BR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[2,:2]
+                self.leg.BR.gait.stance.start_pnt[:2] = self.leg.BR.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[2,:2]  - self.body.ZMP_handler[2,:2]
                 self.leg.BR.gait.stance.start_pnt[2] = self.leg.BR.pose.cur_coord[2]
             # make trajectory
             T = self.leg.BR.gait.stance.time
@@ -190,12 +211,16 @@ class GaitPlanner():
         traj_pnt = np.zeros([3])
         self.leg.BL.gait.swing.time =  self.cmd.gait.swing_time
         if self.cmd.mode.walk:
-            self.leg.BL.gait.swing.end_pnt[:2] = np.array(self.cmd.gait.step_len/2) * np.array([1,-1])
+            if (self.cmd.mode.side_walk_mode == 0):
+                self.leg.BL.gait.swing.end_pnt[:2] = np.array(self.cmd.gait.step_len/2) * np.array([1,-1])
+            else:
+                self.leg.BL.gait.swing.end_pnt[:2] = np.array(self.cmd.gait.step_len/2) 
             self.leg.BL.gait.swing.end_pnt[2] = self.leg.BL.pose.cur_coord[2]
 
             if self.leg.BL.gait.swing.start == False:
+                self.leg.BL.gait.stance.start = False
                 self.leg.BL.gait.swing.start = True
-                self.leg.BL.gait.swing.start_pnt[:2] = self.leg.BL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[3,:2]
+                self.leg.BL.gait.swing.start_pnt[:2] = self.leg.BL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[3,:2] - self.body.ZMP_handler[3,:2]
                 self.leg.BL.gait.swing.start_pnt[2] = self.leg.BL.pose.cur_coord[2]
             # make trajectory
             T = self.leg.BL.gait.swing.time
@@ -206,6 +231,7 @@ class GaitPlanner():
                 traj_pnt[:2] = self.leg.BL.gait.swing.end_pnt[:2]
                 traj_pnt[2] = 0
                 self.leg.BL.gait.swing.start = False
+                
         else:
             traj_pnt[:2] = self.leg.BL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[3,:2]
             traj_pnt[2] = 0
@@ -216,12 +242,15 @@ class GaitPlanner():
         traj_pnt = np.zeros([3])
         self.leg.BL.gait.stance.time = self.cmd.gait.cycle_time - self.cmd.gait.swing_time
         if self.cmd.mode.walk:
-            self.leg.BL.gait.stance.end_pnt[:2] = - self.cmd.gait.step_len/2 * np.array([1,-1])
+            if (self.cmd.mode.side_walk_mode == 0):
+                self.leg.BL.gait.stance.end_pnt[:2] = - self.cmd.gait.step_len/2 * np.array([1,-1])
+            else:
+                self.leg.BL.gait.stance.end_pnt[:2] = - self.cmd.gait.step_len/2
             self.leg.BL.gait.stance.end_pnt[2] = self.leg.BL.pose.cur_coord[2]
             # set start point
             if self.leg.BL.gait.stance.start == False:
                 self.leg.BL.gait.stance.start = True
-                self.leg.BL.gait.stance.start_pnt[:2] = self.leg.BL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[3,:2]
+                self.leg.BL.gait.stance.start_pnt[:2] = self.leg.BL.pose.cur_coord[:2] - self.cmd.leg.foot_zero_pnt[3,:2]  - self.body.ZMP_handler[3,:2]
                 self.leg.BL.gait.stance.start_pnt[2] = self.leg.BL.pose.cur_coord[2]
 
             # make trajectory
@@ -325,7 +354,7 @@ class GaitPlanner():
         t = time.time()
         dt = time.time() - t
         i = 0
-        while self.cmd.mode.gait_type == 1:
+        while self.cmd.mode.walk:
             if dt <= self.cmd.gait.cycle_time:
                 if dt >= self.sample_time*i:
                     i += 1
@@ -356,15 +385,137 @@ class GaitPlanner():
             dt = time.time() - t
             time.sleep(0.0002)
 
+    def run_trot2(self):
+        t = time.time()
+        dt = time.time() - t
+        i = 0
+        while self.cmd.mode.walk:
+            if dt <= self.cmd.gait.cycle_time:
+                if dt >= self.sample_time*i:
+                    i += 1
+                    # FR,BL - swing |   FL,BR - stance
+                    if dt <= self.cmd.gait.swing_time:
+                        self.swing_FR(dt)
+                        self.stance_FL(dt)
+                        self.stance_BR(dt)
+                        self.swing_BL(dt)
+                    # All - stance
+                    elif dt > self.cmd.gait.swing_time and dt < (self.cmd.gait.cycle_time - self.cmd.gait.swing_time)/2:
+                        self.stance_FR(dt - self.cmd.gait.swing_time)
+                        self.stance_FL(dt)
+                        self.stance_BR(dt)
+                        self.stance_BL(dt - self.cmd.gait.swing_time)
+                    # FR,BL - stance |   FL,BR - swing
+                    else:
+                        stance_t = self.cmd.gait.cycle_time - self.cmd.gait.swing_time
+                        self.stance_FR(dt - self.cmd.gait.swing_time)
+                        self.swing_FL(dt - stance_t)
+                        self.swing_BR(dt - stance_t)
+                        self.stance_BL(dt - self.cmd.gait.swing_time)
+            else:
+                # cycle reset
+                i = 0
+                t = time.time()
+            # print(self.leg.FR.gait.traj_pnt[:]) #debug
+            dt = time.time() - t
+            time.sleep(0.0002)
+
+    def run_waveGait(self):
+        stance_zone_count = np.zeros([4])
+        t = time.time()
+        dt = time.time() - t
+        t_zmp = self.t_zmp_wavegait
+        zmp_len = self.len_zmp_wavegait
+        i = 0
+        self.body.ZMP_handler[:,:] = 0
+
+        while self.cmd.mode.walk:
+            zone_time = self.cmd.gait.cycle_time/4
+            if dt <= self.cmd.gait.cycle_time + 2*t_zmp:
+                if dt >= self.sample_time*i:
+                    i += 1
+                    # ZMP body move left
+                    if dt <= t_zmp/2:
+                        self.body.ZMP_handler[::2,1] = dt*zmp_len/(t_zmp/2)  
+                        self.body.ZMP_handler[1::2,1] = -dt*zmp_len/(t_zmp/2) 
+
+                    # BR - swing |   other - stance
+                    elif dt > t_zmp/2 and dt <= zone_time + t_zmp/2:
+                        self.swing_BR(dt - t_zmp/2)
+                        self.stance_FR(stance_zone_count[0]*zone_time + dt - t_zmp/2) 
+                        self.stance_BL(stance_zone_count[3]*zone_time + dt - t_zmp/2)
+                        self.stance_FL(dt- t_zmp/2)
+                        stance_zone_count[2] = 0
+                    # FR - swing | other stance
+                    elif dt > zone_time + t_zmp/2 and dt <= 2*zone_time + t_zmp/2:
+                        self.stance_BR(dt-zone_time - t_zmp/2)
+                        self.swing_FR(dt-zone_time - t_zmp/2)
+                        self.stance_BL(stance_zone_count[3]*zone_time + dt - t_zmp/2)
+                        self.stance_FL(dt - t_zmp/2)
+                        stance_zone_count[0] = 0
+
+                    # ZMP move body right
+                    elif dt > 2*zone_time + t_zmp/2 and dt <= 2*zone_time + 3*t_zmp/2:
+                        self.body.ZMP_handler[::2,1] = zmp_len-(dt-2*zone_time - t_zmp/2)*2*zmp_len/t_zmp  
+                        self.body.ZMP_handler[1::2,1] = -zmp_len+ (dt-2*zone_time - t_zmp/2)*2*zmp_len/t_zmp 
+
+                    # BL - swing | other - stance
+                    elif dt > 2*zone_time + 3*t_zmp/2 and dt <= 3*zone_time + 3*t_zmp/2:
+                        self.stance_BR(dt-zone_time - 3/2*t_zmp)
+                        self.stance_FR(dt-2*zone_time - 3/2*t_zmp)
+                        self.swing_BL(dt-2*zone_time - 3/2*t_zmp)
+                        self.stance_FL(dt - 3/2*t_zmp)
+                        stance_zone_count[3] = 0
+                    # FL - swing | other - stance
+                    elif dt > 3*zone_time + 3/2*t_zmp and dt <= 4*zone_time + 3/2*t_zmp:
+                        self.stance_BR(dt-zone_time - 3/2*t_zmp)
+                        self.stance_FR(dt-2*zone_time - 3/2*t_zmp)
+                        self.stance_BL(dt-3*zone_time - 3/2*t_zmp)
+                        self.swing_FL(dt-3*zone_time - 3/2*t_zmp)
+                        stance_zone_count[1] = 0
+
+                    else:
+                        self.body.ZMP_handler[::2,1] =  -zmp_len + (dt-4*zone_time - 3/2*t_zmp)*zmp_len/(t_zmp/2)  
+                        self.body.ZMP_handler[1::2,1] = zmp_len -(dt-4*zone_time- 3/2*t_zmp)*zmp_len/(t_zmp/2)
+                        
+            else:
+                if np.any(self.cmd.gait.step_len[:2] != 0):
+                    stance_zone_count[0] = 2    # FR
+                    stance_zone_count[1] = 0    # FL
+                    stance_zone_count[2] = 3    # BR
+                    stance_zone_count[3] = 1    # BL
+                else:
+                    for i in range (4):
+                        stance_zone_count[i] = 0
+                # cycle reset
+                self.body.ZMP_handler[:,:] = 0
+                i = 0
+                t = time.time()
+
+            dt = time.time() - t
+            time.sleep(0.0001)
+
 
     def run(self):
         while True:
-            if self.cmd.mode.gait_type == 1:
-                self.run_trot()
+            if self.cmd.mode.walk:
+                if self.cmd.mode.gait_type == 1:
+                    self.cmd.gait.cycle_time = 0.8
+                    self.cmd.gait.swing_time = 0.5* self.cmd.gait.cycle_time
+                    self.body.ZMP_handler[:,:] = 0  
+                    self.run_trot()
+                elif self.cmd.mode.gait_type == 2:
+                    self.cmd.gait.cycle_time = 2
+                    self.cmd.gait.swing_time = 0.25 * self.cmd.gait.cycle_time
+                    self.run_waveGait()
+                elif self.cmd.mode.gait_type == 3:
+                    self.cmd.gait.cycle_time = 0.5
+                    self.cmd.gait.swing_time = 0.15
+                    self.body.ZMP_handler[:,:] = 0
+                    self.run_trot()
             else:
                 self.FR_traj[2] = 0
                 self.FL_traj[2] = 0
                 self.BR_traj[2] = 0
                 self.BL_traj[2] = 0
-
-
+                self.body.ZMP_handler[:,:] = 0

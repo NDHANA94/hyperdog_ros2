@@ -40,17 +40,20 @@ class Cmds():
 #============================================================================ 
         
 class Body():
+    def __init__(self):
+        self.height = None
+        self.centerOfMass = np.zeros([3])
+        self.physical = self._physiacal_params()
+        self.roll = 0
+        self.pitch = 0
+        self.yaw = 0
+        self.ZMP_handler = np.zeros([4,3])
     class _physiacal_params():
         _length = 300
         _width = 172
         _min_height = 80
         _max_height = 240
-    height = None
-    centerOfMass = np.zeros([3])
-    physical = _physiacal_params()
-    roll = 0
-    pitch = 0
-    yaw = 0
+     
 
 
 #============================================================================
@@ -92,7 +95,3 @@ class Leg:
         _L1 = 104 # mm
         _L2 = 150 # mm
         _L3 = 150 # mm
-
-
-
-#============================================================================
