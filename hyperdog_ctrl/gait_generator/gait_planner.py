@@ -495,6 +495,19 @@ class GaitPlanner():
             dt = time.time() - t
             time.sleep(0.0001)
 
+    
+    def give_hand(self):
+        
+        
+        self.body.ZMP_handler[::2,1] = self.len_zmp_wavegait 
+        self.body.ZMP_handler[1::2,1] = -self.len_zmp_wavegait 
+           
+        while self.cmd.mode.gait_type == 0:
+            self.FR_traj[0] = self.cmd.gait.step_len[0]
+            self.FR_traj[2] = self.cmd.gait.step_len[1]
+           
+
+
 
     def run(self):
         while True:
@@ -505,14 +518,17 @@ class GaitPlanner():
                     self.body.ZMP_handler[:,:] = 0  
                     self.run_trot()
                 elif self.cmd.mode.gait_type == 2:
-                    self.cmd.gait.cycle_time = 2
-                    self.cmd.gait.swing_time = 0.25 * self.cmd.gait.cycle_time
+                    self.cmd.gait.cycle_time = 1.5
+                    self.cmd.gait.swing_time = 0.2 * self.cmd.gait.cycle_time
                     self.run_waveGait()
                 elif self.cmd.mode.gait_type == 3:
                     self.cmd.gait.cycle_time = 0.8
                     self.cmd.gait.swing_time = 0.2
                     self.body.ZMP_handler[:,:] = 0
                     self.run_trot()
+                elif self.cmd.mode.gait_type == 0:
+                    self.give_hand()
+                
             else:
                 self.FR_traj[2] = 0
                 self.FL_traj[2] = 0

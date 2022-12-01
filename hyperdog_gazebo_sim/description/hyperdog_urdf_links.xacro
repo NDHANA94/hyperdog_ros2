@@ -37,7 +37,9 @@
             <geometry>
                 <xacro:rightHip_mesh></xacro:rightHip_mesh>
             </geometry>
-            <material name="blue" />
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -56,7 +58,9 @@
             <geometry>                
                 <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
             </geometry>
-            <material name="orange" />
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -74,7 +78,9 @@
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <material name="red" />
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -90,12 +96,14 @@
 
     <!-- *********** FL_hip ********** -->
     <link name="FL_hip_link">
-        <visual>
+        <visual>curve
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
-            <material name="blue" />
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -113,7 +121,9 @@
             <geometry>                
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
-            <material name="orange" />
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material>
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -132,7 +142,9 @@
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <material name="red" />
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -154,7 +166,9 @@
             <geometry>
                 <xacro:rightHip_mesh></xacro:rightHip_mesh>
             </geometry>
-            <material name="blue" />
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -173,7 +187,9 @@
             <geometry>                
                 <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
             </geometry>
-            <material name="orange" />
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material>
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -191,7 +207,9 @@
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <material name="red" />
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -213,7 +231,9 @@
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
-            <material name="blue" />
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -236,7 +256,9 @@
             <geometry>                
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
-            <material name="orange" />
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material>
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
@@ -257,7 +279,9 @@
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <material name="red" />
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
         </visual>
         <collision>
             <origin xyz="0 0 0" rpy="0 0 0"/>
