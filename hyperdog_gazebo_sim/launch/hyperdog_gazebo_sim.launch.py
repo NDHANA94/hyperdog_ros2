@@ -117,7 +117,6 @@ def generate_launch_description():
   return  LaunchDescription([    
 
     declare_simulator_cmd,
-    declare_simulator_cmd,
     declare_use_sim_time_cmd,
     declare_use_simulator_cmd,
     declare_world_cmd,
