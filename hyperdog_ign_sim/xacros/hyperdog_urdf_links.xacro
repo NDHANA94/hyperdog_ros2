@@ -1,0 +1,298 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+<!-- 
+    _____________________________________________________________________
+        include this file into: /description/hyperdog.urdf.xacro 
+        using following line: 
+                    <xacro:include filename="hyperdog_urdf_links.xacro" /> 
+    _____________________________________________________________________ -->
+
+    <xacro:include filename="physics_include.xacro" />     
+
+    <link name="rob_link">
+        <must_be_base_link>true</must_be_base_link>
+        <pose>0 0 0 0 0 0</pose>
+        <xacro:inertial_body></xacro:inertial_body>
+        <visual name='body'>
+            <geometry>
+                <xacro:body_mesh></xacro:body_mesh>
+            </geometry>
+            <material name="green">
+                <color rgba="0.2 1 0.2 1"/>
+            </material>
+          </visual>
+          <collision name='collision'>
+            <geometry>
+                <xacro:body_mesh></xacro:body_mesh>
+            </geometry>
+          </collision>
+    </link>
+
+
+    <!-- *********** FR_hip *********** -->
+    <link name="FR_hip_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:rightHip_mesh></xacro:rightHip_mesh>
+            </geometry>
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:rightHip_mesh></xacro:rightHip_mesh>
+            </geometry>
+        </collision>
+        <!-- <xacro:inertial_right_hip></xacro:inertial_right_hip> -->
+           
+    </link>
+
+    <!-- *********** FR_uleg ********** -->
+    <link name="FR_uleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
+            </geometry>
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
+            </geometry>
+        </collision>
+        <!-- <xacro:inertial_right_uleg></xacro:inertial_right_uleg> -->
+    </link>
+
+    <!-- *********** FR_lleg ********** -->
+    <link name="FR_lleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <!-- <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface> -->
+        </collision>
+        <!-- <xacro:inertial_right_lleg></xacro:inertial_right_lleg> -->
+    </link>
+
+    <!-- *********** FL_hip ********** -->
+    <link name="FL_hip_link">
+        <visual>curve
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:leftHip_mesh></xacro:leftHip_mesh>
+            </geometry>
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:leftHip_mesh></xacro:leftHip_mesh>
+            </geometry>
+        </collision>
+        <!-- <xacro:inertial_left_hip></xacro:inertial_left_hip> -->
+    </link>
+
+    <!-- *********** FL_uleg ********** -->
+    <link name="FL_uleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
+            </geometry>
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
+            </geometry>
+        </collision>
+        <!-- <xacro:inertial_left_uleg></xacro:inertial_left_uleg> -->
+
+    </link>
+
+    <!-- *********** FL_lleg ********** -->
+    <link name="FL_lleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <!-- <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface> -->
+        </collision>
+        <!-- <xacro:inertial_left_lleg></xacro:inertial_left_lleg> -->
+
+    </link>
+
+    <!-- *********** BR_hip ********** -->
+    <link name="BR_hip_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:rightHip_mesh></xacro:rightHip_mesh>
+            </geometry>
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:rightHip_mesh></xacro:rightHip_mesh>
+            </geometry>
+        </collision>
+        <!-- <xacro:inertial_right_hip></xacro:inertial_right_hip> -->
+
+    </link>
+
+    <!-- *********** BR_uleg ********** -->
+    <link name="BR_uleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
+            </geometry>
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
+            </geometry>
+        </collision>
+        <!-- <xacro:inertial_right_uleg></xacro:inertial_right_uleg> -->
+    </link>
+
+    <!-- *********** BR_lleg ********** -->
+    <link name="BR_lleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface>
+        </collision>
+        <!-- <xacro:inertial_right_lleg></xacro:inertial_right_lleg> -->
+
+    </link>
+
+    <!-- *********** BL_hip ********** -->
+    <link name="BL_hip_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:leftHip_mesh></xacro:leftHip_mesh>
+            </geometry>
+            <material name="red">
+                <color rgba="0.8 0.2 0.2 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:leftHip_mesh></xacro:leftHip_mesh>
+            </geometry>
+            <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface>
+        </collision>
+        <!-- <xacro:inertial_left_hip></xacro:inertial_left_hip> -->
+
+    </link>
+
+
+    <!-- *********** BL_uleg ********** -->
+    <link name="BL_uleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
+            </geometry>
+            <material name="orange">
+                <color rgba="0.8 0.5 0.8 1"/>
+            </material>
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
+            </geometry>
+            <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface>
+        </collision>
+        <!-- <xacro:inertial_left_uleg></xacro:inertial_left_uleg> -->
+    </link>
+
+    <!-- *********** BL_lleg ********** -->
+    <link name="BL_lleg_link">
+        <visual>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>                
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <material name="yellow">
+                <color rgba="0.8 1.0 0.1 1"/>
+            </material> 
+        </visual>
+        <collision>
+            <origin xyz="0 0 0" rpy="0 0 0"/>
+            <geometry>
+                <xacro:lleg_mesh></xacro:lleg_mesh>
+            </geometry>
+            <surface>
+                <xacro:foot_surface></xacro:foot_surface>
+            </surface>
+        </collision>
+        <!-- <xacro:inertial_left_lleg></xacro:inertial_left_lleg> -->
+    </link>
+
+</robot>

@@ -21,7 +21,7 @@
 -->
 
 <sdf version="1.7">
-  <world name="tracer">
+  <world name="test_world">
 
     <!-- Physics -->
     <physics name="1ms" type="ignored">
@@ -104,6 +104,21 @@
         </visual>
       </link>
     </model>
+
+    <!-- <plugin filename="JointPositionController" name="JointPositionController">
+      <ignition-gui>
+        <property type="double" key="height">600</property>
+        <property type="double" key="width">400</property>
+
+        <property type="string" key="state">floating</property>
+        <anchors target="3D View">
+          <line own="right" target="right"/>
+          <line own="top" target="top"/>
+        </anchors>
+      </ignition-gui>
+      <model_name>Nao</model_name>
+    </plugin>
+  </gui> -->
     
     <!-- blue vehicle -->
     <!-- <include>

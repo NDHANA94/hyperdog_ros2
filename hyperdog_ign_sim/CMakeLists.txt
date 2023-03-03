@@ -18,8 +18,13 @@ endif()
 # find dependencies
 find_package(ament_cmake REQUIRED)
 find_package(rclcpp REQUIRED)
+find_package(rclcpp_action REQUIRED)
 find_package(std_msgs REQUIRED)
+find_package(geometry_msgs REQUIRED)
+find_package(control_msgs REQUIRED)
 find_package(ros_ign_gazebo REQUIRED)
+# find_package(ign_ros2_control REQUIRED) # install: sudo apt-get install ros-foxy-ign-ros2-control
+
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
@@ -38,9 +43,11 @@ if(BUILD_TESTING)
 endif()
 
 install(DIRECTORY
+  config
   ign
   launch
   models
+  xacros
   worlds
   DESTINATION share/${PROJECT_NAME})
 
