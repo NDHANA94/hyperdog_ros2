@@ -69,7 +69,7 @@ def generate_launch_description():
  
   declare_world_cmd = DeclareLaunchArgument(
     name='world',
-    default_value=world_path,
+    default_value='empty.world',#world_path,
     description='Full path to the world model file to load')
 
   declare_robot_state_publisher = Node(

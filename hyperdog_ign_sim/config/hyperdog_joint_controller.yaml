@@ -32,3 +32,4 @@ gazebo_joint_controller:
     state_interfaces:
       - position
       - velocity
+    use_sim_time: true

@@ -11,10 +11,10 @@
     Instead, we need to add gazebo tags for our links that refer to Gazebo materials
 -->
 
-    <xacro:include filename="physics_include.xacro" /> 
+    <xacro:include filename="physics.xacro" /> 
 
 
-    <gazebo reference="rob_link">
+    <gazebo reference="base_link">
         <material>Gazebo/DarkGrey  </material>
     </gazebo>
     <gazebo reference="FR_hip_link">
@@ -43,26 +43,24 @@
     </gazebo>
     
     <gazebo reference="FR_lleg_link">
-        <material>Gazebo/DarkYellow  </material>
+        <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
-
     </gazebo>
     <gazebo reference="FL_lleg_link">
-        <material>Gazebo/DarkYellow  </material>
+        <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
-
     </gazebo>
     <gazebo reference="BR_lleg_link">
-        <material>Gazebo/DarkYellow  </material>
+        <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
     <gazebo reference="BL_lleg_link">
-        <material>Gazebo/DarkYellow  </material>
+        <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
 
-    <gazebo reference=" FR_lleg_joint">
-        <implicitSpringDamper>1</implicitSpringDamper>
+    <gazebo reference="FR_lleg_joint">
+        <implicitSpringDamper>2</implicitSpringDamper>
     </gazebo>
 
 </robot>

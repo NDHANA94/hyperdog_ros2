@@ -11,7 +11,6 @@
     _____________________________________________________________________ -->
 
 
-
     <!-- CONFIGURE JOINTS OF THE ROBOT -->
     <ros2_control name="IgnitionSystem" type="system">
         <hardware>
@@ -163,10 +162,9 @@
         </joint>
     </ros2_control>
 
-    <!--  CONFIGURE THE GAZEBO PLUGIN Joint State Publisher-->
-
+    <!--  CONFIGURE THE GAZEBO PLUGIN -->
     <gazebo>
-        <plugin filename="libign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+        <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
           <parameters>$(find hyperdog_ign_sim)/config/hyperdog_joint_controller.yaml</parameters>
         </plugin>
     </gazebo>

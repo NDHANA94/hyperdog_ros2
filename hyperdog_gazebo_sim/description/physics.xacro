@@ -1,51 +1,6 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
 
-
-    <!-- Include meshes -->
-    <xacro:macro name="body_mesh">
-        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/body.stl" scale="0.001 0.001 0.001"/>
-    </xacro:macro>
-    <xacro:macro name="rightHip_mesh">
-        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/RIGHT_HIP.stl" scale="0.001 0.001 0.001"/>
-    </xacro:macro>
-    <xacro:macro name="leftHip_mesh">
-        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/LEFT_HIP.stl" scale="0.001 0.001 0.001"/>
-    </xacro:macro>
-    <xacro:macro name="rightUleg_mesh">
-        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/RIGHT_ULEG.stl" scale="0.001 0.001 0.001"/>
-    </xacro:macro>
-    <xacro:macro name="leftUleg_mesh">
-        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/LEFT_ULEG.stl" scale="0.001 0.001 0.001"/>
-    </xacro:macro>
-    <xacro:macro name="lleg_mesh">
-        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/LLEG.stl" scale="0.001 0.001 0.001"/>
-    </xacro:macro>
-    
-
-    <!-- Configure joint dynamics -->
-    <xacro:macro name="lleg_jointDynamics">
-        <dynamics damping="1.0" friction="1000.0"/> 
-    </xacro:macro>
-
-    <!-- Configure foot surface -->
-    <xacro:macro name="foot_surface">
-        <!-- <friction>
-        <mu1>10.0</mu1><mu2>10.0</mu2>
-        </friction>-->
-        <contact>
-            <min_depth>0.001</min_depth>
-        </contact> 
-        <mu1>100.0</mu1>
-        <mu2>100.0</mu2>
-        <kp>1e13</kp>
-        <kd>1.0</kd>
-        <minDepth>0.001</minDepth>
-        <bounce_threshold>10000000</bounce_threshold>
-        <maxVel>0.1</maxVel>
-        <fdir1>0 0 0</fdir1>
-    </xacro:macro>
-
     <!-- configure inertia -->
 
     <!--  BODY -->
@@ -101,5 +56,20 @@
             <inertia ixx="0.01273" ixy="0.01054" ixz="0.00877" iyy="0.02196" iyz="0.00602" izz="0.02318" />
         </inertial>
     </xacro:macro>  
+
+    <!-- ************************************************************************************************** -->
+
+    <!-- Configure joint dynamics -->
+    <xacro:macro name="lleg_jointDynamics">
+        <dynamics damping="1.0" friction="1000.0"/> 
+    </xacro:macro>
+
+    <!-- Configure foot surface -->
+    <xacro:macro name="foot_surface">
+        <mu1>1</mu1>
+        <mu2>1</mu2>
+        <minDepth>0.03</minDepth>
+        <fdir1>1 1 0</fdir1>
+    </xacro:macro>
 
 </robot>

@@ -2,15 +2,50 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <!-- 
+    * Autor: nipun.dhananjaya@gmail.com
+    * Date:  13.03.2023
+
+
     _____________________________________________________________________
         include this file into: /description/hyperdog.urdf.xacro 
         using following line: 
                     <xacro:include filename="hyperdog_urdf_links.xacro" /> 
     _____________________________________________________________________ -->
 
-    <xacro:include filename="physics_include.xacro" />     
 
-    <link name="rob_link">
+    <xacro:include filename="physics.xacro" /> 
+
+
+    <!-- load meshes -->
+    <xacro:macro name="body_mesh">
+        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/body.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="rightHip_mesh">
+        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/RIGHT_HIP.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="leftHip_mesh">
+        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/LEFT_HIP.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="rightUleg_mesh">
+        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/RIGHT_ULEG.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="leftUleg_mesh">
+        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/LEFT_ULEG.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="lleg_mesh">
+        <mesh filename="file://$(find hyperdog_gazebo_sim)/meshes/LLEG.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+   
+
+
+    <!-- *********** Inertial link *********** -->
+    <link name="inertial_link">
+        <xacro:inertial_body></xacro:inertial_body>
+    </link>
+
+
+    <!-- *********** base link *********** -->
+    <link name="base_link">
         <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
@@ -26,7 +61,7 @@
                 <xacro:body_mesh></xacro:body_mesh>
             </geometry>
         </collision>
-        <xacro:inertial_body></xacro:inertial_body>
+        
     </link>
 
 
@@ -51,6 +86,7 @@
            
     </link>
 
+
     <!-- *********** FR_uleg ********** -->
     <link name="FR_uleg_link">
         <visual>
@@ -71,6 +107,7 @@
         <xacro:inertial_right_uleg></xacro:inertial_right_uleg>
     </link>
 
+
     <!-- *********** FR_lleg ********** -->
     <link name="FR_lleg_link">
         <visual>
@@ -87,16 +124,14 @@
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <!-- <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface> -->
         </collision>
         <xacro:inertial_right_lleg></xacro:inertial_right_lleg>
     </link>
 
+
     <!-- *********** FL_hip ********** -->
     <link name="FL_hip_link">
-        <visual>curve
+        <visual>
             <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
@@ -151,9 +186,6 @@
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <!-- <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface> -->
         </collision>
         <xacro:inertial_left_lleg></xacro:inertial_left_lleg>
 
@@ -216,9 +248,6 @@
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
         <xacro:inertial_right_lleg></xacro:inertial_right_lleg>
 
@@ -240,9 +269,6 @@
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
         <xacro:inertial_left_hip></xacro:inertial_left_hip>
 
@@ -265,9 +291,6 @@
             <geometry>
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
         <xacro:inertial_left_uleg></xacro:inertial_left_uleg>
     </link>
@@ -288,9 +311,6 @@
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
         <xacro:inertial_left_lleg></xacro:inertial_left_lleg>
     </link>

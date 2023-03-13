@@ -2,38 +2,70 @@
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
 <!-- 
+    * Autor: nipun.dhananjaya@gmail.com
+    * Date:  13.03.2023
+
+
     _____________________________________________________________________
         include this file into: /description/hyperdog.urdf.xacro 
         using following line: 
                     <xacro:include filename="hyperdog_urdf_links.xacro" /> 
     _____________________________________________________________________ -->
 
-    <xacro:include filename="physics_include.xacro" />     
 
-    <link name="rob_link">
-        <must_be_base_link>true</must_be_base_link>
-        <pose>0 0 0 0 0 0</pose>
+    <xacro:include filename="physics.xacro" /> 
+
+
+    <!-- load meshes -->
+    <xacro:macro name="body_mesh">
+        <mesh filename="file://$(find hyperdog_ign_sim)/models/hyperdog/meshes/body.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="rightHip_mesh">
+        <mesh filename="file://$(find hyperdog_ign_sim)/models/hyperdog/meshes/RIGHT_HIP.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="leftHip_mesh">
+        <mesh filename="file://$(find hyperdog_ign_sim)/models/hyperdog/meshes/LEFT_HIP.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="rightUleg_mesh">
+        <mesh filename="file://$(find hyperdog_ign_sim)/models/hyperdog/meshes/RIGHT_ULEG.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="leftUleg_mesh">
+        <mesh filename="file://$(find hyperdog_ign_sim)/models/hyperdog/meshes/LEFT_ULEG.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+    <xacro:macro name="lleg_mesh">
+        <mesh filename="file://$(find hyperdog_ign_sim)/models/hyperdog/meshes/LLEG.stl" scale="0.001 0.001 0.001"/>
+    </xacro:macro>
+   
+
+
+    <!-- *********** Inertial link *********** -->
+    <link name="inertial_link">
         <xacro:inertial_body></xacro:inertial_body>
-        <visual name='body'>
+    </link>
+
+
+    <!-- *********** base link *********** -->
+    <link name="base_link">
+        <visual>
             <geometry>
                 <xacro:body_mesh></xacro:body_mesh>
             </geometry>
             <material name="green">
                 <color rgba="0.2 1 0.2 1"/>
             </material>
-          </visual>
-          <collision name='collision'>
+        </visual>
+        <collision>
             <geometry>
                 <xacro:body_mesh></xacro:body_mesh>
             </geometry>
-          </collision>
+        </collision>
+        
     </link>
 
 
     <!-- *********** FR_hip *********** -->
     <link name="FR_hip_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:rightHip_mesh></xacro:rightHip_mesh>
             </geometry>
@@ -42,19 +74,18 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:rightHip_mesh></xacro:rightHip_mesh>
             </geometry>
         </collision>
-        <!-- <xacro:inertial_right_hip></xacro:inertial_right_hip> -->
+        <xacro:inertial_right_hip></xacro:inertial_right_hip>
            
     </link>
+
 
     <!-- *********** FR_uleg ********** -->
     <link name="FR_uleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
             </geometry>
@@ -63,18 +94,17 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
             </geometry>
         </collision>
-        <!-- <xacro:inertial_right_uleg></xacro:inertial_right_uleg> -->
+        <xacro:inertial_right_uleg></xacro:inertial_right_uleg>
     </link>
+
 
     <!-- *********** FR_lleg ********** -->
     <link name="FR_lleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
@@ -83,21 +113,17 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <!-- <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface> -->
         </collision>
-        <!-- <xacro:inertial_right_lleg></xacro:inertial_right_lleg> -->
+        <xacro:inertial_right_lleg></xacro:inertial_right_lleg>
     </link>
+
 
     <!-- *********** FL_hip ********** -->
     <link name="FL_hip_link">
-        <visual>curve
-            <origin xyz="0 0 0" rpy="0 0 0"/>
+        <visual>
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
@@ -106,18 +132,16 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
         </collision>
-        <!-- <xacro:inertial_left_hip></xacro:inertial_left_hip> -->
+        <xacro:inertial_left_hip></xacro:inertial_left_hip>
     </link>
 
     <!-- *********** FL_uleg ********** -->
     <link name="FL_uleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
@@ -126,19 +150,17 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
         </collision>
-        <!-- <xacro:inertial_left_uleg></xacro:inertial_left_uleg> -->
+        <xacro:inertial_left_uleg></xacro:inertial_left_uleg>
 
     </link>
 
     <!-- *********** FL_lleg ********** -->
     <link name="FL_lleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
@@ -147,22 +169,17 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <!-- <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface> -->
         </collision>
-        <!-- <xacro:inertial_left_lleg></xacro:inertial_left_lleg> -->
+        <xacro:inertial_left_lleg></xacro:inertial_left_lleg>
 
     </link>
 
     <!-- *********** BR_hip ********** -->
     <link name="BR_hip_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:rightHip_mesh></xacro:rightHip_mesh>
             </geometry>
@@ -171,19 +188,17 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:rightHip_mesh></xacro:rightHip_mesh>
             </geometry>
         </collision>
-        <!-- <xacro:inertial_right_hip></xacro:inertial_right_hip> -->
+        <xacro:inertial_right_hip></xacro:inertial_right_hip>
 
     </link>
 
     <!-- *********** BR_uleg ********** -->
     <link name="BR_uleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
             </geometry>
@@ -192,18 +207,16 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:rightUleg_mesh></xacro:rightUleg_mesh>
             </geometry>
         </collision>
-        <!-- <xacro:inertial_right_uleg></xacro:inertial_right_uleg> -->
+        <xacro:inertial_right_uleg></xacro:inertial_right_uleg>
     </link>
 
     <!-- *********** BR_lleg ********** -->
     <link name="BR_lleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
@@ -212,22 +225,17 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
-        <!-- <xacro:inertial_right_lleg></xacro:inertial_right_lleg> -->
+        <xacro:inertial_right_lleg></xacro:inertial_right_lleg>
 
     </link>
 
     <!-- *********** BL_hip ********** -->
     <link name="BL_hip_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
@@ -236,15 +244,11 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftHip_mesh></xacro:leftHip_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
-        <!-- <xacro:inertial_left_hip></xacro:inertial_left_hip> -->
+        <xacro:inertial_left_hip></xacro:inertial_left_hip>
 
     </link>
 
@@ -252,7 +256,6 @@
     <!-- *********** BL_uleg ********** -->
     <link name="BL_uleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
@@ -261,21 +264,16 @@
             </material>
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:leftUleg_mesh></xacro:leftUleg_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
-        <!-- <xacro:inertial_left_uleg></xacro:inertial_left_uleg> -->
+        <xacro:inertial_left_uleg></xacro:inertial_left_uleg>
     </link>
 
     <!-- *********** BL_lleg ********** -->
     <link name="BL_lleg_link">
         <visual>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>                
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
@@ -284,15 +282,11 @@
             </material> 
         </visual>
         <collision>
-            <origin xyz="0 0 0" rpy="0 0 0"/>
             <geometry>
                 <xacro:lleg_mesh></xacro:lleg_mesh>
             </geometry>
-            <surface>
-                <xacro:foot_surface></xacro:foot_surface>
-            </surface>
         </collision>
-        <!-- <xacro:inertial_left_lleg></xacro:inertial_left_lleg> -->
+        <xacro:inertial_left_lleg></xacro:inertial_left_lleg>
     </link>
 
 </robot>
