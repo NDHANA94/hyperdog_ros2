@@ -91,7 +91,7 @@ packages are :
   
   to launch gazebo with hyperdog
   ```
-  ros2 launch hypedog_gazebo_sim hyperdog_gazebo_sim.launch.py
+  ros2 launch hyperdog_gazebo_sim hyperdog_gazebo_sim.launch.py
 
  
  
