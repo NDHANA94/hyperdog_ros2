@@ -168,7 +168,46 @@
         <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
           <parameters>$(find hyperdog_gazebo_sim)/config/hyperdog_joint_controller.yaml</parameters>
         </plugin>
+         <plugin name="p3d_base_controller" filename="libgazebo_ros_p3d.so"> 
+         <ros>
+            <namespace>hyperdog</namespace>
+            <remapping>odom:=odom</remapping>
+            </ros>
+         <frame_name>map</frame_name>
+            <body_name>base_link</body_name>
+            <update_rate>200.0</update_rate>
+            <gaussian_noise>0.0</gaussian_noise>
+        <alwaysOn>true</alwaysOn>
+        <xyzOffsets>0 0 0</xyzOffsets>
+        <rpyOffsets>0 0 0</rpyOffsets>
+        </plugin>
     </gazebo>
-
+    <!--plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
+      <alwaysOn>true</alwaysOn>
+      <body_name>imu_link</body_name>
+      <frame_name>imu_link</frame_name>
+      <topic_name>imu</topic_name>
+      <serviceName>imu_service</serviceName>
+      <gaussianNoise>0.0</gaussianNoise>
+      <updateRate>0</updateRate>
+      <imu>
+        <noise>
+          <type>gaussian</type>
+          <rate>
+            <mean>0.0</mean>
+            <stddev>2e-4</stddev>
+            <bias_mean>0.0000075</bias_mean>
+            <bias_stddev>0.0000008</bias_stddev>
+          </rate>
+          <accel>
+            <mean>0.0</mean>
+            <stddev>1.7e-2</stddev>
+            <bias_mean>0.1</bias_mean>
+            <bias_stddev>0.001</bias_stddev>
+          </accel>
+        </noise>
+      </imu>
+    </plugin-->
+    
 
 </robot> 
