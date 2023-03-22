@@ -24,4 +24,3 @@ geometry_msgs/Vector3 gait_step
 
 
 
-

@@ -68,7 +68,7 @@
     <xacro:macro name="foot_surface">
         <mu1>1</mu1>
         <mu2>1</mu2>
-        <minDepth>0.03</minDepth>
+        <minDepth>0.001</minDepth>
         <fdir1>1 1 0</fdir1>
     </xacro:macro>
 

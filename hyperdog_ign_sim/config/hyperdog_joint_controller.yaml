@@ -9,6 +9,7 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     gazebo_joint_controller:
+      # type: joint_trajectory_controller/JointTrajectoryController
       type: forward_command_controller/ForwardCommandController
 
 gazebo_joint_controller:
@@ -32,4 +33,3 @@ gazebo_joint_controller:
     state_interfaces:
       - position
       - velocity
-    use_sim_time: true
