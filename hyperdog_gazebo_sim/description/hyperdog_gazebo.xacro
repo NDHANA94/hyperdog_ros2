@@ -15,113 +15,52 @@
 
 
     <gazebo reference="base_link">
-    <selfCollide>false</selfCollide>
-      <mu1 value="0.05" />
-      <mu2 value="0.05" />
         <material>Gazebo/DarkGrey  </material>
     </gazebo>
     <gazebo reference="FR_hip_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/PioneerBody</material>
     </gazebo>   
     <gazebo reference="FL_hip_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="BR_hip_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="BL_hip_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="FR_uleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/Orange     </material>
     </gazebo>   
     <gazebo reference="FL_uleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/Orange   </material>
     </gazebo> 
     <gazebo reference="BR_uleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/Orange   </material>
     </gazebo>
     <gazebo reference="BL_uleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/Orange </material>
     </gazebo>
     
     <gazebo reference="FR_lleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
     <gazebo reference="FL_lleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
     <gazebo reference="BR_lleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
     <gazebo reference="BL_lleg_link">
-    <mu1>0.2</mu1>
-    <mu2>0.2</mu2>
         <material>Gazebo/DarkYellow</material>
         <xacro:foot_surface></xacro:foot_surface>
     </gazebo>
-    
-    <!--gazebo reference="FR_lleg_joint">
-    <mu1>0.1</mu1>
-    <mu2>0.1</mu2>
-    <kp>500000.0</kp>
-    <kd>10.0</kd>
-    <minDepth>0.001</minDepth>
-    <fdir1>1 0 0</fdir1>
+
+    <gazebo reference="FR_lleg_joint">
         <implicitSpringDamper>2</implicitSpringDamper>
-    </gazebo-->
-    <!--gazebo reference="imu_link">
-    <plugin name="imu_plugin" filename="libgazebo_ros_imu.so">
-      <alwaysOn>true</alwaysOn>
-      <bodyName>imu_link</bodyName>
-      <frameName>imu_link</frameName>
-      <topicName>imu</topicName>
-      <serviceName>imu_service</serviceName>
-      <gaussianNoise>0.0</gaussianNoise>
-      <updateRate>0</updateRate>
-      <imu>
-        <noise>
-          <type>gaussian</type>
-          <rate>
-            <mean>0.0</mean>
-            <stddev>2e-4</stddev>
-            <bias_mean>0.0000075</bias_mean>
-            <bias_stddev>0.0000008</bias_stddev>
-          </rate>
-          <accel>
-            <mean>0.0</mean>
-            <stddev>1.7e-2</stddev>
-            <bias_mean>0.1</bias_mean>
-            <bias_stddev>0.001</bias_stddev>
-          </accel>
-        </noise>
-      </imu>
-    </plugin>
-  </gazebo-->
+    </gazebo>
 
 </robot>
