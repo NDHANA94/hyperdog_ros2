@@ -76,10 +76,10 @@ packages are :
  ```
  to add workspace source permenently to .bashrc:
   ```
-    cd /home/$USER/
-    sudo nano .bashrc
     
-    # add following code to the end of the script and save
+    sudo nano ~/.bashrc
+    
+    # add following command to the end of the script and save
     source /home/$USER/hyperdog_ws/install/setup.bash
   ```
   
