@@ -77,10 +77,8 @@ packages are :
  to add workspace source permenently to .bashrc:
   ```
     
-    sudo nano ~/.bashrc
-    
-    # add following command to the end of the script and save
-    source /home/$USER/hyperdog_ws/install/setup.bash
+    # add source 
+    echo "source /home/$USER/hyperdog_ws/install/setup.bash" >> ~/.bachrc
   ```
   
   to launch run following 
