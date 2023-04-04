@@ -1,0 +1,970 @@
+<?xml version="1.0" ?> 
+<!-- 
+  ========================================
+    * Author: nipun.dhananjaya@gmail.com
+    * Created: 04.02.2023
+  ========================================
+ -->
+<sdf version="1.7">
+
+  <model name="hyperdog">
+    <pose>0 0 1 0 0 0</pose>
+
+      
+
+      <!-- Body Link -->
+    <link name='base_link'>
+      <must_be_base_link>true</must_be_base_link>
+      <pose>0 0 0 0 0 0</pose>
+      <inertial>
+        <mass>2.0</mass>
+        <pose>-0.006 0.00633 0.00241 0 0 0</pose>
+        <inertia>
+          <ixx>0.00728</ixx>
+          <ixy>0.00003</ixy>
+          <ixz>0.00073</ixz>
+          <iyy>0.01641</iyy>
+          <iyz>0.00013</iyz>
+          <izz>0.01965</izz>
+        </inertia>
+      </inertial>
+      <visual name='body'>
+        <geometry>
+          <mesh>
+            <uri>meshes/body.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/body.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- FR Hip Link -->
+    <link name='FR_hip'>
+      <pose>0.175 -0.066 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- FL Hip Link -->
+    <link name='FL_hip'>
+      <pose>0.175 0.066 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- BR Hip Link -->
+    <link name='BR_hip'>
+      <pose>-0.175 -0.066 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- BL Hip Link -->
+    <link name='BL_hip'>
+      <pose>-0.175 0.066 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.1 0.1 0.1 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_HIP.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- FR Upper leg -->
+    <link name='FR_ULeg'>
+      <pose relative_to='FR_hip'>0 -0.104 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.2 0.2 0.2 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- FL Upper leg -->
+    <link name='FL_ULeg'>
+      <pose relative_to='FL_hip'>0 0.104 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.2 0.2 0.2 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- BR Upper leg -->
+    <link name='BR_ULeg'>
+      <pose relative_to='BR_hip'>0 -0.104 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.2 0.2 0.2 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/RIGHT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- BL Upper leg -->
+    <link name='BL_ULeg'>
+      <pose relative_to='BL_hip'>0 0.104 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.2 0.2 0.2 1</ambient>
+          <diffuse>0.2 0.2 0.2 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LEFT_ULEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- FR Lower leg -->
+    <link name='FR_LLeg'>
+      <pose relative_to='FR_ULeg'>-0.15 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- FB Lower leg -->
+    <link name='FL_LLeg'>
+      <pose relative_to='FL_ULeg'>-0.15 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- BR Lower leg -->
+    <link name='BR_LLeg'>
+      <pose relative_to='BR_ULeg'>-0.15 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+    <!-- BL Lower leg -->
+    <link name='BL_LLeg'>
+      <pose relative_to='BL_ULeg'>-0.15 0 0 0 0 0</pose>
+      <inertial>
+        <mass>0.25</mass>
+        <pose>0.0 -0.02 0.01 0 0 0</pose>
+        <!-- <inertia>
+          <ixx>0.00199</ixx>
+          <ixy>0.00339</ixy>
+          <ixz>0.00075</ixz>
+          <iyy>0.0078</iyy>
+          <iyz>0.00034</iyz>
+          <izz>0.00943</izz>
+        </inertia> -->
+      </inertial>
+      <visual name='visual'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+        <material>
+          <ambient>0.1 0.1 0.1 1</ambient>
+          <diffuse>0.1 0.1 0.1 1</diffuse>
+          <specular> 0.5 0.5 0.5 1</specular>
+        </material>
+      </visual>
+      <collision name='collision'>
+        <geometry>
+          <mesh>
+            <uri>meshes/LLEG.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+    </link>
+
+
+    <!-- ================================================== -->
+    <!--                    JOINTS                          -->
+    <!-- ================================================== -->
+
+    <!-- ************* FR hip joint ************* -->
+    <joint name='FR_hip_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>FR_hip</child>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>1.57</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+    <!-- ************* FR ULeg joint ************* -->
+    <joint name='FR_ULeg_joint' type='revolute'>
+      <parent>FR_hip</parent>
+      <child>FR_ULeg</child>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>3.14</upper>
+          <lower>-1.2217</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+    <!-- ************* FR LLeg joint ************* -->
+    <joint name='FR_LLeg_joint' type='revolute'>
+      <parent>FR_ULeg</parent>
+      <child>FR_LLeg</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>2.618</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+
+    <!-- ======================================== -->
+    <!-- ************* FL hip joint ************* -->
+    <joint name='FL_hip_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>FL_hip</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>1.57</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+    </axis>
+    <physics>
+      <ode>
+        <limit>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+        </limit>
+        <suspension>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+        </suspension>
+      </ode>
+    </physics>
+    </joint>
+
+    <!-- ************* FL ULeg joint ************* -->
+    <joint name='FL_ULeg_joint' type='revolute'>
+      <parent>FL_hip</parent>
+      <child>FL_ULeg</child>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>3.14</upper>
+          <lower>-1.2217</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+    <!-- ************* FL LLeg joint ************* -->
+    <joint name='FL_LLeg_joint' type='revolute'>
+      <parent>FL_ULeg</parent>
+      <child>FL_LLeg</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>2.618</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+
+    <!-- ======================================== -->
+    <!-- ************* BR hip joint ************* -->
+    <joint name='BR_hip_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>BR_hip</child>
+      <axis>
+        <xyz>-1 0 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>1.57</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+    </axis>
+    <physics>
+      <ode>
+        <limit>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+        </limit>
+        <suspension>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+        </suspension>
+      </ode>
+    </physics>
+    </joint>
+
+    <!-- ************* BR ULeg joint ************* -->
+    <joint name='BR_ULeg_joint' type='revolute'>
+      <parent>BR_hip</parent>
+      <child>BR_ULeg</child>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>3.14</upper>
+          <lower>-1.2217</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+    <!-- ************* BR LLeg joint ************* -->
+    <joint name='BR_LLeg_joint' type='revolute'>
+      <parent>BR_ULeg</parent>
+      <child>BR_LLeg</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>2.618</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+
+    <!-- ======================================== -->
+    <!-- ************* BL hip joint ************* -->
+    <joint name='BL_hip_joint' type='revolute'>
+      <parent>base_link</parent>
+      <child>BL_hip</child>
+      <axis>
+        <xyz>1 0 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>1.57</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+    </axis>
+    <physics>
+      <ode>
+        <limit>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+        </limit>
+        <suspension>
+          <cfm>0</cfm>
+          <erp>0.2</erp>
+        </suspension>
+      </ode>
+    </physics>
+    </joint>
+
+    <!-- ************* BL ULeg joint ************* -->
+    <joint name='BL_ULeg_joint' type='revolute'>
+      <parent>BL_hip</parent>
+      <child>BL_ULeg</child>
+      <axis>
+        <xyz>0 -1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>3.14</upper>
+          <lower>-1.2217</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+    <!-- ************* BL LLeg joint ************* -->
+    <joint name='BL_LLeg_joint' type='revolute'>
+      <parent>BL_ULeg</parent>
+      <child>BL_LLeg</child>
+      <axis>
+        <xyz>0 1 0</xyz>
+        <dynamics>
+          <damping>0</damping>
+          <friction>0</friction>
+          <spring_reference>0</spring_reference>
+          <spring_stiffness>0</spring_stiffness>
+        </dynamics>
+        <limit>
+          <upper>2.618</upper>
+          <lower>-1.57</lower>
+          <effort>-1</effort>
+          <velocity>-1</velocity>
+          <stiffness>1</stiffness>
+        </limit>
+      </axis>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </limit>
+          <suspension>
+            <cfm>0</cfm>
+            <erp>0.2</erp>
+          </suspension>
+        </ode>
+      </physics>
+    </joint>
+
+
+    <!-- ================================================== -->
+    <!--                   PLUGINS                          -->
+    <!-- ================================================== -->
+    <plugin
+      filename="ignition-gazebo-joint-position-controller-system"
+      name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>{FR_hip_joint, FL_hip_joint}</joint_name>
+      <joint_index>0</joint_index>
+      <p_gain>1</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>0.01</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>1.57</cmd_max>
+      <cmd_min>-1.57</cmd_min>
+      <cmd_offset>0</cmd_offset>
+    </plugin>
+
+    <!-- <plugin
+      filename="ignition-gazebo-joint-position-controller-system"
+      name="ignition::gazebo::systems::JointPositionController">
+      <joint_name>FL_hip_joint</joint_name>
+      <joint_index>0</joint_index>
+      <p_gain>1</p_gain>
+      <i_gain>0.1</i_gain>
+      <d_gain>0.01</d_gain>
+      <i_max>1</i_max>
+      <i_min>-1</i_min>
+      <cmd_max>1.57</cmd_max>
+      <cmd_min>-1.57</cmd_min>
+      <cmd_offset>0</cmd_offset>
+    </plugin> -->
+
+  </model>
+
+      
+      
+
+
+
+</sdf>

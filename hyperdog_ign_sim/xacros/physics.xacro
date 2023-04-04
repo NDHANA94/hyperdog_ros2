@@ -1,0 +1,75 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" >
+
+    <!-- configure inertia -->
+
+    <!--  BODY -->
+    <xacro:macro name="inertial_body">
+        <inertial>
+            <origin xyz="-0.006 0.00633 0.00214" rpy="0 0 0"/> <!-- 0.006, -0.000233, 0.00214 -->
+            <mass value="2.0" />
+            <inertia ixx="0.00728" ixy="0.00003" ixz="0.00073" iyy="0.01641" iyz="0.00013" izz="0.01965" />
+        </inertial>
+    </xacro:macro> 
+    <!-- HIP -->
+    <xacro:macro name="inertial_right_hip">
+        <inertial>
+            <origin xyz="0.0 -0.02 0.01" rpy="0 0 0"/>
+            <mass value="0.25" />
+            <inertia ixx="0.00022" ixy="0" ixz="0" iyy="0.00026" iyz="0" izz="0.00038" />
+        </inertial>
+    </xacro:macro> 
+    <xacro:macro name="inertial_left_hip">
+        <inertial>
+            <origin xyz="0.0 0.02 0.01" rpy="0 0 0"/>
+            <mass value="0.25" />
+            <inertia ixx="0.00022" ixy="0" ixz="0" iyy="0.00026" iyz="0" izz="0.00038" />
+        </inertial>
+    </xacro:macro> 
+    <!-- ULEG -->
+    <xacro:macro name="inertial_right_uleg">
+        <inertial>
+            <origin xyz="-0.02 0.02 0.0" rpy="0 0 0"/>
+            <mass value="0.35" />
+            <inertia ixx="0.0007467" ixy="0.0" ixz="0.0" iyy="0.0012791" iyz="0.0" izz="0.0019903" />
+        </inertial>
+    </xacro:macro> 
+    <xacro:macro name="inertial_left_uleg">
+        <inertial>
+            <origin xyz="-0.02 -0.02 0.0" rpy="0 0 0"/>
+            <mass value="0.35" />
+            <inertia ixx="0.0007467" ixy="0" ixz="0" iyy="0.0012791" iyz="0" izz="0.0019903" />
+        </inertial>
+    </xacro:macro> 
+    <!-- LLEG -->
+    <xacro:macro name="inertial_right_lleg">
+        <inertial>
+            <origin xyz="0.05 0.0 -0.0" rpy="0 0 0"/>
+            <mass value="0.24" />
+            <inertia ixx="0.001273" ixy="0" ixz="0" iyy="0.002196" iyz="0" izz="0.002318" />
+        </inertial>
+    </xacro:macro>
+    <xacro:macro name="inertial_left_lleg">
+        <inertial>
+            <origin xyz="0.05 0.0 -0.0" rpy="0 0 0"/>
+            <mass value="0.24" />
+            <inertia ixx="0.001273" ixy="0" ixz="0" iyy="0.002196" iyz="0" izz="0.002318" />
+        </inertial>
+    </xacro:macro>  
+
+    <!-- ************************************************************************************************** -->
+
+    <!-- Configure joint dynamics -->
+    <xacro:macro name="lleg_jointDynamics">
+        <dynamics damping="1.0" friction="1000.0"/> 
+    </xacro:macro>
+
+    <!-- Configure foot surface -->
+    <xacro:macro name="foot_surface">
+        <mu1>1</mu1>
+        <mu2>1</mu2>
+        <minDepth>0.03</minDepth>
+        <fdir1>1 1 0</fdir1>
+    </xacro:macro>
+
+</robot>
