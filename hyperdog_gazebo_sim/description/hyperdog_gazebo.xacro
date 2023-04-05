@@ -16,51 +16,124 @@
 
     <gazebo reference="base_link">
         <material>Gazebo/DarkGrey  </material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
     </gazebo>
     <gazebo reference="FR_hip_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>  
         <material>Gazebo/PioneerBody</material>
     </gazebo>   
     <gazebo reference="FL_hip_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
         <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="BR_hip_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
         <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="BL_hip_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
         <material>Gazebo/PioneerBody</material>
     </gazebo>
     <gazebo reference="FR_uleg_link">
-        <material>Gazebo/Orange     </material>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
+        <material>Gazebo/Orange</material>
     </gazebo>   
     <gazebo reference="FL_uleg_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
         <material>Gazebo/Orange   </material>
     </gazebo> 
     <gazebo reference="BR_uleg_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
         <material>Gazebo/Orange   </material>
     </gazebo>
     <gazebo reference="BL_uleg_link">
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2> 
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
         <material>Gazebo/Orange </material>
     </gazebo>
     
     <gazebo reference="FR_lleg_link">
         <material>Gazebo/DarkYellow</material>
-        <xacro:foot_surface></xacro:foot_surface>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="FL_lleg_link">
         <material>Gazebo/DarkYellow</material>
-        <xacro:foot_surface></xacro:foot_surface>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="BR_lleg_link">
         <material>Gazebo/DarkYellow</material>
-        <xacro:foot_surface></xacro:foot_surface>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <self_collide>1</self_collide>
     </gazebo>
     <gazebo reference="BL_lleg_link">
         <material>Gazebo/DarkYellow</material>
-        <xacro:foot_surface></xacro:foot_surface>
+        <mu1>0.2</mu1>
+        <mu2>0.2</mu2>
+        <self_collide>1</self_collide>
+    </gazebo>
+    <gazebo reference="FR_foot">
+        <material>Gazebo/DarkGrey</material>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
+    </gazebo>
+    <gazebo reference="FL_foot">
+        <material>Gazebo/DarkGrey</material>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
+    </gazebo>
+    <gazebo reference="BL_foot">
+        <material>Gazebo/DarkGrey</material>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
+    </gazebo>
+    <gazebo reference="BR_foot">
+        <material>Gazebo/DarkGrey</material>
+        <mu1>0.6</mu1>
+        <mu2>0.6</mu2>
+        <self_collide>1</self_collide>
+        <kp value="1000000.0"/>
+        <kd value="1.0"/>
     </gazebo>
 
-    <gazebo reference="FR_lleg_joint">
-        <implicitSpringDamper>2</implicitSpringDamper>
-    </gazebo>
+
+    
+    
+   
 
 </robot>

@@ -128,6 +128,27 @@
         <xacro:inertial_right_lleg></xacro:inertial_right_lleg>
     </link>
 
+    <!-- *********** FR FOOT ********** -->
+    <link name="FR_foot">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.02"/>
+          </geometry>
+          <material name="orange"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.03"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="0.06"/>
+          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
+        </inertial>
+      </link>
+
 
     <!-- *********** FL_hip ********** -->
     <link name="FL_hip_link">
@@ -191,6 +212,27 @@
 
     </link>
 
+    <!-- *********** FL FOOT ********** -->
+    <link name="FL_foot">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.02"/>
+          </geometry>
+          <material name="orange"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.03"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="0.06"/>
+          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
+        </inertial>
+      </link>
+
     <!-- *********** BR_hip ********** -->
     <link name="BR_hip_link">
         <visual>
@@ -253,6 +295,27 @@
 
     </link>
 
+    <!-- *********** BR FOOT ********** -->
+    <link name="BR_foot">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.02"/>
+          </geometry>
+          <material name="orange"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.03"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="0.06"/>
+          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
+        </inertial>
+      </link>
+
     <!-- *********** BL_hip ********** -->
     <link name="BL_hip_link">
         <visual>
@@ -314,5 +377,26 @@
         </collision>
         <xacro:inertial_left_lleg></xacro:inertial_left_lleg>
     </link>
+
+    <!-- *********** BL FOOT ********** -->
+    <link name="BL_foot">
+        <visual>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.02"/>
+          </geometry>
+          <material name="orange"/>
+        </visual>
+        <collision>
+          <origin rpy="0 0 0" xyz="0 0 0"/>
+          <geometry>
+            <sphere radius="0.03"/>
+          </geometry>
+        </collision>
+        <inertial>
+          <mass value="0.06"/>
+          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
+        </inertial>
+      </link>
 
 </robot>
