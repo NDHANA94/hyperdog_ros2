@@ -116,6 +116,18 @@ def generate_launch_description():
   # Create the launch description and populate
   return  LaunchDescription([    
 
+    RegisterEventHandler(
+      event_handler=OnProcessExit(
+        target_action=spawn_entity,
+        on_exit=[load_joint_state_controller],
+      )
+    ),
+    RegisterEventHandler(
+      event_handler=OnProcessExit(
+        target_action=load_joint_state_controller,
+        on_exit=[laod_forward_command_controller],
+      )
+    ),
     declare_simulator_cmd,
     declare_use_sim_time_cmd,
     declare_use_simulator_cmd,
@@ -124,10 +136,10 @@ def generate_launch_description():
     start_gazebo_server_cmd,
     start_gazebo_client_cmd,
 
-    declare_robot_state_publisher,
     spawn_entity,
-    load_joint_state_controller,
-    laod_forward_command_controller,
+    declare_robot_state_publisher,
+    # load_joint_state_controller,
+    # laod_forward_command_controller,
     hyperdog_gazebo_joint_cmd,
   
  ])

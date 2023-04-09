@@ -30,6 +30,8 @@
         <!-- <maxVel>0.0</maxVel> -->
         <!-- <self_collide>1</self_collide> -->
         <material>Gazebo/Orange</material>
+        <!-- <implicitSpringDamper>1</implicitSpringDamper>
+        <springStiffness>100</springStiffness> -->
     </xacro:macro>
 
     <xacro:macro name="gz_lleg">
@@ -40,6 +42,8 @@
         <!-- <maxVel>0.0</maxVel> -->
         <!-- <self_collide>1</self_collide>  -->
         <material>Gazebo/DarkYellow</material>
+        <!-- <implicitSpringDamper>1</implicitSpringDamper>
+        <springStiffness>100</springStiffness> -->
     </xacro:macro>
 
     <xacro:macro name="gz_foot">
@@ -50,20 +54,6 @@
         <!-- <maxVel>0.0</maxVel> -->
         <!-- <self_collide>1</self_collide> -->
         <minDepth>0.001</minDepth> 
-        <!-- <surface>
-            <friction>
-                <torsional>
-                    <coefficient>10</coefficient>
-                    <use_fatch_radius>false</use_fatch_radius>
-                    <surface_radius>0.1</surface_radius>
-                    <patch_radius>0.2</patch_radius>
-                </torsional>
-            </friction>
-            <contact>
-                <poissons_ratio>0.5</poissons_ratio>
-                <elastic_modulus>1e8</elastic_modulus>
-            </contact>
-        </surface> -->
         <material>Gazebo/DarkGrey</material>
     </xacro:macro>
 
