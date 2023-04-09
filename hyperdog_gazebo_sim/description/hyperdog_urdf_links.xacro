@@ -140,13 +140,10 @@
         <collision>
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <geometry>
-            <sphere radius="0.03"/>
+            <sphere radius="0.021"/>
           </geometry>
         </collision>
-        <inertial>
-          <mass value="0.06"/>
-          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
-        </inertial>
+        <xacro:inertial_foot></xacro:inertial_foot>
       </link>
 
 
@@ -224,13 +221,10 @@
         <collision>
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <geometry>
-            <sphere radius="0.03"/>
+            <sphere radius="0.021"/>
           </geometry>
         </collision>
-        <inertial>
-          <mass value="0.06"/>
-          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
-        </inertial>
+        <xacro:inertial_foot></xacro:inertial_foot>
       </link>
 
     <!-- *********** BR_hip ********** -->
@@ -307,13 +301,10 @@
         <collision>
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <geometry>
-            <sphere radius="0.03"/>
+            <sphere radius="0.021"/>
           </geometry>
         </collision>
-        <inertial>
-          <mass value="0.06"/>
-          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
-        </inertial>
+        <xacro:inertial_foot></xacro:inertial_foot>
       </link>
 
     <!-- *********** BL_hip ********** -->
@@ -390,13 +381,10 @@
         <collision>
           <origin rpy="0 0 0" xyz="0 0 0"/>
           <geometry>
-            <sphere radius="0.03"/>
+            <sphere radius="0.02"/>
           </geometry>
         </collision>
-        <inertial>
-          <mass value="0.06"/>
-          <inertia ixx="9.6e-06" ixy="0.0" ixz="0.0" iyy="9.6e-06" iyz="0.0" izz="9.6e-06"/>
-        </inertial>
+        <xacro:inertial_foot></xacro:inertial_foot>
       </link>
 
 </robot>

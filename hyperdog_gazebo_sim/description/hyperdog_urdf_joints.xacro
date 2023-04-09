@@ -8,30 +8,59 @@
                     <xacro:include filename="hyperdog_urdf_joints.xacro" /> 
     _____________________________________________________________________ -->
 
-    <!-- ******** Inertial ********** -->
+    <!-- joint dynamics -->
+    <xacro:property name="use_dynamics" value="true"/>
+    <xacro:macro name="hip_joint_dynamics">
+        <dynamics damping="1.0" friction="1.0"/>
+    </xacro:macro>
+    <xacro:macro name="uleg_joint_dynamics">
+        <dynamics damping="1.0" friction="1.0"/>
+    </xacro:macro>
+    <xacro:macro name="lleg_joint_dynamics">
+        <dynamics damping="1.0" friction="10.0"/>
+    </xacro:macro>
+
+    <!-- Limits -->
+    <xacro:macro name="hip_limits">
+        <limit lower="-1.57" upper="1.57" velocity="1" effort="27"/> <!-- effort = 7 -->
+    </xacro:macro>
+    <xacro:macro name="uleg_limits">
+        <limit lower="-1.2217" upper="3.14" velocity="1" effort="27"/>
+    </xacro:macro>
+    <xacro:macro name="lleg_limits">
+        <limit lower="-1.57" upper="2.618" velocity="1" effort="27"/>
+    </xacro:macro>
+
+
+    <!-- ******** Inertial - base joint ********** -->
     <joint name="inertial_joint" type="fixed">
         <parent link="base_link"/>
         <child link="inertial_link"/>
     </joint>
 
-    <!-- *********  FR_hip  ********* -->
+    <!-- *********  FR_hip joint ********* -->
     <joint name="FR_hip_joint" type="revolute">
         <axis xyz="-1 0 0"/>
         <origin xyz="0.175 -0.066 0" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="FR_hip_link"/>
-        <limit lower="-1.57" upper="1.57" velocity="21" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:hip_limits></xacro:hip_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:hip_joint_dynamics></xacro:hip_joint_dynamics>
+        </xacro:if>
     </joint>
 
-    <!-- *********  FR_uleg  ********* -->
+    <!-- *********  FR_uleg joint ********* -->
     <joint name="FR_uleg_joint" type="revolute">
         <axis xyz="0 -1 0"/>
         <origin xyz="0 -0.104 0" rpy="0 0 0"/>
         <parent link="FR_hip_link"/>
         <child link="FR_uleg_link"/>
-        <limit lower="-1.2217" upper="3.14" velocity="1" effort="7"/>
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:uleg_limits></xacro:uleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:uleg_joint_dynamics></xacro:uleg_joint_dynamics>
+        </xacro:if>
+        
     </joint>
 
     <!-- *********  FR_lleg  ********* -->
@@ -40,8 +69,10 @@
         <origin xyz="-0.15 0 0" rpy="0 0.0 0"/>
         <parent link="FR_uleg_link"/>
         <child link="FR_lleg_link"/>
-        <limit lower="-1.57" upper="2.618" velocity="1" effort="7"/>
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:lleg_limits></xacro:lleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:lleg_joint_dynamics></xacro:lleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
      <!-- *********  FR_FOOT  ********* -->
@@ -57,8 +88,10 @@
         <origin xyz="0.175 0.066 0" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="FL_hip_link"/>
-        <limit lower="-1.57" upper="1.57" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:hip_limits></xacro:hip_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:hip_joint_dynamics></xacro:hip_joint_dynamics>
+        </xacro:if>
     </joint>
 
 
@@ -68,8 +101,10 @@
         <origin xyz="0 0.104 0" rpy="0 0 0"/>
         <parent link="FL_hip_link"/>
         <child link="FL_uleg_link"/>
-        <limit lower="-1.2217" upper="3.14" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:uleg_limits></xacro:uleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:uleg_joint_dynamics></xacro:uleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
 
@@ -79,8 +114,10 @@
         <origin xyz="-0.15 0 0" rpy="0 0.0 0"/>
         <parent link="FL_uleg_link"/>
         <child link="FL_lleg_link"/>
-        <limit lower="-1.57" upper="2.618" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:lleg_limits></xacro:lleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:lleg_joint_dynamics></xacro:lleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
      <!-- *********  FL_FOOT  ********* -->
@@ -97,8 +134,10 @@
         <origin xyz="-0.175 -0.066 0" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="BR_hip_link"/>
-        <limit lower="-1.57" upper="1.57" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:hip_limits></xacro:hip_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:hip_joint_dynamics></xacro:hip_joint_dynamics>
+        </xacro:if>
     </joint>
 
     <!-- *********  BR_uleg  ********* -->
@@ -107,8 +146,10 @@
         <origin xyz="0 -0.104 0" rpy="0 0 0"/>
         <parent link="BR_hip_link"/>
         <child link="BR_uleg_link"/>
-        <limit lower="-1.2217" upper="3.14" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:uleg_limits></xacro:uleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:uleg_joint_dynamics></xacro:uleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
     <!-- *********  BR_lleg  ********* -->
@@ -117,8 +158,10 @@
         <parent link="BR_uleg_link"/>
         <child link="BR_lleg_link"/>
         <axis xyz="0 1 0"/>
-        <limit lower="-1.57" upper="2.618" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:lleg_limits></xacro:lleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:lleg_joint_dynamics></xacro:lleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
      <!-- *********  BR_FOOT  ********* -->
@@ -134,8 +177,10 @@
         <origin xyz="-0.175 0.066 0" rpy="0 0 0"/>
         <parent link="base_link"/>
         <child link="BL_hip_link"/>
-        <limit lower="-1.57" upper="1.57" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:hip_limits></xacro:hip_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:hip_joint_dynamics></xacro:hip_joint_dynamics>
+        </xacro:if>
     </joint>
 
     <!-- *********  BL_uleg  ********* -->
@@ -144,8 +189,10 @@
         <origin xyz="0 0.104 0" rpy="0 0 0"/>
         <parent link="BL_hip_link"/>
         <child link="BL_uleg_link"/>
-        <limit lower="-1.2217" upper="3.14" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:uleg_limits></xacro:uleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:uleg_joint_dynamics></xacro:uleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
     <!-- *********  BL_lleg  ********* -->
@@ -154,8 +201,10 @@
         <origin xyz="-0.15 0 0" rpy="0 0.0 0"/>
         <parent link="BL_uleg_link"/>
         <child link="BL_lleg_link"/>
-        <limit lower="-1.57" upper="2.618" velocity="1" effort="7"/> 
-        <dynamics damping="0.01" friction="0.2"/>
+        <xacro:lleg_limits></xacro:lleg_limits>
+        <xacro:if value="${use_dynamics}">
+            <xacro:lleg_joint_dynamics></xacro:lleg_joint_dynamics>
+        </xacro:if>
     </joint>
 
     <!-- *********  BL_FOOT  ********* -->
