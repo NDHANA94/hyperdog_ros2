@@ -78,6 +78,12 @@ def generate_launch_description():
         output='screen',
         parameters=[{'robot_description':robot_description_raw,
                     'use_sim_time':True}])
+  
+  hyperdog_gz_joint_ctrl_node = Node(
+    package='hyperdog_gazebo_sim',
+    executable='hyperdog_gazebo_joint_ctrl_node',
+    output='screen'
+  )
     
   spawn_entity = Node(package='gazebo_ros', executable='spawn_entity.py', 
                     arguments=['-topic', 'robot_description',
@@ -95,10 +101,7 @@ def generate_launch_description():
         output='screen'
     )
 
-  hyperdog_gazebo_joint_cmd = ExecuteProcess(
-        cmd=['ros2', 'run', 'hyperdog_gazebo_joint_cmd', 'hyperdog_gazebo_joint_controller'],
-        output='screen'
-    )
+
 
   # Specify the actions
   # Start Gazebo server
@@ -140,6 +143,6 @@ def generate_launch_description():
     declare_robot_state_publisher,
     # load_joint_state_controller,
     # laod_forward_command_controller,
-    hyperdog_gazebo_joint_cmd,
+    hyperdog_gz_joint_ctrl_node,
   
  ])
