@@ -19,6 +19,11 @@
 
 using std::placeholders::_1;
 
+double odom_x = 0;
+double odom_y = 0;
+double odom_rot = 0;
+double pi = 3.14159;
+
 class FakeOdom : public rclcpp::Node
 {
     public: 
@@ -35,13 +40,35 @@ class FakeOdom : public rclcpp::Node
         
         void topic_callback(const hyperdog_msgs::msg::JoyCtrlCmds::SharedPtr msg) const
         {   auto odom = nav_msgs::msg::Odometry();
-            float x;
-            float y;
+            double x;
+            double y;
+            // double rot;
             bool side_walk;
-            x = msg->gait_step.x;
-            y = msg->gait_step.y;
+            x = msg->gait_step.x/1000;
+            y = msg->gait_step.y/1000;
             side_walk = msg->states[2];
-            std::cout<< x << " " << y << " " << side_walk << "\n";
+            if (!side_walk){
+                odom_x += x;
+                odom_y += y;
+            }
+            if (side_walk && y > 0){
+                odom_x += x;
+                odom_y += y/2;
+                odom_rot += y;
+                if (odom_rot >= 2*pi){
+                    odom_rot = odom_rot - 2*pi;
+                }
+                else if (odom_rot <= -2*pi){
+                    odom_rot = odom_rot + 2*pi;
+                }
+            }
+            odom.pose.pose.position.x = odom_x;
+            odom.pose.pose.position.y = odom_y;
+            odom.pose.pose.orientation.z = odom_rot;
+            odom.header.frame_id = "odom";
+            odom.child_frame_id = "base_link";
+            // std::cout<< x << " " << y << " " << side_walk << "\n";
+            pub_ -> publish(odom);
         }
         rclcpp::Subscription<hyperdog_msgs::msg::JoyCtrlCmds>::SharedPtr sub_;
         rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr pub_;
