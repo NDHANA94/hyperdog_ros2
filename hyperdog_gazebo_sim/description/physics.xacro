@@ -10,9 +10,7 @@
         <inertial>
             <origin xyz="-0.006 0.00633 0.00214" rpy="0 0 0"/> <!-- 0.006, -0.000233, 0.00214 -->
             <mass value="${body_mass}" />
-            <inertia ixx="${(1/12) * body_mass * (body_inertia_y_len * body_inertia_y_len + body_inertia_z_len * body_inertia_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * body_mass * (body_inertia_x_len * body_inertia_x_len + body_inertia_z_len * body_inertia_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * body_mass * (body_inertia_x_len * body_inertia_x_len + body_inertia_y_len * body_inertia_y_len)}" />
+            <inertia  ixx="0.011396658109874464" ixy="0" ixz="0" iyy="0.05486450023370329" iyz="0" izz="0.06098759357764758" />   
         </inertial>
     </xacro:macro> 
 
@@ -21,18 +19,14 @@
         <inertial>
             <origin xyz="0.0 -0.02 0.01" rpy="0 0 0"/>
             <mass value="${hip_mass}" />
-            <inertia ixx="${(1/12) * hip_mass * (hip_inertia_y_len * hip_inertia_y_len + hip_inertia_z_len * hip_inertia_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * hip_mass * (hip_inertia_x_len * hip_inertia_x_len + hip_inertia_z_len * hip_inertia_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * hip_mass * (hip_inertia_x_len * hip_inertia_x_len + hip_inertia_y_len * hip_inertia_y_len)}" />
+            <inertia  ixx="0.000785664594069212" ixy="0" ixz="0" iyy="0.00028126771524959764" iyz="0" izz="0.0007138119943369485" />
         </inertial>
     </xacro:macro> 
     <xacro:macro name="inertial_left_hip">
         <inertial>
             <origin xyz="0.0 0.02 0.01" rpy="0 0 0"/>
             <mass value="${hip_mass}" />
-            <inertia ixx="${(1/12) * hip_mass * (hip_inertia_y_len * hip_inertia_y_len + hip_inertia_z_len * hip_inertia_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * hip_mass * (hip_inertia_x_len * hip_inertia_x_len + hip_inertia_z_len * hip_inertia_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * hip_mass * (hip_inertia_x_len * hip_inertia_x_len + hip_inertia_y_len * hip_inertia_y_len)}" />
+            <inertia  ixx="0.000785664594069212" ixy="0" ixz="0" iyy="0.00028126771524959764" iyz="0" izz="0.0007138119943369485" />
         </inertial>
     </xacro:macro> 
 
@@ -41,24 +35,14 @@
         <inertial>
             <origin xyz="-0.02 0.02 0.0" rpy="0 0 0"/>
             <mass value="${uleg_mass}" />
-            <!-- <inertia ixx="${(1/12) * uleg_mass * (uleg_y_len * uleg_y_len + uleg_z_len * uleg_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * uleg_mass * (uleg_x_len * uleg_x_len + uleg_z_len * uleg_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * uleg_mass * (uleg_x_len * uleg_x_len + uleg_y_len * uleg_y_len)}" /> -->
-            <mass value="0.35"/>
-            <inertia ixx="0.000418" ixy="-0.000078" ixz="-0.00019" 
-                     iyy="0.000484" iyz="0.000051" izz="0.000566"/>
+            <inertia  ixx="0.0005320036781441746" ixy="0" ixz="0" iyy="0.00178632152356757" iyz="0" izz="0.002124721126775121" />
         </inertial>
     </xacro:macro> 
     <xacro:macro name="inertial_left_uleg">
         <inertial>
             <origin xyz="-0.02 -0.02 0.0" rpy="0 0 0"/>
-            <!-- <mass value="${uleg_mass}"/>
-            <inertia ixx="${(1/12) * uleg_mass * (uleg_inertia_y_len * uleg_inertia_y_len + uleg_inertia_z_len * uleg_inertia_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * uleg_mass * (uleg_inertia_x_len * uleg_inertia_x_len + uleg_inertia_z_len * uleg_inertia_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * uleg_mass * (uleg_inertia_x_len * uleg_inertia_x_len + uleg_inertia_y_len * uleg_inertia_y_len)}" /> -->
-            <mass value="0.35"/> 
-            <inertia ixx="0.000418" ixy="0.000078" ixz="-0.00019" 
-                     iyy="0.000484" iyz="-0.000051" izz="0.000566"/>
+            <mass value="${uleg_mass}"/>
+            <inertia  ixx="0.0005320036934665719" ixy="0" ixz="0" iyy="0.0017863215388899672" iyz="0" izz="0.002124721126775121" />
         </inertial>
     </xacro:macro> 
     <!-- LLEG -->
@@ -66,24 +50,14 @@
         <inertial>
             <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
             <mass value="${lleg_mass}" />
-            <inertia ixx="${(1/12) * lleg_mass * (lleg_inertia_y_len * lleg_inertia_y_len + lleg_inertia_z_len * lleg_inertia_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * lleg_mass * (lleg_inertia_x_len * lleg_inertia_x_len + lleg_inertia_z_len * lleg_inertia_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * lleg_mass * (lleg_inertia_x_len * lleg_inertia_x_len + lleg_inertia_y_len * lleg_inertia_y_len)}" />
-            <!-- <mass value="0.24"/>
-            <inertia ixx="0.0.00056" ixy="0.0" ixz="0.00035" 
-                    iyy="0.0008" iyz="0.0" izz="0.00026"/> -->
+            <inertia  ixx="6.323427512607013e-05" ixy="0" ixz="0" iyy="0.0006549703843792289" iyz="0" izz="0.0006232548592531587" />
         </inertial>
     </xacro:macro>
     <xacro:macro name="inertial_left_lleg">
         <inertial>
             <origin xyz="0.05 0.0 0.0" rpy="0 0 0"/>
             <mass value="${lleg_mass}" />
-            <inertia ixx="${(1/12) * lleg_mass * (lleg_inertia_y_len * lleg_inertia_y_len + lleg_inertia_z_len * lleg_inertia_z_len)}" ixy="0.0" ixz="0.0" 
-                     iyy="${(1/12) * lleg_mass * (lleg_inertia_x_len * lleg_inertia_x_len + lleg_inertia_z_len * lleg_inertia_z_len)}" iyz="0.0" 
-                     izz="${(1/12) * lleg_mass * (lleg_inertia_x_len * lleg_inertia_x_len + lleg_inertia_y_len * lleg_inertia_y_len)}" />
-            <!-- <mass value="0.24"/>
-            <inertia ixx="0.0.00056" ixy="0.0" ixz="0.00035" 
-                    iyy="0.0008" iyz="0.0" izz="0.00026"/> -->
+            <inertia  ixx="6.323427512607013e-05" ixy="0" ixz="0" iyy="0.0006549703843792289" iyz="0" izz="0.0006232548592531587" />
         </inertial>
     </xacro:macro>  
 
@@ -93,9 +67,6 @@
         <inertial>
             <origin xyz="0.0 0.0 0.0" rpy="0 0 0"/>
             <mass value="${foot_mass}"/>
-            <!-- <inertia ixx="${2/5 * foot_radius * foot_radius * foot_mass}" ixy="0.0" ixz="0.0"
-                     iyy="${2/5 * foot_radius * foot_radius * foot_mass}" iyz="0.0"
-                     izz="${2/5 * foot_radius * foot_radius * foot_mass}"/> -->
             <inertia ixx="${(1/12) * foot_mass * (0.01 * 0.01 + 0.01 * 0.01)}" ixy="0.0" ixz="0.0" 
                     iyy="${(1/12) * foot_mass * (0.01 * 0.01 + 0.01 * 0.01)}" iyz="0.0" 
                     izz="${(1/12) * foot_mass * (0.01 * 0.01 + 0.01 * 0.01)}" />

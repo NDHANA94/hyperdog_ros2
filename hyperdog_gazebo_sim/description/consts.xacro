@@ -15,17 +15,17 @@
     <!-- joint dynamics -->
     <xacro:property name="use_dynamics" value="true"/>
     <xacro:macro name="hip_joint_dynamics">
-        <dynamics damping="10" friction="1000"/>
+        <dynamics damping="0.01" friction="10000"/>
     </xacro:macro>
     <xacro:macro name="uleg_joint_dynamics">
-        <dynamics damping="10" friction="1000"/>
+        <dynamics damping="0.01" friction="10000"/>
     </xacro:macro>
     <xacro:macro name="lleg_joint_dynamics">
-        <dynamics damping="10" friction="10000"/>
+        <dynamics damping="0.01" friction="10000"/>
     </xacro:macro>
 
     <!-- configure inertia -->
-    <xacro:property name="body_mass" value="15"/>
+    <xacro:property name="body_mass" value="3"/>
     <xacro:property name="body_inertia_x_len" value="0.28"/>
     <xacro:property name="body_inertia_y_len" value="0.172"/>
     <xacro:property name="body_inertia_z_len" value="0.04"/>

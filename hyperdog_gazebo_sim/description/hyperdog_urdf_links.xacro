@@ -324,6 +324,15 @@
           <geometry>
             <sphere radius="${foot_radius}"/>
           </geometry>
+          <surface>
+            <friction>
+                <ode>
+                    <mu>1</mu>
+                    <mu2>1</mu2>
+                    <fdir1>1 0 0</fdir1>
+                </ode>
+            </friction>
+        </surface>
         </collision>
         <xacro:inertial_foot></xacro:inertial_foot>
       </link>
@@ -341,6 +350,15 @@
           <geometry>
             <sphere radius="${foot_radius}"/>
           </geometry>
+          <surface>
+            <friction>
+                <ode>
+                    <mu>1</mu>
+                    <mu2>1</mu2>
+                    <fdir1>1 0 0</fdir1>
+                </ode>
+            </friction>
+        </surface>
         </collision>
         <xacro:inertial_foot></xacro:inertial_foot>
       </link>
@@ -358,6 +376,15 @@
           <geometry>
             <sphere radius="${foot_radius}"/>
           </geometry>
+          <surface>
+            <friction>
+                <ode>
+                    <mu>1</mu>
+                    <mu2>1</mu2>
+                    <fdir1>1 0 0</fdir1>
+                </ode>
+            </friction>
+        </surface>
         </collision>
         <xacro:inertial_foot></xacro:inertial_foot>
       </link>
@@ -375,6 +402,15 @@
           <geometry>
             <sphere radius="${foot_radius}"/>
           </geometry>
+          <surface>
+            <friction>
+                <ode>
+                    <mu>1</mu>
+                    <mu2>1</mu2>
+                    <fdir1>1 0 0</fdir1>
+                </ode>
+            </friction>
+        </surface>
         </collision>
         <xacro:inertial_foot></xacro:inertial_foot>
       </link>

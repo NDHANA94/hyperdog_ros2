@@ -16,9 +16,10 @@
     <xacro:macro name="gz_hip">
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>  
-        <kp value="1000000.0"/>
+        <kp value="2147483647.0"/>
         <kd value="1.0"/>
-        <!-- <maxVel>0.0</maxVel> -->
+        <maxVel>0.01</maxVel>
+        <self_collide>1</self_collide>
         <material>Gazebo/PioneerBody</material>
     </xacro:macro>
 
@@ -27,8 +28,8 @@
         <mu2>0.2</mu2> 
         <kp value="2147483647.0"/>
         <kd value="1.0"/>
-        <!-- <maxVel>0.0</maxVel> -->
-        <!-- <self_collide>1</self_collide> -->
+        <maxVel>0.01</maxVel>
+        <self_collide>1</self_collide>
         <material>Gazebo/Orange</material>
         <!-- <implicitSpringDamper>1</implicitSpringDamper>
         <springStiffness>100</springStiffness> -->
@@ -37,11 +38,13 @@
     <xacro:macro name="gz_lleg">
         <mu1>0.2</mu1>
         <mu2>0.2</mu2>    
-        <kp>1000000.0</kp>
+        <fdir1>1 0 0</fdir1>
+        <kp>2147483647.0</kp>
         <kd>1.0</kd>
-        <!-- <maxVel>0.0</maxVel> -->
-        <!-- <self_collide>1</self_collide>  -->
+        <maxVel>0.01</maxVel>
+        <self_collide>1</self_collide> 
         <material>Gazebo/DarkYellow</material>
+        <minDepth>0.001</minDepth> 
         <!-- <implicitSpringDamper>1</implicitSpringDamper>
         <springStiffness>100</springStiffness> -->
     </xacro:macro>
@@ -49,11 +52,16 @@
     <xacro:macro name="gz_foot">
         <mu1>0.9</mu1>
         <mu2>0.9</mu2>
-        <kp value="1000000.0" />
+        <fdir1>1 1 0</fdir1>
+        <kp value="2147483647.0" />
         <kd value="100.0" />
-        <maxVel>0.0</maxVel>
+        <maxVel>0.01</maxVel>
         <self_collide>1</self_collide>
         <minDepth>0.001</minDepth> 
+
+        <restitution_coefficient>1</restitution_coefficient>
+        <threshold>0</threshold>
+
         <material>Gazebo/DarkGrey</material>
     </xacro:macro>
 
@@ -65,6 +73,7 @@
         <mu2>0.05</mu2>
         <!-- <kp>1000000.0</kp>
         <kd>1.0</kd> -->
+        <maxVel>0.01</maxVel>
         <material>Gazebo/DarkGrey  </material>
     </gazebo>
 
