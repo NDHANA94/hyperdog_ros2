@@ -8,7 +8,7 @@ HyperDog is a quadruped robot which is fully based on ROS 2 and Micro-ROS.
 - [`HyperPalm` | IEEE SMC-2023](https://ieeexplore.ieee.org/document/9945223)
 
 ## Contains
-This repository contains ros2 packages for quadruped robot Hyperdog.
+This repository contains ros2 packages for quadruped robot HyperDog.
 packages are :
   1. **`hyperdog_msgs`** : this package contains the msgs those used by other packages.
   
@@ -18,14 +18,14 @@ packages are :
               - `geometry_msgs/Pose pose` : to control slant(x,y) and roll,pitch,yaw
               - `geometry_msgs/Vector3 gait_step` : gait_step.x = steplen_x, gait_step.y = steplen_y, gait_step.z = swing_height
               
-        2. `Geometry`: this contains the parameters for cordinate of each leg and body orientation(roll,pitch,yaw)
+        2. `Geometry`: this contains the parameters for coordinate of each leg and body orientation(roll,pitch,yaw)
               - `geometry_msgs/Point32 fr` : x,y,z end effector coordinates of FR leg
               - `geometry_msgs/Point32 fl` : x,y,z end effector coordinates of FL leg
               - `geometry_msgs/Point32 br` : x,y,z end effector coordinates of BR leg
               - `geometry_msgs/Point32 bl` : x,y,z end effector coordinates of BL leg
               - `geometry_msgs/Quaternion euler_ang` : roll, pitch, yaw angles
               
-  2. **`hyperdog_teleop`** : this pkg creates `/hyperdog_teleop_gamepad_node`. 
+  2. **`hyperdog_teleop`** : this pkg creates `/hyperdog_teleop_gamepad_node. 
         - Node 1 : `/joy_node`
             This node creates commands to robot from Gamepad commands
             - subscriber : `/joy_node` 
@@ -97,8 +97,7 @@ packages are :
   to launch gazebo with hyperdog
   ```
   ros2 launch hypedog_gazebo_sim hyperdog_gazebo_sim.launch.py
+  ```
 
- 
- 
-            
-        
+# Known bugs:
+- gazebo-ros2-control pkg doesn't work properly. So the robot slides on the ground.
