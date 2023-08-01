@@ -1,4 +1,10 @@
 # hyperdog_ros2
+HyperDog is a quadruped robot which is fully based on ROS 2 and Micro-ROS. 
+
+### Publications:
+- (IEEE SMC-2022)[https://ieeexplore.ieee.org/document/9945526]
+- 
+
 
 ## Contains
 This repository contains ros2 packages for quadruped robot Hyperdog.
