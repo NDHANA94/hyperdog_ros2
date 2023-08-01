@@ -32,7 +32,7 @@ packages are :
             - publisher : `/hyperdog_joy_ctrl_cmd` using the interface `hyperdog_msgs/msg/JoyCtrlCmd`
 
   3. **`hyperdog_ctrl`** : This pkg has `Body_motion_planner` and `gait_generater` and creates the nodes `/command_manager_node` and `/IK_node`
-        - `Body_motion_planner` : plans body motions from control commands comes from `/command_manager_node`
+        - `Body_motion_planner` : plans body motions from control commands receive from `/command_manager_node`
         - `gait_generator` : generates gaits acording to the given gait_type command from the Gamepad 
    
         - Node 1 : `/command_manager_node` 
