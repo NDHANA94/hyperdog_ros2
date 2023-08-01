@@ -11,7 +11,7 @@ packages are :
               - `geometry_msgs/Pose pose` : to control slant(x,y) and roll,pitch,yaw
               - `geometry_msgs/Vector3 gait_step` : gait_step.x = steplen_x, gait_step.y = steplen_y, gait_step.z = swing_height
               
-        2. `Geometry`: this contains the parameters for cordinate of each leg and body orientation(roll,pitch,yaw)
+        2. `Geometry`: this contains the parameters for coordinate of each leg and body orientation(roll,pitch,yaw)
               - `geometry_msgs/Point32 fr` : x,y,z end effector coordinates of FR leg
               - `geometry_msgs/Point32 fl` : x,y,z end effector coordinates of FL leg
               - `geometry_msgs/Point32 br` : x,y,z end effector coordinates of BR leg
@@ -36,7 +36,7 @@ packages are :
             - subscriber : `/hyperdog_geometry` via `hyperdog_msgs/msg/Geometry` interface
             - publisher  : `/hyperdog_jointController/commands`
   
-  4. **`uros`** : this is the micro_ros package from its official git. this package is used to launch `micro_ros_agent` to communicate with micro-controllers which run micro_ros via ROS2
+  4. **`uros`** : this is the micro_ros package from its (official git)[]. this package is used to launch `micro_ros_agent` to communicate with micro-controllers which run micro_ros via ROS2
   
   5. **`hyperdog_launch`** : This contains the launch file for all the above nodes and `micro_ros_agent`
   
@@ -91,7 +91,9 @@ packages are :
   ```
   ros2 launch hypedog_gazebo_sim hyperdog_gazebo_sim.launch.py
 
- 
+ # Known bugs:
+- gazebo-ros2-control doesn't work properly. Hence robot slides on the ground in gazebo simulation.
+
  
             
         
