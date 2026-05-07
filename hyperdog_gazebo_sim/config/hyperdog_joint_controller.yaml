@@ -9,7 +9,7 @@ controller_manager:
       type: joint_state_broadcaster/JointStateBroadcaster
 
     gazebo_joint_controller:
-      type: forward_command_controller/ForwardCommandController
+      type: position_controllers/JointGroupPositionController
 
 gazebo_joint_controller:
   ros__parameters:

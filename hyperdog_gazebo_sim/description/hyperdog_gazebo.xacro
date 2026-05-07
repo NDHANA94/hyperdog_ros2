@@ -50,10 +50,10 @@
     </xacro:macro>
 
     <xacro:macro name="gz_foot">
-        <mu1>0.9</mu1>
-        <mu2>0.9</mu2>
+        <mu1>1.5</mu1>
+        <mu2>1.5</mu2>
         <fdir1>1 1 0</fdir1>
-        <kp value="2147483647.0" />
+        <kp value="1000000.0" />
         <kd value="100.0" />
         <maxVel>0.01</maxVel>
         <self_collide>1</self_collide>
