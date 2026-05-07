@@ -67,19 +67,14 @@ class InverseKinematics():
             eularAng: np array [roll, pitch, yaw]
             return : rotation matrix
         """
-        M11 = np.cos(eularAng[1])*np.cos(eularAng[2])
-        M12 = np.sin(eularAng[0])*np.sin(eularAng[1])*np.cos(eularAng[2]) - np.cos(eularAng[0])*np.sin(eularAng[2])
-        M13 = np.cos(eularAng[0])*np.sin(eularAng[1])*np.cos(eularAng[2]) + np.sin(eularAng[0])*np.sin(eularAng[2])
+        ca, cb, cg = np.cos(eularAng)
+        sa, sb, sg = np.sin(eularAng)
 
-        M21 = np.cos(eularAng[1])*np.sin(eularAng[2])
-        M22 = np.sin(eularAng[0])*np.sin(eularAng[1])*np.sin(eularAng[2]) + np.cos(eularAng[0])*np.cos(eularAng[2])
-        M23 = np.cos(eularAng[0])*np.sin(eularAng[1])*np.sin(eularAng[2]) - np.sin(eularAng[0])*np.cos(eularAng[2])
-        
-        M31 = -np.sin(eularAng[1])
-        M32 = np.sin(eularAng[0])*np.cos(eularAng[1])
-        M33 = np.cos(eularAng[0])*np.cos(eularAng[1])
-        rotMat = np.array([ [M11, M12, M13], [M21, M22, M23], [M31, M32, M33] ])
-        return rotMat
+        return np.array([
+            [cb*cg, sa*sb*cg - ca*sg, ca*sb*cg + sa*sg],
+            [cb*sg, sa*sb*sg + ca*cg, ca*sb*sg - sa*cg],
+            [-sb, sa*cb, ca*cb]
+        ])
 
     def get_joint_angles(self, coord):
         """

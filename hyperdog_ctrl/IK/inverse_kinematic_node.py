@@ -63,17 +63,18 @@ class InvKin_Node(Node):
         ang_BL = self.IK.get_BL_joint_angles(bl_coord, eulerAng)
         # self.get_logger().info('singularity: {}!'.format(self.IK.singularity))
         if not np.any(self.IK.singularity) \
-            and np.any(ang_FR != None) and np.any(ang_FL != None) and np.any(ang_BR != None) and np.any(ang_BL != None):
-            for i in range (3):
-                ang_FR[i] = np.rad2deg(ang_FR[i])
-                ang_FL[i] = np.rad2deg(ang_FL[i])
-                ang_BR[i] = np.rad2deg(ang_BR[i])
-                ang_BL[i] = np.rad2deg(ang_BL[i])
+            and ang_FR is not None and ang_FL is not None and ang_BR is not None and ang_BL is not None:
+
+            ang_FR_deg = np.rad2deg(ang_FR)
+            ang_FL_deg = np.rad2deg(ang_FL)
+            ang_BR_deg = np.rad2deg(ang_BR)
+            ang_BL_deg = np.rad2deg(ang_BL)
+
             self.joint_angs.data = [
-                                ang_FR[0], ang_FR[1], ang_FR[1]+ang_FR[2],
-                                ang_FL[0], ang_FL[1], ang_FL[1]+ang_FL[2],
-                                ang_BR[0], ang_BR[1], ang_BR[1]+ang_BR[2],
-                                ang_BL[0], ang_BL[1], ang_BL[1]+ang_BL[2]
+                                ang_FR_deg[0], ang_FR_deg[1], ang_FR_deg[1]+ang_FR_deg[2],
+                                ang_FL_deg[0], ang_FL_deg[1], ang_FL_deg[1]+ang_FL_deg[2],
+                                ang_BR_deg[0], ang_BR_deg[1], ang_BR_deg[1]+ang_BR_deg[2],
+                                ang_BL_deg[0], ang_BL_deg[1], ang_BL_deg[1]+ang_BL_deg[2]
                                 ] 
             self.prev_joint_angs = self.joint_angs.data
             # self.pub2STM.publish(self.joint_angs) 

@@ -63,7 +63,7 @@ class CmdManager_ROS():
         self.pub = None
         self.pub_name = 'hyperdog_geometry'
         self.pub_interface = Geometry   #hyperdog_msgs.msg.Geometry
-        self.pub_timer_period = 0.001
+        self.pub_timer_period = 0.01  # 100Hz
         self.pub_timer = None
         self.pub_queueSize = 12
         self.pub_callback = self._pub_callback

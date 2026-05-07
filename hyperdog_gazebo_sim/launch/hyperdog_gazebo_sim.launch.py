@@ -109,16 +109,19 @@ def generate_launch_description():
                                '-entity', 'HyperDog'],
                     output='screen')
 
-  load_joint_state_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start',
-            'joint_state_broadcaster'],
-        output='screen' )
+  load_joint_state_controller = Node(
+      package='controller_manager',
+      executable='spawner',
+      arguments=['joint_state_broadcaster'],
+      output='screen',
+  )
   
-  laod_forward_command_controller = ExecuteProcess(
-        cmd=['ros2', 'control', 'load_controller', '--set-state', 'start', 
-            'gazebo_joint_controller'],
-        output='screen'
-    )
+  load_forward_command_controller = Node(
+      package='controller_manager',
+      executable='spawner',
+      arguments=['gazebo_joint_controller'],
+      output='screen',
+  )
 
 
 
@@ -147,7 +150,7 @@ def generate_launch_description():
     RegisterEventHandler(
       event_handler=OnProcessExit(
         target_action=load_joint_state_controller,
-        on_exit=[laod_forward_command_controller],
+        on_exit=[load_forward_command_controller],
       )
     ),
     declare_simulator_cmd,

@@ -41,33 +41,34 @@ from launch.substitutions import (EnvironmentVariable, FindExecutable,
 
 def generate_launch_description():
 
-    node_joy = ExecuteProcess(
-        cmd=['ros2', 'run', 'joy', 'joy_node'],
+    node_joy = Node(
+        package='joy',
+        executable='joy_node',
         output='screen'
     )
 
-    node_hyperdog_teleop_joy = ExecuteProcess(
-        cmd=['ros2', 'run', 'hyperdog_teleop', 'hyperdog_teleop_joy_node'],
+    node_hyperdog_teleop_joy = Node(
+        package='hyperdog_teleop',
+        executable='hyperdog_teleop_joy_node',
         output='screen'
     )
 
-    node_hyperdog_ctrl = ExecuteProcess(
-        cmd=['ros2', 'run', 'hyperdog_ctrl', 'cmd_manager_node'],
+    node_hyperdog_ctrl = Node(
+        package='hyperdog_ctrl',
+        executable='cmd_manager_node',
         output='screen'
     )
 
-    node_IK_node = ExecuteProcess(
-        cmd=['ros2', 'run', 'hyperdog_ctrl', 'IK_node'],
+    node_IK_node = Node(
+        package='hyperdog_ctrl',
+        executable='IK_node',
         output='screen'
     )
 
-    node_uros_agent = ExecuteProcess(
-        cmd=['ros2', 'run', 'micro_ros_agent', 'micro_ros_agent', 'serial', '-b', '115200', '--dev', '/dev/ttyUSB0'],
-        output='screen'
-    )
-
-    hyperdog_gazebo_joint_cmd = ExecuteProcess(
-        cmd=['ros2', 'run', 'hyperdog_gazebo_joint_cmd', 'hyperdog_gazebo_joint_controller'],
+    node_uros_agent = Node(
+        package='micro_ros_agent',
+        executable='micro_ros_agent',
+        arguments=['serial', '-b', '115200', '--dev', '/dev/ttyUSB0'],
         output='screen'
     )
 
