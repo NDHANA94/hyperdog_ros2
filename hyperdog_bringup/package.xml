@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>hyperdog_bringup</name>
+  <version>2.0.0</version>
+  <description>Launch files to run HyperDog on real hardware (BLDC actuators over CAN).</description>
+  <maintainer email="nipun.dhananjaya@gmail.com">W.M. Nipun Dhananjaya Weerakkodi</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <exec_depend>hyperdog_description</exec_depend>
+  <exec_depend>hyperdog_bldc_control</exec_depend>
+  <exec_depend>hyperdog_locomotion</exec_depend>
+  <exec_depend>hyperdog_teleop</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>launch_xml</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>

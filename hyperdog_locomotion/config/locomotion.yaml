@@ -33,7 +33,7 @@ locomotion_controller:
       body_height: 0.24                 # [m] nominal base height above ground
       body_height_limits: [0.15, 0.28]
       step_height: 0.06                 # [m] swing apex height
-      max_velocity: [0.8, 0.4, 1.5]     # vx [m/s], vy [m/s], wz [rad/s]
+      max_velocity: [0.5, 0.3, 1.2]     # vx [m/s], vy [m/s], wz [rad/s] (validated envelope, see README)
       max_acceleration: [1.5, 1.0, 3.0] # ramps applied to /cmd_vel
       command_timeout: 0.5              # [s] older /cmd_vel is treated as zero
       idle_time_to_stand: 0.8           # [s] stop stepping without velocity command
@@ -75,7 +75,7 @@ locomotion_controller:
         update_period: 0.01             # [s] re-solve period (100 Hz)
         max_iterations: 200
         # weights: roll pitch yaw, x y z, wx wy wz, vx vy vz, gravity
-        state_weights: [5.0, 5.0, 2.0, 2.0, 2.0, 50.0, 0.2, 0.2, 0.3, 1.0, 1.0, 0.5, 0.0]
+        state_weights: [10.0, 10.0, 2.0, 2.0, 2.0, 100.0, 0.2, 0.2, 0.3, 1.0, 1.0, 1.0, 0.0]
         force_weight: 0.00001
 
     disturbance_recovery:

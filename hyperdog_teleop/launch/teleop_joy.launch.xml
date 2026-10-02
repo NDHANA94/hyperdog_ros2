@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- ros2 launch hyperdog_teleop teleop_joy.launch.xml [joy_config:=<file>] [use_sim_time:=true] -->
+<launch>
+  <arg name="joy_config" default="$(find-pkg-share hyperdog_teleop)/config/joy_xbox.yaml"/>
+  <arg name="joy_dev" default="0"/>
+  <arg name="use_sim_time" default="false"/>
+  <node pkg="joy" exec="joy_node" name="joy_node">
+    <param name="device_id" value="$(var joy_dev)"/>
+    <param name="autorepeat_rate" value="20.0"/>
+  </node>
+  <node pkg="hyperdog_teleop" exec="hyperdog_teleop_joy_node" name="hyperdog_teleop_joy" output="screen">
+    <param from="$(var joy_config)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+</launch>

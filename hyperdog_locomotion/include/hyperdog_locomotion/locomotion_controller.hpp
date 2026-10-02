@@ -46,7 +46,7 @@ struct ControllerConfig
   double body_height_min{0.15};
   double body_height_max{0.28};
   double step_height{0.06};
-  Vec3 max_velocity{0.8, 0.4, 1.5};
+  Vec3 max_velocity{0.5, 0.3, 1.2};
   Vec3 max_acceleration{1.5, 1.0, 3.0};
   double idle_time_to_stand{0.8};
   bool terrain_adaptation{true};

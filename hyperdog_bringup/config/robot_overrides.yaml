@@ -1,0 +1,15 @@
+# Parameter overrides for the real robot (loaded after the default files).
+bldc_controller:
+  ros__parameters:
+    simulate_motor_dynamics: false   # the motor drivers close the current loop; only limits are applied
+
+locomotion_controller:
+  ros__parameters:
+    publish_tf: true
+    estimation:
+      # set to "imu_orientation" if your IMU driver publishes a fused orientation
+      attitude_source: "mahony"
+      # no foot switches on the stock robot: detect contact from the motor torques
+      contact_source: "torque"
+    locomotion:
+      auto_start: false              # wait for the operator (gamepad START) on hardware

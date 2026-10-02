@@ -160,6 +160,42 @@ private:
       s.expect_rest_at_end = true;
       steps_.push_back(s);
     }
+    if (scenario_ == "stress") {
+      Step s = stand("push while standing: lateral 70 N x 0.2 s", 5.0);
+      s.pushes.push_back({0.5, 0.2, 0.0, 70.0});
+      s.expect_rest_at_end = true;
+      steps_.push_back(s);
+      s = stand("push while standing: diagonal 80 N x 0.2 s", 5.0);
+      s.pushes.push_back({0.5, 0.2, -56.0, -56.0});
+      s.expect_rest_at_end = true;
+      steps_.push_back(s);
+      s = Step();
+      s.name = "fast trot 0.55 m/s";
+      s.duration = 6.0; s.vx = 0.55; s.track_from = 3.0; s.vx_tol = 0.15;
+      steps_.push_back(s);
+      s = Step();
+      s.name = "push while fast trotting: lateral 50 N x 0.2 s";
+      s.duration = 4.0; s.vx = 0.55;
+      s.pushes.push_back({1.0, 0.2, 0.0, 50.0});
+      steps_.push_back(s);
+      s = Step();
+      s.name = "trot + turn 0.4 m/s, 0.6 rad/s";
+      s.duration = 6.0; s.vx = 0.4; s.wz = 0.6; s.track_from = 2.0;
+      steps_.push_back(s);
+      s = stand("stop and stand", 4.0);
+      s.expect_rest_at_end = true;
+      steps_.push_back(s);
+    }
+    if (scenario_ == "terrain") {
+      // terrain.sdf: 8 deg ramp up (x = 2 .. 4), plateau, 8 deg ramp down
+      Step s;
+      s.name = "trot over 8 deg ramp, plateau and ramp down at 0.3 m/s";
+      s.duration = 32.0; s.vx = 0.3; s.track_from = 2.0; s.vx_tol = 0.15;
+      steps_.push_back(s);
+      s = stand("stop and stand on flat ground", 4.0);
+      s.expect_rest_at_end = true;
+      steps_.push_back(s);
+    }
     stats_.resize(steps_.size());
   }
 
@@ -317,6 +353,8 @@ private:
     bool all_ok = !fell_ && !startup_failed_;
     std::ostringstream md;
     md << "# HyperDog closed-loop validation report\n\n";
+    md << "Distance travelled (ground truth): x = " << gt_.pose.pose.position.x << " m, y = " <<
+      gt_.pose.pose.position.y << " m\n\n";
     md << "Scenario: `" << scenario_ << "` - simulator: Gazebo Harmonic (DART, 1 kHz), "
        << "actuators: simulated BLDC (MIT impedance mode, 1 kHz), controller: hyperdog_locomotion (500 Hz)\n\n";
     if (startup_failed_) {

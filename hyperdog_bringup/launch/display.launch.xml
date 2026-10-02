@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<!-- Publish the robot model (no simulation, no hardware) - useful to inspect the URDF in RViz. -->
+<launch>
+  <arg name="use_lidar" default="true"/>
+  <arg name="use_camera" default="true"/>
+  <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
+    <param name="robot_description" type="str"
+           value="$(command 'xacro $(find-pkg-share hyperdog_description)/urdf/hyperdog.urdf.xacro use_lidar:=$(var use_lidar) use_camera:=$(var use_camera)')"/>
+  </node>
+</launch>

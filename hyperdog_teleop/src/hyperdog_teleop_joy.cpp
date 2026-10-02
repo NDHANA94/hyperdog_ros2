@@ -1,211 +1,158 @@
-// __________________________________________________________________________________
-// MIT License                                                                       |
-//                                                                                   |
-// Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi                               |
-//                                                                                   | 
-// Permission is hereby granted, free of charge, to any person obtaining a copy      |
-// of this software and associated documentation files (the "Software"), to deal     |
-// in the Software without restriction, including without limitation the rights      |
-// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell         |
-// copies of the Software, and to permit persons to whom the Software is             |
-// furnished to do so, subject to the following conditions:                          |
-//                                                                                   |
-// The above copyright notice and this permission notice shall be included in all    |
-// copies or substantial portions of the Software.                                   |
-//                                                                                   |
-// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR        |
-// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,          |
-// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE       |
-// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER            |
-// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,     |
-// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE     |
-// SOFTWARE.                                                                         |
-// __________________________________________________________________________________|
-#include <rosidl_runtime_cpp/bounded_vector.hpp>
-#include <rosidl_runtime_cpp/message_initialization.hpp>
+// MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
+//
+// Gamepad teleoperation of HyperDog.
+//   joy (sensor_msgs/Joy) -> cmd_vel (geometry_msgs/Twist)
+//                         -> hyperdog/command (hyperdog_msgs/LocomotionCommand)
+// Every axis / button index and scale is a parameter (config/joy_xbox.yaml).
+//
+// Default (Xbox style) mapping:
+//   START   stand up + walk  /  sit down (toggle)      BACK  passive (damping, e-stop)
+//   A trot   B walk   X pace   Y bound
+//   left stick: vx / vy        right stick (horizontal): yaw rate
+//   LB held + left stick: body roll / pitch while standing
+//   d-pad up/down: body height (LB held: step height)
+//   RB: dead-man switch (only if require_deadman is true)
 
-
-#include <array>
+#include <algorithm>
 #include <memory>
 #include <string>
 #include <vector>
-#include <algorithm>
 
-#include "std_msgs/msg/string.hpp"
-#include "chrono"
+#include "geometry_msgs/msg/twist.hpp"
+#include "hyperdog_msgs/msg/locomotion_command.hpp"
 #include "rclcpp/rclcpp.hpp"
 #include "sensor_msgs/msg/joy.hpp"
-#include "trajectory_msgs/msg/joint_trajectory.hpp"
 
-#include "hyperdog_msgs/msg/joy_ctrl_cmds.hpp"
-// #include "hyperdog_msgs/msg/ctrl_variables.hpp"
+using hyperdog_msgs::msg::LocomotionCommand;
 
-#include "hyperdog_definitions.hpp"
-// #include "hyperdog_ctrl_variables.hpp"
-
-
-using std::placeholders::_1; 
-// ;
- 
-int t1, t2, t3 = clock();
-int btn_tgl_delay = 3000;
-
-auto cmd = hyperdog_msgs::msg::JoyCtrlCmds();
-
-bool LJ_btn_sw = 0;
-
-class PublishingSubscriber : public rclcpp::Node
+class HyperdogTeleopJoy : public rclcpp::Node
 {
-  public: 
-    PublishingSubscriber() 
-    : Node("hyperdog_teleop_gamepad_node")
-    {
-      subscription_ = this->create_subscription<sensor_msgs::msg::Joy>(
-        "joy", 12, std::bind(&PublishingSubscriber::topic_callback, this, _1));
+public:
+  HyperdogTeleopJoy()
+  : Node("hyperdog_teleop_joy")
+  {
+    axis_vx_ = declare_parameter("axis.vx", 1);
+    axis_vy_ = declare_parameter("axis.vy", 0);
+    axis_wz_ = declare_parameter("axis.wz", 3);
+    axis_height_ = declare_parameter("axis.height", 7);
+    btn_start_ = declare_parameter("button.start", 7);
+    btn_passive_ = declare_parameter("button.passive", 6);
+    btn_body_ = declare_parameter("button.body_pose", 4);
+    btn_deadman_ = declare_parameter("button.deadman", 5);
+    gait_buttons_ = declare_parameter("button.gaits", std::vector<int64_t>{0, 1, 2, 3});
+    gait_names_ = declare_parameter("gaits", std::vector<std::string>{"trot", "walk", "pace", "bound"});
+    max_vx_ = declare_parameter("scale.vx", 0.5);
+    max_vy_ = declare_parameter("scale.vy", 0.3);
+    max_wz_ = declare_parameter("scale.wz", 1.2);
+    max_roll_ = declare_parameter("scale.roll", 0.3);
+    max_pitch_ = declare_parameter("scale.pitch", 0.3);
+    height_ = declare_parameter("body_height", 0.24);
+    height_min_ = declare_parameter("body_height_min", 0.15);
+    height_max_ = declare_parameter("body_height_max", 0.28);
+    step_height_ = declare_parameter("step_height", 0.06);
+    require_deadman_ = declare_parameter("require_deadman", false);
+    deadzone_ = declare_parameter("deadzone", 0.08);
 
-      publisher_ = this->create_publisher<hyperdog_msgs::msg::JoyCtrlCmds>("hyperdog_joy_ctrl_cmd",40);
+    twist_pub_ = create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
+    cmd_pub_ = create_publisher<LocomotionCommand>("hyperdog/command", 10);
+    joy_sub_ = create_subscription<sensor_msgs::msg::Joy>(
+      "joy", 10, [this](sensor_msgs::msg::Joy::ConstSharedPtr m) {on_joy(*m);});
+    cmd_.mode = LocomotionCommand::MODE_PASSIVE;
+    cmd_.gait = gait_names_.empty() ? "trot" : gait_names_[0];
+    RCLCPP_INFO(get_logger(), "HyperDog joystick teleop ready (START: stand/sit, BACK: passive)");
+  }
+
+private:
+  double axis(const sensor_msgs::msg::Joy & j, int64_t i) const
+  {
+    if (i < 0 || static_cast<size_t>(i) >= j.axes.size()) {return 0.0;}
+    const double v = j.axes[i];
+    return std::abs(v) < deadzone_ ? 0.0 : v;
+  }
+  bool button(const sensor_msgs::msg::Joy & j, int64_t i) const
+  {
+    return i >= 0 && static_cast<size_t>(i) < j.buttons.size() && j.buttons[i];
+  }
+  bool pressed(const sensor_msgs::msg::Joy & j, int64_t i)
+  {
+    const bool now = button(j, i);
+    const bool was = prev_buttons_.size() > static_cast<size_t>(std::max<int64_t>(i, 0)) && i >= 0 &&
+      prev_buttons_[i];
+    return now && !was;
+  }
+
+  void on_joy(const sensor_msgs::msg::Joy & j)
+  {
+    bool changed = false;
+    if (pressed(j, btn_passive_)) {
+      cmd_.mode = LocomotionCommand::MODE_PASSIVE;
+      changed = true;
+    } else if (pressed(j, btn_start_)) {
+      cmd_.mode = cmd_.mode == LocomotionCommand::MODE_LOCOMOTION ?
+        LocomotionCommand::MODE_SIT : LocomotionCommand::MODE_LOCOMOTION;
+      changed = true;
     }
-
-  
-    void joy_state_to_joy_cmd(sensor_msgs::msg::Joy::SharedPtr msg_joy)
-    { 
-      // set start <- btn: start
-      if (!cmd.states[0] && msg_joy->buttons[7] && (clock() - t1 > btn_tgl_delay)){
-        cmd.states[0] = true;
-        t1 = clock();
+    for (size_t k = 0; k < gait_buttons_.size() && k < gait_names_.size(); ++k) {
+      if (pressed(j, gait_buttons_[k])) {
+        cmd_.gait = gait_names_[k];
+        changed = true;
       }
-      else if (cmd.states[0] && msg_joy->buttons[7] && (clock() - t1 > btn_tgl_delay )){
-        cmd.states[0] = false;
-        t1 = clock();
-      }
-
-      if (cmd.states[0]){
-        // set walk <- btn: back
-        if (!cmd.states[1] && msg_joy->buttons[6] && (clock() - t2 > btn_tgl_delay)){
-          cmd.states[1] = true;
-          t2 = clock();
-        }
-        else if (cmd.states[1] && msg_joy->buttons[6] && (clock() - t2 > btn_tgl_delay )){
-          cmd.states[1] = false;
-          t2 = clock();
-        }
-
-        // change side_walk_mode <- btn: RJ btn
-        if (!cmd.states[2] && msg_joy->buttons[10] && (clock() - t3 > btn_tgl_delay)){
-          cmd.states[2] = true;
-          t3 = clock();
-        }
-        else if (cmd.states[2] && msg_joy->buttons[10] && (clock() - t3 > btn_tgl_delay )){
-          cmd.states[2] = false;
-          t3 = clock();
-        }
-
-        // select gait <- btn: A, B, X, Y
-        if(msg_joy->buttons[0]){
-          cmd.gait_type = 0;
-        }
-        if(msg_joy->buttons[1]){
-          cmd.gait_type  = 1;
-        }
-        if(msg_joy->buttons[2]){
-          cmd.gait_type  = 2;
-        }
-        if(msg_joy->buttons[3]){
-          cmd.gait_type = 3;
-        }
-
-        // set robot height
-        if (cmd.pose.position.z < MIN_HEIGHT)
-          cmd.pose.position.z = MIN_HEIGHT;
-        if(cmd.pose.position.z > MAX_HEIGHT)
-          cmd.pose.position.z = MAX_HEIGHT;
-        if(!msg_joy->buttons[4] && msg_joy->axes[7] > 0 && cmd.pose.position.z < MAX_HEIGHT ){
-          cmd.pose.position.z += 5;
-        }
-        if(!msg_joy->buttons[4] && msg_joy->axes[7] < 0 && cmd.pose.position.z > MIN_HEIGHT ){
-          cmd.pose.position.z -= 5;
-        }
-
-        // if walking mode is on and robot's height is not enough for walking, 
-        // increase robot's height and swing step height
-        if (cmd.states[1] == true && cmd.pose.position.z < 100){
-          cmd.pose.position.z += 5;
-          cmd.gait_step.z += 5;
-        }
-
-        // set step height
-        if (cmd.gait_step.z > cmd.pose.position.z - MIN_HEIGHT)
-          cmd.gait_step.z = cmd.pose.position.z - MIN_HEIGHT;
-        if(msg_joy->buttons[4] && msg_joy->axes[7] > 0 && cmd.gait_step.z < cmd.pose.position.z - MIN_HEIGHT){      
-          cmd.gait_step.z += 5;
-        }
-        if(msg_joy->buttons[4] && msg_joy->axes[7] < 0 && cmd.gait_step.z > 10 ){      
-          cmd.gait_step.z -= 5;
-        }
-
-        // set eular angles
-        if (!msg_joy->buttons[9] && !LJ_btn_sw){
-          cmd.pose.orientation.x = -msg_joy->axes[0] * ROLL_RANGE;
-          cmd.pose.orientation.y = msg_joy->axes[1] * PITCH_RANGE;
-          cmd.pose.orientation.z = (msg_joy->axes[2] - msg_joy->axes[5])/2 * YAW_RANGE;
-        }
-
-        // set step length x y
-        cmd.gait_step.x = msg_joy->axes[4] * MAX_STEP_LENGTH_X;
-        cmd.gait_step.y = -msg_joy->axes[3] * MAX_STEP_LENGTH_Y;
-
-        // set slant
-        if (msg_joy->buttons[9]){
-          LJ_btn_sw = 1;
-          if (cmd.pose.position.x <= SLANT_X_MAX && cmd.pose.position.x >= SLANT_X_MIN){
-            cmd.pose.position.x += msg_joy->axes[1]*5 ;
-          }
-          else if (cmd.pose.position.x < SLANT_X_MIN){
-            cmd.pose.position.x = SLANT_X_MIN;
-          } 
-          else{
-            cmd.pose.position.x = SLANT_X_MAX;
-          }
-          if (cmd.pose.position.y <= SLANT_Y_MAX && cmd.pose.position.y >= SLANT_Y_MIN){
-            cmd.pose.position.y -= msg_joy->axes[0]*5 ;
-          }
-          else if (cmd.pose.position.y < SLANT_Y_MIN){
-            cmd.pose.position.y = SLANT_Y_MIN;
-          } 
-          else{
-            cmd.pose.position.y = SLANT_Y_MAX;
-          }
-        }
-        if (msg_joy->axes[0] == 0 && msg_joy->axes[1] == 0){
-          LJ_btn_sw = 0;
-        }
-        
-      }
-      
     }
-
-
-  private:
-    void topic_callback(const sensor_msgs::msg::Joy::SharedPtr msg_rx) 
-    {
-      joy_state_to_joy_cmd(msg_rx);
-
-      publisher_ -> publish(cmd);
-
-      // RCLCPP_INFO(this->get_logger(), "start: '%i'  | walk: %i  | R: %i  | P: %i | Y: %i  | Lx: %i  | Ly: %i  | Height: %i  | stepH: %i" , 
-      //                 rob_ctrlVar.state.start, rob_ctrlVar.state.walk,  rob_ctrlVar.body.eularAng[0], rob_ctrlVar.body.eularAng[1], rob_ctrlVar.body.eularAng[2],
-      //                 rob_ctrlVar.gaitParam.L[0], rob_ctrlVar.gaitParam.L[1], rob_ctrlVar.body.height, rob_ctrlVar.gaitParam.stepUp_h);
+    const bool body_mode = button(j, btn_body_);
+    const double dpad = axis(j, axis_height_);
+    if (dpad != 0.0 && (now() - last_height_change_).seconds() > 0.15) {
+      if (body_mode) {
+        step_height_ = std::clamp(step_height_ + 0.01 * (dpad > 0 ? 1 : -1), 0.02, 0.12);
+      } else {
+        height_ = std::clamp(height_ + 0.01 * (dpad > 0 ? 1 : -1), height_min_, height_max_);
+      }
+      last_height_change_ = now();
+      changed = true;
     }
-    rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr subscription_;
-    rclcpp::Publisher<hyperdog_msgs::msg::JoyCtrlCmds>::SharedPtr publisher_;
+    geometry_msgs::msg::Vector3 rpy;
+    if (body_mode) {
+      rpy.x = -axis(j, axis_vy_) * max_roll_;
+      rpy.y = axis(j, axis_vx_) * max_pitch_;
+    }
+    if (rpy.x != cmd_.body_rpy.x || rpy.y != cmd_.body_rpy.y) {
+      cmd_.body_rpy = rpy;
+      changed = true;
+    }
+    cmd_.body_height = height_;
+    cmd_.step_height = step_height_;
+    if (changed) {cmd_pub_->publish(cmd_);}
+
+    geometry_msgs::msg::Twist t;
+    const bool enabled = !require_deadman_ || button(j, btn_deadman_);
+    if (enabled && !body_mode) {
+      t.linear.x = axis(j, axis_vx_) * max_vx_;
+      t.linear.y = axis(j, axis_vy_) * max_vy_;
+      t.angular.z = axis(j, axis_wz_) * max_wz_;
+    }
+    twist_pub_->publish(t);
+    prev_buttons_ = j.buttons;
+  }
+
+  int64_t axis_vx_, axis_vy_, axis_wz_, axis_height_;
+  int64_t btn_start_, btn_passive_, btn_body_, btn_deadman_;
+  std::vector<int64_t> gait_buttons_;
+  std::vector<std::string> gait_names_;
+  double max_vx_, max_vy_, max_wz_, max_roll_, max_pitch_;
+  double height_, height_min_, height_max_, step_height_;
+  bool require_deadman_;
+  double deadzone_;
+  LocomotionCommand cmd_;
+  std::vector<int32_t> prev_buttons_;
+  rclcpp::Time last_height_change_{0, 0, RCL_ROS_TIME};
+  rclcpp::Publisher<geometry_msgs::msg::Twist>::SharedPtr twist_pub_;
+  rclcpp::Publisher<LocomotionCommand>::SharedPtr cmd_pub_;
+  rclcpp::Subscription<sensor_msgs::msg::Joy>::SharedPtr joy_sub_;
 };
 
-
-int main(int argc, char * argv[])
+int main(int argc, char ** argv)
 {
-  
-  rclcpp::init(argc, argv);  // Initialize ROS 2
-  rclcpp::spin(std::make_shared<PublishingSubscriber>());  // Start processing data from the node as well as the callbacks
-  rclcpp::shutdown(); // Shutdown the node when finished
+  rclcpp::init(argc, argv);
+  rclcpp::spin(std::make_shared<HyperdogTeleopJoy>());
+  rclcpp::shutdown();
   return 0;
 }

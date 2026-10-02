@@ -11,7 +11,7 @@
   <arg name="headless" default="true"/>
   <arg name="report" default="hyperdog_validation_report.md"/>
   <arg name="locomotion_params" default="$(find-pkg-share hyperdog_locomotion)/config/locomotion.yaml"/>
-  <arg name="scenario" default="full" description="full | push | walk"/>
+  <arg name="scenario" default="full" description="full | push | walk | stress | terrain (use world:=terrain)"/>
 
   <include file="$(find-pkg-share hyperdog_gazebo)/launch/sim.launch.xml">
     <arg name="world" value="$(var world)"/>

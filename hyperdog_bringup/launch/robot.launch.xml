@@ -1,0 +1,39 @@
+<?xml version="1.0"?>
+<!--
+  HyperDog on real hardware: BLDC actuators over SocketCAN (MIT protocol), ros2_control,
+  closed-loop locomotion controller and (optionally) gamepad teleop.
+
+  ros2 launch hyperdog_bringup robot.launch.xml can_interface:=can0 imu_topic:=/imu/data
+-->
+<launch>
+  <arg name="can_interface" default="can0"/>
+  <arg name="imu_topic" default="/imu/data" description="sensor_msgs/Imu from your IMU driver"/>
+  <arg name="teleop" default="true"/>
+  <arg name="motors_file" default="$(find-pkg-share hyperdog_description)/config/bldc_motors.yaml"/>
+  <arg name="controllers_file" default="$(find-pkg-share hyperdog_description)/config/controllers.yaml"/>
+  <arg name="locomotion_params" default="$(find-pkg-share hyperdog_locomotion)/config/locomotion.yaml"/>
+  <arg name="robot_params" default="$(find-pkg-share hyperdog_bringup)/config/robot_overrides.yaml"/>
+
+  <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
+    <param name="robot_description" type="str"
+           value="$(command 'xacro $(find-pkg-share hyperdog_description)/urdf/hyperdog.urdf.xacro sim:=false use_lidar:=false use_camera:=false can_interface:=$(var can_interface) motors_file:=$(var motors_file)')"/>
+  </node>
+
+  <node pkg="controller_manager" exec="ros2_control_node" output="screen">
+    <param from="$(var controllers_file)"/>
+    <param from="$(var motors_file)"/>
+    <param from="$(var robot_params)"/>
+    <remap from="~/robot_description" to="/robot_description"/>
+  </node>
+
+  <node pkg="controller_manager" exec="spawner" output="screen"
+        args="joint_state_broadcaster bldc_controller --controller-manager /controller_manager"/>
+
+  <node pkg="hyperdog_locomotion" exec="locomotion_node" name="locomotion_controller" output="screen">
+    <param from="$(var locomotion_params)"/>
+    <param from="$(var robot_params)"/>
+    <remap from="imu" to="$(var imu_topic)"/>
+  </node>
+
+  <include file="$(find-pkg-share hyperdog_teleop)/launch/teleop_joy.launch.xml" if="$(var teleop)"/>
+</launch>

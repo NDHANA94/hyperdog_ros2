@@ -1,0 +1,27 @@
+# Gamepad mapping for hyperdog_teleop_joy (Xbox / Logitech F710 in X mode)
+hyperdog_teleop_joy:
+  ros__parameters:
+    axis:
+      vx: 1          # left stick vertical
+      vy: 0          # left stick horizontal
+      wz: 3          # right stick horizontal
+      height: 7      # d-pad vertical
+    button:
+      start: 7       # stand up / sit down
+      passive: 6     # back: damping mode (e-stop)
+      body_pose: 4   # LB: left stick controls body roll / pitch
+      deadman: 5     # RB
+      gaits: [0, 1, 2, 3]
+    gaits: ["trot", "walk", "pace", "bound"]
+    scale:
+      vx: 0.5        # [m/s]
+      vy: 0.3        # [m/s]
+      wz: 1.2        # [rad/s]
+      roll: 0.3      # [rad]
+      pitch: 0.3     # [rad]
+    body_height: 0.24
+    body_height_min: 0.15
+    body_height_max: 0.28
+    step_height: 0.06
+    require_deadman: false
+    deadzone: 0.08

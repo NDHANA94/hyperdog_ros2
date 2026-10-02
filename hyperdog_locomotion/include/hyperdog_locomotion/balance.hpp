@@ -77,7 +77,7 @@ struct MPCParams
   double dt{0.03};
   double update_period{0.01};
   int max_iterations{200};
-  std::array<double, 13> state_weights{5, 5, 2, 2, 2, 50, 0.2, 0.2, 0.3, 1, 1, 0.5, 0};
+  std::array<double, 13> state_weights{10, 10, 2, 2, 2, 100, 0.2, 0.2, 0.3, 1, 1, 1, 0};
   double force_weight{1e-5};
 };
 
