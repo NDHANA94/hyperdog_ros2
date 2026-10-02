@@ -1,0 +1,30 @@
+name: build-and-test
+
+on:
+  push:
+    branches: [latest]
+  pull_request:
+    branches: [latest]
+
+jobs:
+  jazzy:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: ros-tooling/setup-ros@v0.7
+        with:
+          required-ros-distributions: jazzy
+      - uses: ros-tooling/action-ros-ci@v0.4
+        with:
+          target-ros2-distro: jazzy
+          package-name: >-
+            hyperdog_msgs
+            hyperdog_description
+            hyperdog_bldc_control
+            hyperdog_locomotion
+            hyperdog_gazebo
+            hyperdog_teleop
+            hyperdog_bringup
+          colcon-defaults: |
+            {
+              "build": {"cmake-args": ["-DCMAKE_BUILD_TYPE=Release"]}
+            }

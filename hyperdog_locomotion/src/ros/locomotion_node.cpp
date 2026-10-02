@@ -62,14 +62,16 @@ public:
       debug_.open(debug_file);
       debug_ << "t,mode,gait";
       for (const char * l : hl::kLegNames) {
-        for (const char * k : {"c", "fx", "fy", "fz", "tx", "ty", "tz", "Fx", "Fy", "Fz"}) {debug_ << "," << l << "_" << k;}
+        for (const char * k : {"c", "fx", "fy", "fz", "tx", "ty", "tz", "Fx", "Fy", "Fz"}) {
+          debug_ << "," << l << "_" << k;
+        }
       }
       debug_ << ",px,py,pz,vx,vy,vz,roll,pitch,yaw\n";
     }
     const auto contact_topics = declare_parameter(
       "foot_contact_topics", std::vector<std::string>{
-        "hyperdog/foot_contact/FR", "hyperdog/foot_contact/FL",
-        "hyperdog/foot_contact/BR", "hyperdog/foot_contact/BL"});
+      "hyperdog/foot_contact/FR", "hyperdog/foot_contact/FL",
+      "hyperdog/foot_contact/BR", "hyperdog/foot_contact/BL"});
     command_.gait = declare_parameter("locomotion.default_gait", std::string("trot"));
 
     for (size_t i = 0; i < names_.size(); ++i) {joint_index_[names_[i]] = static_cast<int>(i);}
@@ -92,19 +94,26 @@ public:
       "imu", sensor_qos, [this](sensor_msgs::msg::Imu::ConstSharedPtr m) {
         std::lock_guard<std::mutex> lk(mtx_);
         const auto & o = m->orientation;
-        if (m->orientation_covariance[0] >= 0.0 && (o.x != 0.0 || o.y != 0.0 || o.z != 0.0 || o.w != 0.0)) {
+        if (m->orientation_covariance[0] >= 0.0 &&
+        (o.x != 0.0 || o.y != 0.0 || o.z != 0.0 || o.w != 0.0))
+        {
           sensors_.imu_orientation = Eigen::Quaterniond(o.w, o.x, o.y, o.z);
         } else {
           sensors_.imu_orientation.reset();
         }
-        sensors_.gyro = hl::Vec3(m->angular_velocity.x, m->angular_velocity.y, m->angular_velocity.z);
-        sensors_.accel = hl::Vec3(m->linear_acceleration.x, m->linear_acceleration.y,
-            m->linear_acceleration.z);
+        sensors_.gyro = hl::Vec3(
+          m->angular_velocity.x, m->angular_velocity.y,
+          m->angular_velocity.z);
+        sensors_.accel = hl::Vec3(
+          m->linear_acceleration.x, m->linear_acceleration.y,
+          m->linear_acceleration.z);
         have_imu_ = true;
       });
     for (size_t i = 0; i < contact_topics.size() && i < 4; ++i) {
-      contact_subs_.push_back(create_subscription<ros_gz_interfaces::msg::Contacts>(
-          contact_topics[i], sensor_qos, [this, i](ros_gz_interfaces::msg::Contacts::ConstSharedPtr m) {
+      contact_subs_.push_back(
+        create_subscription<ros_gz_interfaces::msg::Contacts>(
+          contact_topics[i], sensor_qos,
+          [this, i](ros_gz_interfaces::msg::Contacts::ConstSharedPtr m) {
             if (m->contacts.empty()) {return;}
             std::lock_guard<std::mutex> lk(mtx_);
             last_contact_[i] = now();
@@ -124,10 +133,14 @@ public:
       "hyperdog/command", 10, [this](hyperdog_msgs::msg::LocomotionCommand::ConstSharedPtr m) {
         std::lock_guard<std::mutex> lk(mtx_);
         switch (m->mode) {
-          case hyperdog_msgs::msg::LocomotionCommand::MODE_PASSIVE: command_.mode = hl::Mode::PASSIVE; break;
-          case hyperdog_msgs::msg::LocomotionCommand::MODE_STAND: command_.mode = hl::Mode::BALANCE; break;
-          case hyperdog_msgs::msg::LocomotionCommand::MODE_LOCOMOTION: command_.mode = hl::Mode::LOCOMOTION; break;
-          case hyperdog_msgs::msg::LocomotionCommand::MODE_SIT: command_.mode = hl::Mode::SIT; break;
+          case hyperdog_msgs::msg::LocomotionCommand::MODE_PASSIVE: command_.mode =
+            hl::Mode::PASSIVE; break;
+          case hyperdog_msgs::msg::LocomotionCommand::MODE_STAND: command_.mode = hl::Mode::BALANCE;
+            break;
+          case hyperdog_msgs::msg::LocomotionCommand::MODE_LOCOMOTION: command_.mode =
+            hl::Mode::LOCOMOTION; break;
+          case hyperdog_msgs::msg::LocomotionCommand::MODE_SIT: command_.mode = hl::Mode::SIT;
+            break;
           default: break;
         }
         if (!m->gait.empty()) {command_.gait = m->gait;}
@@ -137,16 +150,22 @@ public:
         auto_start_ = false;   // an explicit command overrides the auto start
       });
 
-    motor_pub_ = create_publisher<hyperdog_msgs::msg::MotorCommands>("bldc_controller/commands", 10);
+    motor_pub_ = create_publisher<hyperdog_msgs::msg::MotorCommands>(
+      "bldc_controller/commands",
+      10);
     state_pub_ = create_publisher<hyperdog_msgs::msg::LocomotionState>("hyperdog/state", 10);
     odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", 10);
     tf_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
-    state_decimation_ = std::max(1, static_cast<int>(cfg_.control_rate / std::max(state_rate, 1.0)));
+    state_decimation_ = std::max(
+      1,
+      static_cast<int>(cfg_.control_rate / std::max(state_rate, 1.0)));
 
     // the control loop follows the ROS clock (sim time in Gazebo)
-    timer_ = rclcpp::create_timer(this, get_clock(),
-        rclcpp::Duration::from_seconds(1.0 / cfg_.control_rate), [this]() {control_step();});
-    RCLCPP_INFO(get_logger(), "HyperDog locomotion controller ready: %.0f Hz, balance=%s, contact=%s",
+    timer_ = rclcpp::create_timer(
+      this, get_clock(),
+      rclcpp::Duration::from_seconds(1.0 / cfg_.control_rate), [this]() {control_step();});
+    RCLCPP_INFO(
+      get_logger(), "HyperDog locomotion controller ready: %.0f Hz, balance=%s, contact=%s",
       cfg_.control_rate, cfg_.balance.controller.c_str(), cfg_.estimation.contact.source.c_str());
   }
 
@@ -158,7 +177,9 @@ private:
     {
       std::lock_guard<std::mutex> lk(mtx_);
       if (!have_joints_ || !have_imu_) {
-        RCLCPP_INFO_THROTTLE(get_logger(), *get_clock(), 3000, "waiting for joint_states and imu ...");
+        RCLCPP_INFO_THROTTLE(
+          get_logger(), *get_clock(), 3000,
+          "waiting for joint_states and imu ...");
         return;
       }
       s = sensors_;
@@ -208,13 +229,18 @@ private:
       const auto d = controller_->diagnostics();
       debug_ << now().seconds() << "," << hl::to_string(d.mode) << "," << d.gait;
       for (int i = 0; i < 4; ++i) {
-        debug_ << "," << d.contact[i] << "," << d.feet_world(i, 0) << "," << d.feet_world(i, 1) << "," <<
+        debug_ << "," << d.contact[i] << "," << d.feet_world(i, 0) << "," << d.feet_world(
+          i,
+          1) << "," <<
           d.feet_world(i, 2) << "," << d.foot_target(i, 0) << "," << d.foot_target(i, 1) << "," <<
-          d.foot_target(i, 2) << "," << d.foot_force[3 * i] << "," << d.foot_force[3 * i + 1] << "," <<
+          d.foot_target(
+          i,
+          2) << "," << d.foot_force[3 * i] << "," << d.foot_force[3 * i + 1] << "," <<
           d.foot_force[3 * i + 2];
       }
       debug_ << "," << d.position.x() << "," << d.position.y() << "," << d.position.z() << "," <<
-        d.velocity.x() << "," << d.velocity.y() << "," << d.velocity.z() << "," << d.rpy.x() << "," <<
+        d.velocity.x() << "," << d.velocity.y() << "," << d.velocity.z() << "," << d.rpy.x() <<
+        "," <<
         d.rpy.y() << "," << d.rpy.z() << "\n";
     }
   }
@@ -286,7 +312,8 @@ private:
   hl::SensorData sensors_;
   hl::Command command_;
   bool have_joints_{false}, have_imu_{false}, have_contact_sensor_{false}, have_cmd_vel_{false};
-  std::array<rclcpp::Time, 4> last_contact_{rclcpp::Time(0, 0, RCL_ROS_TIME), rclcpp::Time(0, 0, RCL_ROS_TIME),
+  std::array<rclcpp::Time, 4> last_contact_{rclcpp::Time(0, 0, RCL_ROS_TIME),
+    rclcpp::Time(0, 0, RCL_ROS_TIME),
     rclcpp::Time(0, 0, RCL_ROS_TIME), rclcpp::Time(0, 0, RCL_ROS_TIME)};
   rclcpp::Time last_cmd_vel_{0, 0, RCL_ROS_TIME};
   std::optional<rclcpp::Time> ready_since_;
@@ -299,7 +326,7 @@ private:
   bool publish_tf_{true};
   std::string odom_frame_, base_frame_;
   int state_decimation_{10};
-  long tick_{0};
+  int64_t tick_{0};
   std::ofstream debug_;
 
   rclcpp::Subscription<sensor_msgs::msg::JointState>::SharedPtr joint_sub_;

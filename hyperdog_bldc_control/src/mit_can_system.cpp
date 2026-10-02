@@ -41,14 +41,16 @@ class MitCanSystem : public hardware_interface::SystemInterface
 public:
   hardware_interface::CallbackReturn on_init(const hardware_interface::HardwareInfo & info) override
   {
-    if (hardware_interface::SystemInterface::on_init(info) != hardware_interface::CallbackReturn::SUCCESS) {
+    if (hardware_interface::SystemInterface::on_init(info) !=
+      hardware_interface::CallbackReturn::SUCCESS)
+    {
       return hardware_interface::CallbackReturn::ERROR;
     }
     auto get = [](const std::unordered_map<std::string, std::string> & m, const std::string & k,
       double def) {
-        auto it = m.find(k);
-        return it == m.end() ? def : std::stod(it->second);
-      };
+      auto it = m.find(k);
+      return it == m.end() ? def : std::stod(it->second);
+    };
     auto it = info_.hardware_parameters.find("can_interface");
     can_if_ = it == info_.hardware_parameters.end() ? "can0" : it->second;
     const size_t n = info_.joints.size();

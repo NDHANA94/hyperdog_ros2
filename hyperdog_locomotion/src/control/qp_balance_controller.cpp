@@ -35,7 +35,8 @@ Vec12 QPBalanceController::compute(
   const Vec3 & omega_ref, const Mat43 & feet_world, const Bool4 & contact, const Vec3 & normal)
 {
   const auto t0 = std::chrono::steady_clock::now();
-  const Vec3 acc = p_.kp_position.cwiseProduct(p_ref - s.p) + p_.kd_position.cwiseProduct(v_ref - s.v);
+  const Vec3 acc = p_.kp_position.cwiseProduct(p_ref - s.p) +
+    p_.kd_position.cwiseProduct(v_ref - s.v);
   const Vec3 F = mass_ * (acc + Vec3(0.0, 0.0, kGravity));
   const Vec3 e_R = so3_log(R_ref * s.R.transpose());
   const Mat3 I_w = s.R * inertia_ * s.R.transpose();
@@ -50,7 +51,8 @@ Vec12 QPBalanceController::compute(
   }
   const Eigen::Matrix<double, 6, 6> S = p_.wrench_weights.asDiagonal();
   const double reg = p_.force_regularization + p_.force_smoothing;
-  const Eigen::MatrixXd P = 2.0 * (A.transpose() * S * A + reg * Eigen::Matrix<double, 12, 12>::Identity());
+  const Eigen::MatrixXd P = 2.0 * (A.transpose() * S * A + reg * Eigen::Matrix<double, 12,
+    12>::Identity());
   const Eigen::VectorXd q = -2.0 * (A.transpose() * S * b + p_.force_smoothing * f_prev_);
   Eigen::MatrixXd C;
   Eigen::VectorXd lo, hi;

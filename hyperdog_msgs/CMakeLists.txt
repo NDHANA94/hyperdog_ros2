@@ -23,9 +23,6 @@ find_package(rosidl_default_generators REQUIRED)
 find_package(geometry_msgs REQUIRED)
 
 rosidl_generate_interfaces(hyperdog_msgs
-  "msg/JoyCtrlCmds.msg"
-  "msg/Limits.msg"
-  "msg/Geometry.msg"
   "msg/MotorCommands.msg"
   "msg/MotorStates.msg"
   "msg/LocomotionCommand.msg"
@@ -33,6 +30,9 @@ rosidl_generate_interfaces(hyperdog_msgs
   DEPENDENCIES builtin_interfaces std_msgs geometry_msgs
 )
 
-
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
 ament_package()

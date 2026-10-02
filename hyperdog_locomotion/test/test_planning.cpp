@@ -6,7 +6,13 @@
 #include "hyperdog_locomotion/planning/gait_scheduler.hpp"
 #include "hyperdog_locomotion/planning/swing_trajectory.hpp"
 
-using namespace hyperdog_locomotion;
+using hyperdog_locomotion::DisturbanceMonitor;
+using hyperdog_locomotion::FootholdParams;
+using hyperdog_locomotion::GaitScheduler;
+using hyperdog_locomotion::Mat43;
+using hyperdog_locomotion::Vec3;
+using hyperdog_locomotion::plan_foothold;
+using hyperdog_locomotion::swing_trajectory;
 
 TEST(Gait, TrotHasDiagonalPairs)
 {
@@ -25,11 +31,17 @@ TEST(Gait, StopsWithAllFeetDown)
 {
   GaitScheduler g;
   g.request("trot");
-  for (int k = 0; k < 130; ++k) {g.step(0.002);}
+  for (int k = 0; k < 130; ++k) {
+    g.step(0.002);
+  }
   g.request("stand");
-  for (int k = 0; k < 500; ++k) {g.step(0.002);}
+  for (int k = 0; k < 500; ++k) {
+    g.step(0.002);
+  }
   EXPECT_TRUE(g.is_standing());
-  for (bool c : g.contact()) {EXPECT_TRUE(c);}
+  for (bool c : g.contact()) {
+    EXPECT_TRUE(c);
+  }
 }
 
 TEST(Swing, StartsAndEndsAtTargets)
@@ -50,11 +62,15 @@ TEST(Foothold, RaibertAndCapturePointOffsets)
   FootholdParams p;
   const Vec3 nominal(0.175, -0.17, 0.0);
   // standing still: foot lands right below the hip
-  Vec3 f = plan_foothold(p, nominal, Vec3(0, 0, 0.24), 0.0, Vec3::Zero(), Vec3::Zero(), 0.0, 0.1, 0.2, 0.24);
+  Vec3 f = plan_foothold(
+    p, nominal, Vec3(0, 0, 0.24), 0.0, Vec3::Zero(), Vec3::Zero(), 0.0, 0.1,
+    0.2, 0.24);
   EXPECT_NEAR(f.x(), 0.175, 1e-9);
   EXPECT_NEAR(f.y(), -0.17, 1e-9);
   // moving faster than commanded: step further ahead (capture point feedback), bounded
-  f = plan_foothold(p, nominal, Vec3(0, 0, 0.24), 0.0, Vec3(2.0, 0, 0), Vec3::Zero(), 0.0, 0.1, 0.2, 0.24);
+  f = plan_foothold(
+    p, nominal, Vec3(0, 0, 0.24), 0.0, Vec3(2.0, 0, 0), Vec3::Zero(), 0.0, 0.1, 0.2,
+    0.24);
   EXPECT_NEAR(f.x() - 0.175, p.max_step_offset, 1e-9);
 }
 
@@ -65,9 +81,12 @@ TEST(DisturbanceMonitor, DetectsPushAndSettles)
   feet << 0.175, -0.17, 0.02, 0.175, 0.17, 0.02, -0.175, -0.17, 0.02, -0.175, 0.17, 0.02;
   const Vec3 p(0, 0, 0.24);
   // quiet stance: nothing happens
-  EXPECT_EQ(m.update(true, p, Vec3::Zero(), 0.24, feet, 0.0, 0.002), DisturbanceMonitor::Event::NONE);
+  EXPECT_EQ(
+    m.update(true, p, Vec3::Zero(), 0.24, feet, 0.0, 0.002),
+    DisturbanceMonitor::Event::NONE);
   // lateral push: capture point outside the support polygon
-  EXPECT_EQ(m.update(true, p, Vec3(0, 1.0, 0), 0.24, feet, 0.0, 0.002),
+  EXPECT_EQ(
+    m.update(true, p, Vec3(0, 1.0, 0), 0.24, feet, 0.0, 0.002),
     DisturbanceMonitor::Event::DETECTED);
   EXPECT_TRUE(m.recovering());
   // settles after settle_time of rest

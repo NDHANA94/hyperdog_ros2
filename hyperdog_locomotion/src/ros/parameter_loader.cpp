@@ -2,6 +2,7 @@
 
 #include "parameter_loader.hpp"
 
+#include <algorithm>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -119,7 +120,9 @@ ControllerConfig load_controller_config(rclcpp::Node & node)
   r.get("balance.qp.kd_orientation", b.qp.kd_orientation);
   std::vector<double> ww(b.qp.wrench_weights.data(), b.qp.wrench_weights.data() + 6);
   r.get_array("balance.qp.wrench_weights", ww, 6);
-  for (int i = 0; i < 6; ++i) {b.qp.wrench_weights[i] = ww[i];}
+  for (int i = 0; i < 6; ++i) {
+    b.qp.wrench_weights[i] = ww[i];
+  }
   r.get("balance.qp.force_regularization", b.qp.force_regularization);
   r.get("balance.qp.force_smoothing", b.qp.force_smoothing);
   r.get("balance.mpc.horizon", b.mpc.horizon);

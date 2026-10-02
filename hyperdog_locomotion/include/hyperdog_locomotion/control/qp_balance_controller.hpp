@@ -19,7 +19,8 @@ struct QPBalanceParams
   Vec3 kd_position{14.0, 14.0, 30.0};
   Vec3 kp_orientation{300.0, 300.0, 120.0};
   Vec3 kd_orientation{30.0, 30.0, 18.0};
-  Eigen::Matrix<double, 6, 1> wrench_weights{(Eigen::Matrix<double, 6, 1>() << 1, 1, 5, 20, 20, 10).finished()};
+  Eigen::Matrix<double, 6,
+    1> wrench_weights{(Eigen::Matrix<double, 6, 1>() << 1, 1, 5, 20, 20, 10).finished()};
   double force_regularization{1e-3};
   double force_smoothing{1e-3};
 };
@@ -27,7 +28,9 @@ struct QPBalanceParams
 class QPBalanceController
 {
 public:
-  QPBalanceController(const QPBalanceParams & p, const ContactLimits & lim, double mass, const Mat3 & inertia);
+  QPBalanceController(
+    const QPBalanceParams & p, const ContactLimits & lim, double mass,
+    const Mat3 & inertia);
   Vec12 compute(
     const BodyState & s, const Mat3 & R_ref, const Vec3 & p_ref, const Vec3 & v_ref,
     const Vec3 & omega_ref, const Mat43 & feet_world, const Bool4 & contact, const Vec3 & normal);

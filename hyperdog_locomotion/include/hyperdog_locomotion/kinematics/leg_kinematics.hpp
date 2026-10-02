@@ -12,6 +12,7 @@
 
 #include <array>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "hyperdog_locomotion/common/math.hpp"
@@ -52,7 +53,9 @@ public:
   const Vec3 & hip_offset() const {return hip_;}
 
 private:
-  void frames(const Vec3 & q, std::array<Vec3, 3> & p, std::array<Vec3, 3> & axes, Vec3 & foot) const;
+  void frames(
+    const Vec3 & q, std::array<Vec3, 3> & p, std::array<Vec3, 3> & axes,
+    Vec3 & foot) const;
 
   double side_{1.0};
   Vec3 hip_{Vec3::Zero()};

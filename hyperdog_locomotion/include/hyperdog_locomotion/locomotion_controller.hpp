@@ -16,6 +16,7 @@
 #define HYPERDOG_LOCOMOTION__LOCOMOTION_CONTROLLER_HPP_
 
 #include <array>
+#include <cstdint>
 #include <string>
 #include <utility>
 #include <vector>
@@ -96,7 +97,7 @@ private:
   Mode mode_{Mode::PASSIVE};
   double mode_time_{0.0};
   double time_{0.0};
-  long tick_{0};
+  int64_t tick_{0};
   Command cmd_;
   Vec12 start_q_{Vec12::Zero()};
   std::vector<std::pair<double, std::string>> events_;

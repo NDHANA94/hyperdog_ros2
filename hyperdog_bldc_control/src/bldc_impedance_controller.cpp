@@ -56,12 +56,12 @@ BldcMotorParams BldcImpedanceController::load_motor(const std::string & type)
   BldcMotorParams p;
   p.name = type;
   auto get = [&](const std::string & key, double def) {
-      const std::string name = "motors." + type + "." + key;
-      if (!node->has_parameter(name)) {
-        node->declare_parameter<double>(name, def);
-      }
-      return node->get_parameter(name).as_double();
-    };
+    const std::string name = "motors." + type + "." + key;
+    if (!node->has_parameter(name)) {
+      node->declare_parameter<double>(name, def);
+    }
+    return node->get_parameter(name).as_double();
+  };
   p.kv_rpm_per_volt = get("kv_rpm_per_volt", p.kv_rpm_per_volt);
   p.torque_constant = get("torque_constant", p.torque_constant);
   p.phase_resistance = get("phase_resistance", p.phase_resistance);
@@ -100,7 +100,8 @@ CallbackReturn BldcImpedanceController::on_configure(const rclcpp_lifecycle::Sta
     types.assign(joints_.size(), types[0]);
   }
   if (types.size() != joints_.size()) {
-    RCLCPP_ERROR(node->get_logger(),
+    RCLCPP_ERROR(
+      node->get_logger(),
       "'joint_motor_types' must have 1 or %zu entries", joints_.size());
     return CallbackReturn::ERROR;
   }
@@ -108,7 +109,8 @@ CallbackReturn BldcImpedanceController::on_configure(const rclcpp_lifecycle::Sta
   for (size_t i = 0; i < joints_.size(); ++i) {
     const auto p = load_motor(types[i]);
     motors_.emplace_back(p);
-    RCLCPP_INFO(node->get_logger(),
+    RCLCPP_INFO(
+      node->get_logger(),
       "%s: motor '%s' Kt=%.3f Nm/A N=%.1f peak=%.1f Nm rated=%.1f Nm no-load=%.1f rad/s",
       joints_[i].c_str(), p.name.c_str(), p.kt(), p.gear_ratio, p.peak_torque(),
       p.rated_torque(), p.no_load_speed());
@@ -133,18 +135,21 @@ CallbackReturn BldcImpedanceController::on_configure(const rclcpp_lifecycle::Sta
   state_pub_ = node->create_publisher<hyperdog_msgs::msg::MotorStates>(
     "~/motor_states", rclcpp::SystemDefaultsQoS());
   rt_state_pub_ =
-    std::make_unique<realtime_tools::RealtimePublisher<hyperdog_msgs::msg::MotorStates>>(state_pub_);
+    std::make_unique<realtime_tools::RealtimePublisher<hyperdog_msgs::msg::MotorStates>>(
+    state_pub_);
   return CallbackReturn::SUCCESS;
 }
 
-void BldcImpedanceController::command_callback(const hyperdog_msgs::msg::MotorCommands::SharedPtr msg)
+void BldcImpedanceController::command_callback(
+  const hyperdog_msgs::msg::MotorCommands::SharedPtr msg)
 {
   const size_t n = msg->name.size();
   auto arr_ok = [n](const std::vector<double> & v) {return v.empty() || v.size() == n;};
   if (n == 0 || msg->position.size() != n || !arr_ok(msg->velocity) || !arr_ok(msg->effort) ||
     !arr_ok(msg->kp) || !arr_ok(msg->kd))
   {
-    RCLCPP_WARN_THROTTLE(get_node()->get_logger(), *get_node()->get_clock(), 2000,
+    RCLCPP_WARN_THROTTLE(
+      get_node()->get_logger(), *get_node()->get_clock(), 2000,
       "ignoring malformed MotorCommands message");
     return;
   }
@@ -192,18 +197,24 @@ InterfaceConfiguration BldcImpedanceController::state_interface_configuration() 
 
 CallbackReturn BldcImpedanceController::on_activate(const rclcpp_lifecycle::State &)
 {
-  if (command_interfaces_.size() != joints_.size() || state_interfaces_.size() != 2 * joints_.size()) {
+  if (command_interfaces_.size() != joints_.size() ||
+    state_interfaces_.size() != 2 * joints_.size())
+  {
     RCLCPP_ERROR(get_node()->get_logger(), "unexpected number of claimed interfaces");
     return CallbackReturn::ERROR;
   }
   command_buffer_.writeFromNonRT(std::make_shared<CommandFrame>());
-  for (auto & m : motors_) {m.reset();}
+  for (auto & m : motors_) {
+    m.reset();
+  }
   return CallbackReturn::SUCCESS;
 }
 
 CallbackReturn BldcImpedanceController::on_deactivate(const rclcpp_lifecycle::State &)
 {
-  for (auto & c : command_interfaces_) {write_iface(c, 0.0);}
+  for (auto & c : command_interfaces_) {
+    write_iface(c, 0.0);
+  }
   return CallbackReturn::SUCCESS;
 }
 

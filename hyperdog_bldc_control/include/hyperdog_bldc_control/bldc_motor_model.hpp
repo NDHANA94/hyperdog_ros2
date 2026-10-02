@@ -35,7 +35,7 @@ struct BldcMotorParams
   double phase_inductance{5.7e-5};   // [H] (informational, electrical time constant)
   int pole_pairs{14};
   double bus_voltage{48.0};          // [V]
-  double voltage_utilization{0.577}; // usable fraction of the bus for the q-axis (SVPWM ~ 1/sqrt(3))
+  double voltage_utilization{0.577};  // usable bus fraction for the q-axis (SVPWM ~ 1/sqrt(3))
   double max_current{25.0};          // [A] peak q-axis current
   double rated_current{8.0};         // [A] continuous current
   double current_loop_bandwidth{1000.0};  // [Hz]
@@ -74,7 +74,7 @@ struct BldcMotorOutput
 {
   double torque{0.0};           // delivered output torque [Nm]
   double current{0.0};          // q-axis current [A]
-  double electrical_power{0.0}; // [W]
+  double electrical_power{0.0};  // [W]
   double temperature{25.0};     // [degC]
   bool saturated{false};
 };
@@ -108,7 +108,9 @@ public:
   /// Advance the model by dt with a requested output torque at joint speed `velocity`.
   /// When `simulate_dynamics` is false only the static limits are applied (real hardware:
   /// the driver closes the current loop).
-  BldcMotorOutput update(double torque_request, double velocity, double dt, bool simulate_dynamics = true)
+  BldcMotorOutput update(
+    double torque_request, double velocity, double dt,
+    bool simulate_dynamics = true)
   {
     const auto & p = params_;
     BldcMotorOutput out;

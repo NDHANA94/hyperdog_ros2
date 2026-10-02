@@ -40,9 +40,10 @@ inline Mat3 rpy_to_rot(const Vec3 & rpy)
 
 inline Vec3 rot_to_rpy(const Mat3 & R)
 {
-  return Vec3(std::atan2(R(2, 1), R(2, 2)),
-           -std::asin(std::clamp(R(2, 0), -1.0, 1.0)),
-           std::atan2(R(1, 0), R(0, 0)));
+  return Vec3(
+    std::atan2(R(2, 1), R(2, 2)),
+    -std::asin(std::clamp(R(2, 0), -1.0, 1.0)),
+    std::atan2(R(1, 0), R(0, 0)));
 }
 
 inline Mat3 rot_z(double yaw)

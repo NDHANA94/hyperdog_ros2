@@ -40,7 +40,9 @@ public:
     btn_body_ = declare_parameter("button.body_pose", 4);
     btn_deadman_ = declare_parameter("button.deadman", 5);
     gait_buttons_ = declare_parameter("button.gaits", std::vector<int64_t>{0, 1, 2, 3});
-    gait_names_ = declare_parameter("gaits", std::vector<std::string>{"trot", "walk", "pace", "bound"});
+    gait_names_ = declare_parameter(
+      "gaits",
+      std::vector<std::string>{"trot", "walk", "pace", "bound"});
     max_vx_ = declare_parameter("scale.vx", 0.5);
     max_vy_ = declare_parameter("scale.vy", 0.3);
     max_wz_ = declare_parameter("scale.wz", 1.2);
@@ -76,7 +78,9 @@ private:
   bool pressed(const sensor_msgs::msg::Joy & j, int64_t i)
   {
     const bool now = button(j, i);
-    const bool was = prev_buttons_.size() > static_cast<size_t>(std::max<int64_t>(i, 0)) && i >= 0 &&
+    const bool was = prev_buttons_.size() > static_cast<size_t>(std::max<int64_t>(
+        i,
+        0)) && i >= 0 &&
       prev_buttons_[i];
     return now && !was;
   }

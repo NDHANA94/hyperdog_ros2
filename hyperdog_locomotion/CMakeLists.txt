@@ -60,6 +60,8 @@ install(TARGETS locomotion_node DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_gtest REQUIRED)
   foreach(test_name kinematics estimation planning control)
     ament_add_gtest(test_${test_name} test/test_${test_name}.cpp)

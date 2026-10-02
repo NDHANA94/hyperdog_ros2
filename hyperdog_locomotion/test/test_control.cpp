@@ -5,7 +5,24 @@
 #include "hyperdog_locomotion/control/leg_controller.hpp"
 #include "hyperdog_locomotion/control/qp_balance_controller.hpp"
 
-using namespace hyperdog_locomotion;
+using hyperdog_locomotion::BodyState;
+using hyperdog_locomotion::Bool4;
+using hyperdog_locomotion::ContactLimits;
+using hyperdog_locomotion::ConvexMPC;
+using hyperdog_locomotion::LegControlInput;
+using hyperdog_locomotion::LegController;
+using hyperdog_locomotion::LegControllerParams;
+using hyperdog_locomotion::MPCParams;
+using hyperdog_locomotion::Mat3;
+using hyperdog_locomotion::Mat43;
+using hyperdog_locomotion::MotorCommand;
+using hyperdog_locomotion::QPBalanceController;
+using hyperdog_locomotion::QPBalanceParams;
+using hyperdog_locomotion::QPSolver;
+using hyperdog_locomotion::RobotKinematics;
+using hyperdog_locomotion::Vec12;
+using hyperdog_locomotion::Vec3;
+using hyperdog_locomotion::kGravity;
 
 namespace
 {
@@ -36,11 +53,13 @@ TEST(QPSolver, BoxConstrainedQuadratic)
 
 TEST(QPBalance, StaticStandDistributesWeight)
 {
-  QPBalanceController c(QPBalanceParams(), ContactLimits(), 7.4, Vec3(0.06, 0.12, 0.14).asDiagonal());
+  QPBalanceController c(QPBalanceParams(), ContactLimits(), 7.4,
+    Vec3(0.06, 0.12, 0.14).asDiagonal());
   BodyState s;
   s.p = Vec3(0, 0, 0.24);
-  const Vec12 f = c.compute(s, Mat3::Identity(), s.p, Vec3::Zero(), Vec3::Zero(), feet(),
-      Bool4{true, true, true, true}, Vec3::UnitZ());
+  const Vec12 f = c.compute(
+    s, Mat3::Identity(), s.p, Vec3::Zero(), Vec3::Zero(), feet(),
+    Bool4{true, true, true, true}, Vec3::UnitZ());
   for (int i = 0; i < 4; ++i) {
     EXPECT_NEAR(f[3 * i + 2], 7.4 * kGravity / 4.0, 0.2);
     EXPECT_NEAR(f[3 * i], 0.0, 0.2);
@@ -49,12 +68,14 @@ TEST(QPBalance, StaticStandDistributesWeight)
 
 TEST(QPBalance, RespectsFrictionAndSwingLegs)
 {
-  QPBalanceController c(QPBalanceParams(), ContactLimits(), 7.4, Vec3(0.06, 0.12, 0.14).asDiagonal());
+  QPBalanceController c(QPBalanceParams(), ContactLimits(), 7.4,
+    Vec3(0.06, 0.12, 0.14).asDiagonal());
   BodyState s;
   s.p = Vec3(0, 0, 0.24);
   s.v = Vec3(0.5, 0, 0);   // pushed forward
-  const Vec12 f = c.compute(s, Mat3::Identity(), Vec3(0, 0, 0.24), Vec3::Zero(), Vec3::Zero(), feet(),
-      Bool4{true, false, false, true}, Vec3::UnitZ());
+  const Vec12 f = c.compute(
+    s, Mat3::Identity(), Vec3(0, 0, 0.24), Vec3::Zero(), Vec3::Zero(), feet(),
+    Bool4{true, false, false, true}, Vec3::UnitZ());
   EXPECT_NEAR(f.segment<3>(3).norm(), 0.0, 1e-9);
   EXPECT_NEAR(f.segment<3>(6).norm(), 0.0, 1e-9);
   for (int i : {0, 3}) {
@@ -76,10 +97,14 @@ TEST(ConvexMPC, AcceleratesTowardsVelocityReference)
     ref(k, 9) = 0.5;
   }
   std::vector<Bool4> table(N, Bool4{true, false, false, true});
-  for (int k = 5; k < N; ++k) {table[k] = Bool4{false, true, true, false};}
+  for (int k = 5; k < N; ++k) {
+    table[k] = Bool4{false, true, true, false};
+  }
   const Vec12 f = mpc.compute(s, ref, feet(), table, Vec3::UnitZ());
   double fz = 0, fx = 0;
-  for (int i = 0; i < 4; ++i) {fz += f[3 * i + 2]; fx += f[3 * i];}
+  for (int i = 0; i < 4; ++i) {
+    fz += f[3 * i + 2]; fx += f[3 * i];
+  }
   EXPECT_GT(fx, 5.0);
   EXPECT_NEAR(fz, 7.4 * kGravity, 25.0);
   EXPECT_NEAR(f.segment<3>(3).norm(), 0.0, 1e-9);
@@ -93,7 +118,9 @@ TEST(LegController, StanceTorqueSupportsWeight)
   LegControlInput in;
   in.p = Vec3(0, 0, 0.24);
   Mat43 feet_b;
-  for (int i = 0; i < 4; ++i) {feet_b.row(i) = kin.leg(i).nominal_foot(0.22).transpose();}
+  for (int i = 0; i < 4; ++i) {
+    feet_b.row(i) = kin.leg(i).nominal_foot(0.22).transpose();
+  }
   kin.inverse_all(feet_b, in.q);
   in.feet_body = feet_b;
   for (int i = 0; i < 4; ++i) {

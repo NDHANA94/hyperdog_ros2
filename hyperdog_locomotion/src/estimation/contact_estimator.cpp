@@ -15,7 +15,9 @@ void ContactEstimator::update(
   if (p_.source == "sensor" && sensor) {
     measured = *sensor;
   } else if (p_.source == "torque" && foot_fz) {
-    for (int i = 0; i < 4; ++i) {measured[i] = (*foot_fz)[i] > p_.force_threshold;}
+    for (int i = 0; i < 4; ++i) {
+      measured[i] = (*foot_fz)[i] > p_.force_threshold;
+    }
   }
   for (int i = 0; i < 4; ++i) {
     early_[i] = false;

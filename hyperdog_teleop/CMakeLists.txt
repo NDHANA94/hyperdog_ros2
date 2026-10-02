@@ -20,4 +20,9 @@ ament_target_dependencies(hyperdog_teleop_joy_node rclcpp sensor_msgs geometry_m
 install(TARGETS hyperdog_teleop_joy_node DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY config launch DESTINATION share/${PROJECT_NAME})
 
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
+
 ament_package()

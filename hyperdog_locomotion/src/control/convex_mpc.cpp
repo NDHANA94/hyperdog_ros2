@@ -17,7 +17,9 @@ double elapsed(const std::chrono::steady_clock::time_point & t0)
 }
 }  // namespace
 
-ConvexMPC::ConvexMPC(const MPCParams & p, const ContactLimits & lim, double mass, const Mat3 & inertia)
+ConvexMPC::ConvexMPC(
+  const MPCParams & p, const ContactLimits & lim, double mass,
+  const Mat3 & inertia)
 : p_(p), lim_(lim), mass_(mass), inertia_(inertia)
 {
   QPSettings s;
@@ -60,9 +62,13 @@ Vec12 ConvexMPC::compute(
 
   std::vector<Eigen::Matrix<double, nx, nx>> Apow(N + 1);
   Apow[0].setIdentity();
-  for (int k = 1; k <= N; ++k) {Apow[k] = Ad * Apow[k - 1];}
+  for (int k = 1; k <= N; ++k) {
+    Apow[k] = Ad * Apow[k - 1];
+  }
   std::vector<Eigen::Matrix<double, nx, nu>> AB(N);
-  for (int k = 0; k < N; ++k) {AB[k] = Apow[k] * Bd;}
+  for (int k = 0; k < N; ++k) {
+    AB[k] = Apow[k] * Bd;
+  }
 
   Eigen::MatrixXd Aqp(nx * N, nx);
   Eigen::MatrixXd Bqp = Eigen::MatrixXd::Zero(nx * N, nu * N);
@@ -72,9 +78,14 @@ Vec12 ConvexMPC::compute(
     for (int j = 0; j <= k; ++j) {
       Bqp.block<nx, nu>(nx * k, nu * j) = AB[k - j];
     }
-    Xref.segment<12>(nx * k) = ref.row(std::min<int>(k, static_cast<int>(ref.rows()) - 1)).transpose();
+    Xref.segment<12>(nx * k) = ref.row(
+      std::min<int>(
+        k,
+        static_cast<int>(ref.rows()) - 1)).transpose();
     Xref(nx * k + 12) = -kGravity;
-    for (int i = 0; i < nx; ++i) {Ldiag(nx * k + i) = p_.state_weights[i];}
+    for (int i = 0; i < nx; ++i) {
+      Ldiag(nx * k + i) = p_.state_weights[i];
+    }
   }
   const Eigen::MatrixXd LB = Ldiag.asDiagonal() * Bqp;
   Eigen::MatrixXd H = 2.0 * (Bqp.transpose() * LB);

@@ -44,6 +44,8 @@ install(TARGETS ${PROJECT_NAME}
 )
 
 if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
   find_package(ament_cmake_gtest REQUIRED)
   ament_add_gtest(test_bldc_motor_model test/test_bldc_motor_model.cpp)
   target_include_directories(test_bldc_motor_model PRIVATE include)

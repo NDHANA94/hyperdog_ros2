@@ -5,7 +5,9 @@
 
 #include "hyperdog_locomotion/kinematics/leg_kinematics.hpp"
 
-using namespace hyperdog_locomotion;
+using hyperdog_locomotion::Mat3;
+using hyperdog_locomotion::RobotKinematics;
+using hyperdog_locomotion::Vec3;
 
 TEST(Kinematics, NominalStandingPose)
 {

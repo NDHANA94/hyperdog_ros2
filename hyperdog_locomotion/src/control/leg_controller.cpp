@@ -51,7 +51,9 @@ Mat43 LegController::compute(const LegControlInput & in, MotorCommand & out) con
     Vec3 dq_des = J[i].fullPivLu().solve(v_b);
     if (!dq_des.allFinite()) {dq_des.setZero();}
     out.q.segment<3>(3 * i) = q_des;
-    out.dq.segment<3>(3 * i) = dq_des.cwiseMax(-p_.max_joint_velocity).cwiseMin(p_.max_joint_velocity);
+    out.dq.segment<3>(
+      3 *
+      i) = dq_des.cwiseMax(-p_.max_joint_velocity).cwiseMin(p_.max_joint_velocity);
     out.kp.segment<3>(3 * i) = kp;
     out.kd.segment<3>(3 * i) = kd;
     out.tau.segment<3>(3 * i) = tau;

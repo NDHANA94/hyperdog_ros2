@@ -27,7 +27,9 @@ namespace
 Vec12 tile(const Vec3 & v)
 {
   Vec12 o;
-  for (int i = 0; i < 4; ++i) {o.segment<3>(3 * i) = v;}
+  for (int i = 0; i < 4; ++i) {
+    o.segment<3>(3 * i) = v;
+  }
   return o;
 }
 
@@ -35,7 +37,7 @@ constexpr double kCrouchHeight = 0.12;        // [m] intermediate pose of the st
 constexpr double kSitHeight = 0.11;           // [m] final pose of the sit-down motion
 constexpr double kMaxBodyRpyCommand = 0.4;    // [rad]
 constexpr double kMaxTerrainTilt = 0.35;      // [rad]
-constexpr double kMaxPositionError = 0.08;    // [m] position reference is kept this close to the body
+constexpr double kMaxPositionError = 0.08;    // [m] max distance of the position reference
 constexpr double kMaxYawError = 0.3;          // [rad]
 constexpr double kCenteringSpeed = 0.2;       // [m/s] CoM re-centering over the feet while standing
 constexpr double kHeightRate = 0.1;           // [m/s] body height command slew rate
@@ -131,7 +133,8 @@ void LocomotionController::update_contacts(const SensorData & s)
   const bool use_torque = cfg_.estimation.contact.source == "torque";
   std::array<double, 4> fz{};
   if (use_torque) {fz = foot_forces_from_torque(s);}
-  contacts_.update(gait_.contact(), gait_.progress(), s.foot_contact ? &*s.foot_contact : nullptr,
+  contacts_.update(
+    gait_.contact(), gait_.progress(), s.foot_contact ? &*s.foot_contact : nullptr,
     use_torque ? &fz : nullptr);
 }
 
@@ -153,7 +156,9 @@ void LocomotionController::estimate_state(const SensorData & s)
     feet_world_.row(i) = (p + R_ * feet_body_.row(i).transpose()).transpose();
   }
   Bool4 use;
-  for (int i = 0; i < 4; ++i) {use[i] = contacts_.contact()[i] && trust[i] > 0.5;}
+  for (int i = 0; i < 4; ++i) {
+    use[i] = contacts_.contact()[i] && trust[i] > 0.5;
+  }
   ground_.update(feet_world_, use, cfg_.geometry.foot_radius);
 }
 
@@ -185,11 +190,11 @@ void LocomotionController::handle_mode(const SensorData & s)
     cmd_.mode = Mode::PASSIVE;
     return;
   }
+  const bool wants_up = req == Mode::BALANCE || req == Mode::LOCOMOTION;
+  const bool is_down = mode_ == Mode::PASSIVE || mode_ == Mode::SIT;
   if (req == Mode::PASSIVE) {
     set_mode(Mode::PASSIVE);
-  } else if ((req == Mode::BALANCE || req == Mode::LOCOMOTION) &&
-    (mode_ == Mode::PASSIVE || mode_ == Mode::SIT))
-  {
+  } else if (wants_up && is_down) {
     start_q_ = s.q;
     set_mode(Mode::STAND_UP);
   } else if (req == Mode::SIT && active) {
@@ -204,7 +209,9 @@ void LocomotionController::handle_mode(const SensorData & s)
 Vec12 LocomotionController::joint_pose(double height) const
 {
   Mat43 feet;
-  for (int i = 0; i < 4; ++i) {feet.row(i) = kin_.leg(i).nominal_foot(height).transpose();}
+  for (int i = 0; i < 4; ++i) {
+    feet.row(i) = kin_.leg(i).nominal_foot(height).transpose();
+  }
   Vec12 q;
   kin_.inverse_all(feet, q);
   return q;
@@ -268,11 +275,15 @@ void LocomotionController::init_balance(const SensorData & s)
 {
   const Mat43 fb = kin_.forward_all(s.q);
   double h = 0.0;
-  for (int i = 0; i < 4; ++i) {h -= (R_ * fb.row(i).transpose()).z() / 4.0;}
+  for (int i = 0; i < 4; ++i) {
+    h -= (R_ * fb.row(i).transpose()).z() / 4.0;
+  }
   h += cfg_.geometry.foot_radius;
   const Vec3 p0(0.0, 0.0, h);
   Mat43 fw;
-  for (int i = 0; i < 4; ++i) {fw.row(i) = (p0 + R_ * fb.row(i).transpose()).transpose();}
+  for (int i = 0; i < 4; ++i) {
+    fw.row(i) = (p0 + R_ * fb.row(i).transpose()).transpose();
+  }
   kf_.reset(p0, fw);
   ground_ = GroundPlaneEstimator(cfg_.estimation.ground_plane_filter);
   ground_.reset(fw, cfg_.geometry.foot_radius);
@@ -285,7 +296,9 @@ void LocomotionController::init_balance(const SensorData & s)
   gait_ = GaitScheduler(cfg_.gaits);
   prev_sched_ = {true, true, true, true};
   v_des_.setZero();
-  for (int i = 0; i < 4; ++i) {f_des_.segment<3>(3 * i) = Vec3(0, 0, cfg_.body.mass * kGravity / 4.0);}
+  for (int i = 0; i < 4; ++i) {
+    f_des_.segment<3>(3 * i) = Vec3(0, 0, cfg_.body.mass * kGravity / 4.0);
+  }
   qp_.reset();
   mpc_.reset();
   disturbance_.reset();
@@ -384,7 +397,9 @@ Bool4 LocomotionController::update_leg_phases()
   Bool4 stance;
   for (int i = 0; i < 4; ++i) {
     if (prev_sched_[i] && !sched[i]) {liftoff_.row(i) = feet_world_.row(i);}
-    if ((!prev_sched_[i] && sched[i]) || (early[i] && !stance_[i])) {anchor_.row(i) = feet_world_.row(i);}
+    if ((!prev_sched_[i] && sched[i]) || (early[i] && !stance_[i])) {
+      anchor_.row(i) = feet_world_.row(i);
+    }
     stance[i] = sched[i] || early[i];
   }
   prev_sched_ = sched;
@@ -409,7 +424,8 @@ Vec3 LocomotionController::update_body_reference()
     p_ref_.head<2>() += v_des_world_.head<2>() * dt_;
     if (recovering) {
       // do not fight the push with the position loop, damp the velocity instead
-      p_ref_.head<2>() = p.head<2>() + (p_ref_.head<2>() - p.head<2>()).cwiseMax(-0.03).cwiseMin(0.03);
+      p_ref_.head<2>() = p.head<2>() +
+        (p_ref_.head<2>() - p.head<2>()).cwiseMax(-0.03).cwiseMin(0.03);
     }
   }
   const Eigen::Vector2d err = p_ref_.head<2>() - p.head<2>();
@@ -419,10 +435,13 @@ Vec3 LocomotionController::update_body_reference()
   p_ref_.z() = ground_.height(p.x(), p.y()) + height_ref_;
   yaw_ref_ = wrap_angle(yaw_ref_ + v_des_.z() * dt_);
   const double yerr = wrap_angle(yaw_ref_ - yaw);
-  if (std::abs(yerr) > kMaxYawError) {yaw_ref_ = wrap_angle(yaw + std::copysign(kMaxYawError, yerr));}
+  if (std::abs(yerr) > kMaxYawError) {
+    yaw_ref_ = wrap_angle(yaw + std::copysign(kMaxYawError, yerr));
+  }
   const Eigen::Vector2d trp = terrain_rp();
-  return Vec3(trp.x() + body_rpy_cmd.x(), trp.y() + body_rpy_cmd.y(),
-           wrap_angle(yaw_ref_ + body_rpy_cmd.z()));
+  return Vec3(
+    trp.x() + body_rpy_cmd.x(), trp.y() + body_rpy_cmd.y(),
+    wrap_angle(yaw_ref_ + body_rpy_cmd.z()));
 }
 
 void LocomotionController::update_footholds(const Bool4 & stance)
@@ -437,8 +456,9 @@ void LocomotionController::update_footholds(const Bool4 & stance)
     } else if (progress[i] < kFootholdFreeze) {
       Vec3 nominal = kin_.leg(i).nominal_foot(0.0);
       nominal.z() = 0.0;
-      Vec3 f = plan_foothold(cfg_.foothold, nominal, p, rpy_.z(), v, v_des_world_, v_des_.z(),
-          gait_.swing_remaining(i), t_stance, height_ref_);
+      Vec3 f = plan_foothold(
+        cfg_.foothold, nominal, p, rpy_.z(), v, v_des_world_, v_des_.z(),
+        gait_.swing_remaining(i), t_stance, height_ref_);
       f.z() = ground_.height(f.x(), f.y()) + cfg_.geometry.foot_radius;
       foothold_.row(i) = f.transpose();
     }
@@ -473,14 +493,17 @@ void LocomotionController::compute_ground_forces(const Bool4 & stance, const Vec
         ref.row(k).segment<3>(9) = v_des_world_.transpose();
       }
       Mat43 feet;
-      for (int i = 0; i < 4; ++i) {feet.row(i) = stance[i] ? feet_world_.row(i) : foothold_.row(i);}
+      for (int i = 0; i < 4; ++i) {
+        feet.row(i) = stance[i] ? feet_world_.row(i) : foothold_.row(i);
+      }
       f_des_ = mpc_.compute(bs, ref, feet, table, normal);
       solve_time_ = mpc_.solve_time();
     }
     active_ctrl_ = "mpc";
   } else {
-    f_des_ = qp_.compute(bs, rpy_to_rot(rpy_ref), p_ref_, v_des_world_, Vec3(0.0, 0.0, wz_des),
-        feet_world_, stance, normal);
+    f_des_ = qp_.compute(
+      bs, rpy_to_rot(rpy_ref), p_ref_, v_des_world_, Vec3(0.0, 0.0, wz_des),
+      feet_world_, stance, normal);
     solve_time_ = qp_.solve_time();
     active_ctrl_ = "qp";
   }

@@ -84,7 +84,9 @@ std::vector<Bool4> GaitScheduler::contact_table(int horizon, double dt) const
   if (current_.is_stand()) {return table;}
   for (int k = 0; k < horizon; ++k) {
     for (int i = 0; i < 4; ++i) {
-      const double ph = std::fmod(phase_ + (k + 1) * dt / current_.period + current_.offsets[i], 1.0);
+      const double ph = std::fmod(
+        phase_ + (k + 1) * dt / current_.period + current_.offsets[i],
+        1.0);
       table[k][i] = ph < current_.duty || (stopping_ && latched_[i]);
     }
   }

@@ -30,29 +30,10 @@
 #include "rclcpp/rclcpp.hpp"
 #include "ros_gz_interfaces/msg/entity.hpp"
 #include "ros_gz_interfaces/msg/entity_wrench.hpp"
+#include "scenarios.hpp"
 
 namespace
 {
-struct Push
-{
-  double start{0.0};      // [s] after the step began
-  double duration{0.0};   // [s]
-  double fx{0.0}, fy{0.0};
-};
-
-struct Step
-{
-  std::string name;
-  double duration{1.0};
-  double vx{0.0}, vy{0.0}, wz{0.0};
-  std::string gait{"trot"};
-  std::vector<Push> pushes;
-  // metric window (seconds from the step start) for velocity tracking; < 0 disables
-  double track_from{-1.0};
-  double vx_tol{0.12}, vy_tol{0.1}, wz_tol{0.25};
-  bool expect_rest_at_end{false};
-};
-
 struct Stats
 {
   double max_tilt{0.0};
@@ -79,6 +60,8 @@ void rp_of(const geometry_msgs::msg::Quaternion & q, double & r, double & p)
 }
 }  // namespace
 
+using hyperdog_gazebo::Step;
+
 class ScenarioRunner : public rclcpp::Node
 {
 public:
@@ -96,105 +79,32 @@ public:
     hl_pub_ = create_publisher<hyperdog_msgs::msg::LocomotionCommand>("hyperdog/command", 10);
     wrench_pub_ = create_publisher<ros_gz_interfaces::msg::EntityWrench>(
       "/world/hyperdog/wrench/persistent", 10);
-    clear_pub_ = create_publisher<ros_gz_interfaces::msg::Entity>("/world/hyperdog/wrench/clear", 10);
+    clear_pub_ = create_publisher<ros_gz_interfaces::msg::Entity>(
+      "/world/hyperdog/wrench/clear",
+      10);
     gt_sub_ = create_subscription<nav_msgs::msg::Odometry>(
       "/hyperdog/ground_truth", rclcpp::SensorDataQoS(),
       [this](nav_msgs::msg::Odometry::ConstSharedPtr m) {gt_ = *m; have_gt_ = true;});
     st_sub_ = create_subscription<hyperdog_msgs::msg::LocomotionState>(
       "hyperdog/state", 10,
-      [this](hyperdog_msgs::msg::LocomotionState::ConstSharedPtr m) {state_ = *m; have_state_ = true;});
+      [this](hyperdog_msgs::msg::LocomotionState::ConstSharedPtr m) {
+        state_ = *m; have_state_ = true;
+      });
     csv_.open(report_file_ + ".csv");
-    csv_ << "t,step,x,y,z,roll,pitch,yaw,vx_body,vy_body,wz,est_vx,est_vy,mode,gait,recovering,solve_ms,est_height,est_roll,est_pitch\n";
-    timer_ = rclcpp::create_timer(this, get_clock(), rclcpp::Duration::from_seconds(0.01),
-        [this]() {tick();});
+    csv_ <<
+      "t,step,x,y,z,roll,pitch,yaw,vx_body,vy_body,wz,est_vx,est_vy,"
+      "mode,gait,recovering,solve_ms,est_height,est_roll,est_pitch\n";
+    timer_ = rclcpp::create_timer(
+      this, get_clock(), rclcpp::Duration::from_seconds(0.01),
+      [this]() {tick();});
   }
 
 private:
   void build_scenario()
   {
-    auto stand = [](const std::string & n, double d) {
-        Step s; s.name = n; s.duration = d; s.gait = "trot"; return s;
-      };
-    if (scenario_ == "full" || scenario_ == "push") {
-      Step s = stand("stand still", 3.0);
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-      s = stand("push while standing: lateral 40 N x 0.2 s", 5.0);
-      s.pushes.push_back({0.5, 0.2, 0.0, 40.0});
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-      s = stand("push while standing: frontal 50 N x 0.2 s", 5.0);
-      s.pushes.push_back({0.5, 0.2, -50.0, 0.0});
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-    }
-    if (scenario_ == "full" || scenario_ == "walk") {
-      Step s;
-      s.name = "trot forward 0.4 m/s";
-      s.duration = 6.0; s.vx = 0.4; s.track_from = 2.0;
-      steps_.push_back(s);
-      if (scenario_ == "full") {
-        s = Step();
-        s.name = "push while trotting: lateral 40 N x 0.2 s";
-        s.duration = 4.0; s.vx = 0.4;
-        s.pushes.push_back({1.0, 0.2, 0.0, -40.0});
-        steps_.push_back(s);
-      }
-      s = Step();
-      s.name = "trot sideways 0.2 m/s";
-      s.duration = 5.0; s.vy = 0.2; s.track_from = 2.0;
-      steps_.push_back(s);
-      s = Step();
-      s.name = "turn in place 0.8 rad/s";
-      s.duration = 5.0; s.wz = 0.8; s.track_from = 2.0;
-      steps_.push_back(s);
-      s = Step();
-      s.name = "walk gait forward 0.2 m/s";
-      s.duration = 7.0; s.vx = 0.2; s.gait = "walk"; s.track_from = 3.0;
-      steps_.push_back(s);
-      s = Step();
-      s.name = "trot backward -0.3 m/s";
-      s.duration = 5.0; s.vx = -0.3; s.track_from = 2.0;
-      steps_.push_back(s);
-      s = stand("stop and stand", 4.0);
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-    }
-    if (scenario_ == "stress") {
-      Step s = stand("push while standing: lateral 70 N x 0.2 s", 5.0);
-      s.pushes.push_back({0.5, 0.2, 0.0, 70.0});
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-      s = stand("push while standing: diagonal 80 N x 0.2 s", 5.0);
-      s.pushes.push_back({0.5, 0.2, -56.0, -56.0});
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-      s = Step();
-      s.name = "fast trot 0.55 m/s";
-      s.duration = 6.0; s.vx = 0.55; s.track_from = 3.0; s.vx_tol = 0.15;
-      steps_.push_back(s);
-      s = Step();
-      s.name = "push while fast trotting: lateral 50 N x 0.2 s";
-      s.duration = 4.0; s.vx = 0.55;
-      s.pushes.push_back({1.0, 0.2, 0.0, 50.0});
-      steps_.push_back(s);
-      s = Step();
-      s.name = "trot + turn 0.4 m/s, 0.6 rad/s";
-      s.duration = 6.0; s.vx = 0.4; s.wz = 0.6; s.track_from = 2.0;
-      steps_.push_back(s);
-      s = stand("stop and stand", 4.0);
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
-    }
-    if (scenario_ == "terrain") {
-      // terrain.sdf: 8 deg ramp up (x = 2 .. 4), plateau, 8 deg ramp down
-      Step s;
-      s.name = "trot over 8 deg ramp, plateau and ramp down at 0.3 m/s";
-      s.duration = 32.0; s.vx = 0.3; s.track_from = 2.0; s.vx_tol = 0.15;
-      steps_.push_back(s);
-      s = stand("stop and stand on flat ground", 4.0);
-      s.expect_rest_at_end = true;
-      steps_.push_back(s);
+    steps_ = hyperdog_gazebo::build_scenario(scenario_);
+    if (steps_.empty()) {
+      RCLCPP_ERROR(get_logger(), "unknown scenario '%s'", scenario_.c_str());
     }
     stats_.resize(steps_.size());
   }
@@ -226,8 +136,10 @@ private:
         double r0, p0;
         rp_of(gt_.pose.pose.orientation, r0, p0);
         csv_ << t << ",-1," << gt_.pose.pose.position.x << "," << gt_.pose.pose.position.y << "," <<
-          gt_.pose.pose.position.z << "," << r0 << "," << p0 << ",0," << gt_.twist.twist.linear.x << "," <<
-          gt_.twist.twist.linear.y << "," << gt_.twist.twist.angular.z << ",0,0," << state_.mode << "," <<
+          gt_.pose.pose.position.z << "," << r0 << "," << p0 << ",0," << gt_.twist.twist.linear.x <<
+          "," <<
+          gt_.twist.twist.linear.y << "," << gt_.twist.twist.angular.z << ",0,0," << state_.mode <<
+          "," <<
           state_.gait << "," << state_.disturbance_recovery << "," << state_.solve_time_ms << "," <<
           state_.body_height << "," << state_.rpy.x << "," << state_.rpy.y << "\n";
       }
@@ -238,7 +150,8 @@ private:
           started_ = true;
           step_t0_ = t;
           stand_height_ = gt_.pose.pose.position.z;
-          RCLCPP_INFO(get_logger(), "robot is up (height %.3f m) -> starting scenario '%s'",
+          RCLCPP_INFO(
+            get_logger(), "robot is up (height %.3f m) -> starting scenario '%s'",
             stand_height_, scenario_.c_str());
           hyperdog_msgs::msg::LocomotionCommand c;
           c.mode = hyperdog_msgs::msg::LocomotionCommand::MODE_LOCOMOTION;
@@ -326,10 +239,14 @@ private:
       fell_ = true;
       fall_step_ = step_;
     }
-    csv_ << t << "," << step_ << "," << gt_.pose.pose.position.x << "," << gt_.pose.pose.position.y << "," << z <<
-      "," << r << "," << pch << "," << yaw << "," << vxb << "," << vyb << "," << wz << "," << est_vxb << "," <<
-      est_vyb << "," << state_.mode << "," << state_.gait << "," << state_.disturbance_recovery << "," <<
-      state_.solve_time_ms << "," << state_.body_height << "," << state_.rpy.x << "," << state_.rpy.y << "\n";
+    csv_ << t << "," << step_ << "," << gt_.pose.pose.position.x << "," <<
+      gt_.pose.pose.position.y << "," << z <<
+      "," << r << "," << pch << "," << yaw << "," << vxb << "," << vyb << "," << wz << "," <<
+      est_vxb << "," <<
+      est_vyb << "," << state_.mode << "," << state_.gait << "," << state_.disturbance_recovery <<
+      "," <<
+      state_.solve_time_ms << "," << state_.body_height << "," << state_.rpy.x << "," <<
+      state_.rpy.y << "\n";
 
     if (fell_) {
       RCLCPP_ERROR(get_logger(), "robot FELL during '%s'", s.name.c_str());
@@ -356,13 +273,16 @@ private:
     md << "Distance travelled (ground truth): x = " << gt_.pose.pose.position.x << " m, y = " <<
       gt_.pose.pose.position.y << " m\n\n";
     md << "Scenario: `" << scenario_ << "` - simulator: Gazebo Harmonic (DART, 1 kHz), "
-       << "actuators: simulated BLDC (MIT impedance mode, 1 kHz), controller: hyperdog_locomotion (500 Hz)\n\n";
+       <<
+      "actuators: simulated BLDC (MIT impedance mode, 1 kHz), "
+      "controller: hyperdog_locomotion (500 Hz)\n\n";
     if (startup_failed_) {
-      md << "**FAILED: the robot did not reach a standing mode within " << startup_timeout_ << " s.**\n";
+      md << "**FAILED: the robot did not reach a standing mode within " << startup_timeout_ <<
+        " s.**\n";
     } else {
       md << "Standing height after stand-up: " << stand_height_ << " m\n\n";
       md << "| step | result | max tilt [deg] | height min/max [m] | tracking (cmd -> achieved) | "
-         "auto-step | est. vel RMSE [m/s] |\n|---|---|---|---|---|---|---|\n";
+        "auto-step | est. vel RMSE [m/s] |\n|---|---|---|---|---|---|---|\n";
       for (size_t i = 0; i < steps_.size() && i < stats_.size(); ++i) {
         const Step & s = steps_[i];
         const Stats & st = stats_[i];
@@ -373,10 +293,12 @@ private:
         bool ok = !(fell_ && fall_step_ == i);
         std::ostringstream trk;
         if (s.track_from >= 0.0 && st.n_track > 0) {
-          const double vx = st.sum_vx / std::max(1, st.n_lin), vy = st.sum_vy / std::max(1, st.n_lin);
+          const double vx = st.sum_vx / std::max(1, st.n_lin),
+            vy = st.sum_vy / std::max(1, st.n_lin);
           const double wz = st.yaw_accum / std::max(1e-3, st.t_track1 - st.t_track0);
           trk.precision(2);
-          trk << std::fixed << "vx " << s.vx << "->" << vx << ", vy " << s.vy << "->" << vy << ", wz " << s.wz <<
+          trk << std::fixed << "vx " << s.vx << "->" << vx << ", vy " << s.vy << "->" << vy <<
+            ", wz " << s.wz <<
             "->" << wz;
           ok = ok && std::abs(vx - s.vx) < s.vx_tol && std::abs(vy - s.vy) < s.vy_tol &&
             std::abs(wz - s.wz) < s.wz_tol;

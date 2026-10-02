@@ -16,7 +16,9 @@ TEST(BldcMotorModel, TracksSmallTorqueAtStandstill)
   p.viscous_friction = 0.0;
   BldcMotorModel m(p);
   hyperdog_bldc_control::BldcMotorOutput out;
-  for (int i = 0; i < 20; ++i) {out = m.update(5.0, 0.0, 0.001);}
+  for (int i = 0; i < 20; ++i) {
+    out = m.update(5.0, 0.0, 0.001);
+  }
   EXPECT_NEAR(out.torque, 5.0, 1e-3);
   EXPECT_FALSE(out.saturated);
 }
@@ -28,7 +30,9 @@ TEST(BldcMotorModel, CurrentLimitCapsTorque)
   p.viscous_friction = 0.0;
   BldcMotorModel m(p);
   hyperdog_bldc_control::BldcMotorOutput out;
-  for (int i = 0; i < 20; ++i) {out = m.update(1000.0, 0.0, 0.001);}
+  for (int i = 0; i < 20; ++i) {
+    out = m.update(1000.0, 0.0, 0.001);
+  }
   EXPECT_NEAR(out.torque, p.peak_torque(), 1e-3);
   EXPECT_TRUE(out.saturated);
 }
@@ -42,11 +46,15 @@ TEST(BldcMotorModel, BackEmfLimitsTorqueAtSpeed)
   // close to no-load speed only a small torque is available in the motoring direction
   const double w = 0.95 * p.no_load_speed();
   hyperdog_bldc_control::BldcMotorOutput out;
-  for (int i = 0; i < 20; ++i) {out = m.update(p.peak_torque(), w, 0.001);}
+  for (int i = 0; i < 20; ++i) {
+    out = m.update(p.peak_torque(), w, 0.001);
+  }
   EXPECT_LT(out.torque, 0.5 * p.peak_torque());
   // braking torque is still fully available
   m.reset();
-  for (int i = 0; i < 20; ++i) {out = m.update(-p.peak_torque(), w, 0.001);}
+  for (int i = 0; i < 20; ++i) {
+    out = m.update(-p.peak_torque(), w, 0.001);
+  }
   EXPECT_NEAR(out.torque, -p.peak_torque(), 1e-3);
 }
 
@@ -55,7 +63,9 @@ TEST(BldcMotorModel, ThermalDeratingReducesCurrent)
   BldcMotorParams p;
   p.thermal_capacitance = 1.0;   // heat up quickly
   BldcMotorModel m(p);
-  for (int i = 0; i < 20000; ++i) {m.update(p.peak_torque(), 0.0, 0.001);}
+  for (int i = 0; i < 20000; ++i) {
+    m.update(p.peak_torque(), 0.0, 0.001);
+  }
   EXPECT_GT(m.temperature(), p.derate_start_temperature);
   EXPECT_LT(m.current_limit(), p.max_current);
 }

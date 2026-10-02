@@ -24,29 +24,17 @@ is still available on the [`foxy`](https://github.com/NDHANA94/hyperdog_ros2/tre
 ## Architecture
 
 ```
- gamepad / nav stack                                   Gazebo Harmonic (DART, 1 kHz)  or  real robot
-        |  /cmd_vel, /hyperdog/command                        ^ effort            | joint states, IMU,
-        v                                                     |                   | foot contacts
- +---------------------------- hyperdog_locomotion (C++, 500 Hz) ---------------------------------+
- |  attitude (IMU / Mahony) -> contact estimation -> kinematic Kalman filter (base + feet)        |
- |  gait scheduler (trot/walk/pace/bound/pronk, safe transitions, auto-stepping on pushes)       |
- |  foothold planner (Raibert + capture point) -> min-jerk swing trajectories                    |
- |  convex MPC (stepping, 100 Hz)  |  QP force distribution (standing)   + friction cones on     |
- |                                 |                                       the estimated terrain |
- |  stance: tau = -J^T R^T f   swing: cartesian impedance + leg gravity compensation            |
- +--------------------------------------------------------------------------------------------+
-        |  hyperdog_msgs/MotorCommands  (q, dq, kp, kd, tau_ff per joint)
-        v
- +----------------- hyperdog_bldc_control (ros2_control, 1 kHz) -----------------+
- |  tau = kp (q* - q) + kd (dq* - dq) + tau_ff  -> BLDC motor model:             |
- |  current limit + thermal derating, back-EMF torque/speed envelope,            |
- |  current-loop lag, gearbox efficiency + friction  -> joint effort             |
- |  real robot: MitCanSystem (SocketCAN, MIT protocol) hardware interface        |
- +-------------------------------------------------------------------------------+
+ /cmd_vel, gamepad --> hyperdog_locomotion (500 Hz): state estimation, gait + footholds,
+                       convex MPC / QP force control, push recovery
+                          | MotorCommands (q, dq, kp, kd, tau_ff)
+                          v
+                       hyperdog_bldc_control (1 kHz): impedance law + BLDC motor model
+                          | joint effort
+                          v
+                       Gazebo Harmonic (sim)  |  MIT CAN BLDC drivers (robot)
 ```
-
-All code in this branch is C++. Configuration is done with YAML parameter files and
-XML launch files.
+See [docs/architecture.md](docs/architecture.md) for the data flow, state machine and conventions.
+All code in this branch is C++; configuration is done with YAML parameter files and XML launch files.
 
 ## Packages
 
@@ -59,6 +47,8 @@ XML launch files.
 | `hyperdog_gazebo` | Gazebo Harmonic worlds (`flat`, `terrain`), ros_gz bridges, `sim.launch.xml`, `validate.launch.xml`, `scenario_runner` |
 | `hyperdog_teleop` | gamepad teleop (`/joy` -> `/cmd_vel` + `/hyperdog/command`), mapping in `config/joy_xbox.yaml` |
 | `hyperdog_bringup` | real-robot launch (`robot.launch.xml`), robot parameter overrides |
+
+Each package has its own README describing its files.
 
 ### Sensors (simulation)
 | sensor | topic | notes |
@@ -167,6 +157,11 @@ report and a CSV time series, and exits non-zero on failure. Results of the curr
 | [`stress`](docs/validation/stress.md) | 70 N lateral and 80 N diagonal pushes (0.2 s) while standing, fast trot, 50 N push while trotting, trot + turn | **PASS** |
 | [`terrain`](docs/validation/terrain.md) | trot over an 8 deg ramp, 0.28 m plateau and ramp down | **PASS** |
 
+## Development
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the code organisation and conventions. `colcon test` runs
+the unit tests and the linters (`ament_uncrustify`, `ament_cpplint`, `ament_lint_cmake`,
+`ament_xmllint`). GitHub Actions builds and tests every push to `latest`.
+
 ## Real robot
 ```bash
 sudo ip link set can0 up type can bitrate 1000000
@@ -184,8 +179,10 @@ gamepad before standing up.
 - Validated speed envelope: about 0.4 m/s trotting. Commands are clamped to 0.5 m/s, and above roughly
   0.45 m/s the achieved speed saturates (0.55 m/s commanded gives 0.42 m/s in the stress test) because
   the single-rigid-body MPC ignores the heavy legs (about 60 % of the mass).
+- The 80 N diagonal push in the `stress` scenario is at the limit of what the controller recovers from
+  (passed 5 of 6 runs). The simulation is not bit-for-bit deterministic, because ROS nodes and Gazebo
+  run asynchronously, so results near the limits can vary between runs.
 - The `MitCanSystem` hardware interface is compiled and loads, but it has not been tested on hardware yet.
   Check directions, offsets and current limits with the robot lifted off the ground.
 - Lidar and camera need a render engine (GPU, or Mesa software rendering for headless use). The
   validation scenarios disable them.
-- `uros/` and `uros_pkg/` are leftovers of the Foxy micro-ROS firmware and are not used by this branch.

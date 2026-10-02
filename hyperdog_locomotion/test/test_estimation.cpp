@@ -6,7 +6,18 @@
 #include "hyperdog_locomotion/estimation/ground_plane_estimator.hpp"
 #include "hyperdog_locomotion/estimation/kinematic_kalman_filter.hpp"
 
-using namespace hyperdog_locomotion;
+using hyperdog_locomotion::Bool4;
+using hyperdog_locomotion::ContactEstimator;
+using hyperdog_locomotion::GroundPlaneEstimator;
+using hyperdog_locomotion::KalmanParams;
+using hyperdog_locomotion::KinematicKalmanFilter;
+using hyperdog_locomotion::MahonyFilter;
+using hyperdog_locomotion::Mat3;
+using hyperdog_locomotion::Mat43;
+using hyperdog_locomotion::Vec3;
+using hyperdog_locomotion::kGravity;
+using hyperdog_locomotion::rot_to_rpy;
+using hyperdog_locomotion::rpy_to_rot;
 
 TEST(KalmanFilter, StandingRobotStaysPut)
 {
@@ -18,7 +29,9 @@ TEST(KalmanFilter, StandingRobotStaysPut)
   kf.reset(Vec3(0, 0, 0.24), fw);
   const std::array<double, 4> trust{1, 1, 1, 1}, gz{0.02, 0.02, 0.02, 0.02};
   for (int k = 0; k < 1000; ++k) {
-    kf.update(Mat3::Identity(), Vec3::Zero(), Vec3(0.05, 0, kGravity), fb, Mat43::Zero(), trust, gz);
+    kf.update(
+      Mat3::Identity(), Vec3::Zero(), Vec3(0.05, 0, kGravity), fb, Mat43::Zero(), trust,
+      gz);
   }
   EXPECT_LT(kf.velocity().norm(), 0.01);
   EXPECT_NEAR(kf.position().z(), 0.24, 0.01);
@@ -29,7 +42,8 @@ TEST(GroundPlane, EstimatesSlope)
   GroundPlaneEstimator g(1.0);
   Mat43 f;
   // 10 % uphill in +x
-  f << 0.2, -0.2, 0.02 + 0.02, 0.2, 0.2, 0.02 + 0.02, -0.2, -0.2, 0.02 - 0.02, -0.2, 0.2, 0.02 - 0.02;
+  f << 0.2, -0.2, 0.02 + 0.02, 0.2, 0.2, 0.02 + 0.02, -0.2, -0.2, 0.02 - 0.02, -0.2, 0.2,
+    0.02 - 0.02;
   g.update(f, Bool4{true, true, true, true}, 0.02);
   EXPECT_NEAR(g.slope_rp(0.0).y(), -std::atan(0.1), 1e-6);
   EXPECT_NEAR(g.slope_rp(0.0).x(), 0.0, 1e-6);
@@ -55,6 +69,8 @@ TEST(MahonyFilter, ConvergesToGravityDirection)
   // robot rolled by 0.2 rad: gravity seen in the body frame
   const Vec3 accel = rpy_to_rot(Vec3(0.2, 0.0, 0.0)).transpose() * Vec3(0, 0, kGravity);
   Eigen::Quaterniond q;
-  for (int k = 0; k < 5000; ++k) {q = f.update(Vec3::Zero(), accel, 0.002);}
+  for (int k = 0; k < 5000; ++k) {
+    q = f.update(Vec3::Zero(), accel, 0.002);
+  }
   EXPECT_NEAR(rot_to_rpy(q.toRotationMatrix()).x(), 0.2, 1e-3);
 }

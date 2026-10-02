@@ -20,7 +20,9 @@ void friction_constraints(
   Vec3 t1 = Vec3::UnitY().cross(n).normalized();
   const Vec3 t2 = n.cross(t1);
   int rows = 0;
-  for (int i = 0; i < 4; ++i) {rows += contact[i] ? 5 : 3;}
+  for (int i = 0; i < 4; ++i) {
+    rows += contact[i] ? 5 : 3;
+  }
   A = Eigen::MatrixXd::Zero(rows, total_cols);
   l.resize(rows);
   u.resize(rows);

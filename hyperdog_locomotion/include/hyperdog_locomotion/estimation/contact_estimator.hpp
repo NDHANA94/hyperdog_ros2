@@ -35,7 +35,9 @@ public:
     const Bool4 & scheduled, const std::array<double, 4> & progress, const Bool4 * sensor,
     const std::array<double, 4> * foot_fz);
   /// Confidence in [0, 1] that each foot is a static stance foot (Kalman filter weighting).
-  std::array<double, 4> trust(const Bool4 & scheduled, const std::array<double, 4> & progress) const;
+  std::array<double, 4> trust(
+    const Bool4 & scheduled,
+    const std::array<double, 4> & progress) const;
 
   const Bool4 & contact() const {return contact_;}
   const Bool4 & early() const {return early_;}
