@@ -186,3 +186,7 @@ gamepad before standing up.
   Check directions, offsets and current limits with the robot lifted off the ground.
 - Lidar and camera need a render engine (GPU, or Mesa software rendering for headless use). The
   validation scenarios disable them.
+
+## License
+Licensed under the [Apache License, Version 2.0](LICENSE). The ROS 2 Foxy version on the
+`foxy` branch was released under the MIT license.

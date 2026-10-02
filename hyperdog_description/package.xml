@@ -5,7 +5,7 @@
   <version>2.0.0</version>
   <description>URDF/xacro model of the BLDC-actuated HyperDog quadruped with sensors, ros2_control and BLDC motor parameters.</description>
   <maintainer email="nipun.dhananjaya@gmail.com">W.M. Nipun Dhananjaya Weerakkodi</maintainer>
-  <license>MIT</license>
+  <license>Apache-2.0</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
 

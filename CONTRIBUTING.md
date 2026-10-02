@@ -30,8 +30,10 @@ of ROS dependencies; ROS code lives in `hyperdog_locomotion/src/ros/`.
   and YAML.
 - **Frames and order:** legs are ordered FR, FL, BR, BL and joints hip, uleg, lleg. Forces
   computed by the balance controllers act on the robot and are expressed in the world frame.
-- **Header comment:** every file starts with
-  `// MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi`.
+- **License header:** every C++ file starts with the Apache-2.0 header
+  (`// Copyright 2024 W.M. Nipun Dhananjaya Weerakkodi` followed by the standard
+  "Licensed under the Apache License, Version 2.0" notice; copy it from any existing file).
+  It is checked by `ament_copyright`.
 
 ## Before opening a pull request
 ```bash

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
   HyperDog quadruped - BLDC actuated, ROS 2 Jazzy / Gazebo Harmonic
-  MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
+  Copyright 2024 W.M. Nipun Dhananjaya Weerakkodi - Apache License 2.0 (see LICENSE)
 
   xacro arguments
     sim            true  -> gz_ros2_control (Gazebo), false -> MIT CAN hardware interface
