@@ -5,26 +5,35 @@ on:
     branches: [latest]
   pull_request:
     branches: [latest]
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
-  jazzy:
+  build-and-test:
     runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base
     steps:
-      - uses: ros-tooling/setup-ros@v0.7
+      - uses: actions/checkout@v4
         with:
-          required-ros-distributions: jazzy
-      - uses: ros-tooling/action-ros-ci@v0.4
-        with:
-          target-ros2-distro: jazzy
-          package-name: >-
-            hyperdog_msgs
-            hyperdog_description
-            hyperdog_bldc_control
-            hyperdog_locomotion
-            hyperdog_gazebo
-            hyperdog_teleop
-            hyperdog_bringup
-          colcon-defaults: |
-            {
-              "build": {"cmake-args": ["-DCMAKE_BUILD_TYPE=Release"]}
-            }
+          path: src/hyperdog_ros2
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          rosdep update --rosdistro jazzy
+          rosdep install --from-paths src --ignore-src -y --rosdistro jazzy
+
+      - name: Build
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --event-handlers console_cohesion+ \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+      - name: Unit tests and linters
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon test --event-handlers console_cohesion+
+          colcon test-result --verbose
