@@ -1,0 +1,77 @@
+<?xml version="1.0"?>
+<!--
+  HyperDog quadruped - BLDC actuated, ROS 2 Jazzy / Gazebo Harmonic
+  MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
+
+  xacro arguments
+    sim            true  -> gz_ros2_control (Gazebo), false -> MIT CAN hardware interface
+    use_lidar      true  -> 3D lidar (gpu_lidar, needs rendering)
+    use_camera     true  -> front RGB-D camera (needs rendering)
+    motors_file    BLDC motor parameter file (effort / velocity limits are derived from it)
+    controllers_file  ros2_control controller configuration
+    can_interface  SocketCAN interface for the real robot
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="hyperdog">
+
+  <xacro:arg name="sim" default="true"/>
+  <xacro:arg name="use_lidar" default="true"/>
+  <xacro:arg name="use_camera" default="true"/>
+  <xacro:arg name="motors_file" default="$(find hyperdog_description)/config/bldc_motors.yaml"/>
+  <xacro:arg name="controllers_file" default="$(find hyperdog_description)/config/controllers.yaml"/>
+  <xacro:arg name="can_interface" default="can0"/>
+
+  <xacro:property name="motors_file" value="$(arg motors_file)"/>
+  <xacro:include filename="$(find hyperdog_description)/urdf/common.xacro"/>
+  <xacro:include filename="$(find hyperdog_description)/urdf/leg.xacro"/>
+  <xacro:include filename="$(find hyperdog_description)/urdf/sensors.xacro"/>
+  <xacro:include filename="$(find hyperdog_description)/urdf/ros2_control.xacro"/>
+
+  <!-- ============================== body ============================== -->
+  <link name="base_link">
+    <visual>
+      <geometry><mesh filename="file://$(find hyperdog_description)/meshes/body.stl" scale="0.001 0.001 0.001"/></geometry>
+      <material name="body_grey"><color rgba="0.25 0.25 0.28 1"/></material>
+    </visual>
+    <collision name="base_collision">
+      <origin xyz="0.018 0.0 0.033" rpy="0 0 0"/>
+      <geometry><box size="0.42 0.18 0.10"/></geometry>
+    </collision>
+  </link>
+
+  <joint name="inertial_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="inertial_link"/>
+  </joint>
+  <link name="inertial_link">
+    <inertial>
+      <origin xyz="0.0 0.0 0.01" rpy="0 0 0"/>
+      <mass value="${body_mass}"/>
+      <inertia ixx="0.0114" ixy="0" ixz="0" iyy="0.0549" iyz="0" izz="0.0610"/>
+    </inertial>
+  </link>
+
+  <!-- ============================== legs ============================== -->
+  <xacro:hyperdog_leg prefix="FR" front="1" left="-1"/>
+  <xacro:hyperdog_leg prefix="FL" front="1" left="1"/>
+  <xacro:hyperdog_leg prefix="BR" front="-1" left="-1"/>
+  <xacro:hyperdog_leg prefix="BL" front="-1" left="1"/>
+
+  <!-- ============================= sensors ============================ -->
+  <xacro:hyperdog_imu/>
+  <xacro:hyperdog_foot_contact prefix="FR"/>
+  <xacro:hyperdog_foot_contact prefix="FL"/>
+  <xacro:hyperdog_foot_contact prefix="BR"/>
+  <xacro:hyperdog_foot_contact prefix="BL"/>
+  <xacro:if value="$(arg use_lidar)">
+    <xacro:hyperdog_lidar/>
+  </xacro:if>
+  <xacro:if value="$(arg use_camera)">
+    <xacro:hyperdog_rgbd_camera/>
+  </xacro:if>
+  <xacro:hyperdog_ground_truth/>
+
+  <!-- ========================== ros2_control ========================== -->
+  <xacro:hyperdog_ros2_control sim="$(arg sim)" can_interface="$(arg can_interface)"
+                               controllers_file="$(arg controllers_file)"
+                               motors_file="$(arg motors_file)"/>
+</robot>

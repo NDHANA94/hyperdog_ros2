@@ -1,0 +1,7 @@
+<library path="hyperdog_bldc_control">
+  <class name="hyperdog_bldc_control/MitCanSystem"
+         type="hyperdog_bldc_control::MitCanSystem"
+         base_class_type="hardware_interface::SystemInterface">
+    <description>BLDC actuators using the MIT CAN protocol over SocketCAN (real HyperDog hardware).</description>
+  </class>
+</library>

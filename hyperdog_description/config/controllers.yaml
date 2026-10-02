@@ -1,0 +1,19 @@
+# ros2_control configuration (simulation and real robot)
+controller_manager:
+  ros__parameters:
+    update_rate: 1000            # [Hz] impedance loop rate (MIT mode)
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+    bldc_controller:
+      type: hyperdog_bldc_control/BldcImpedanceController
+
+bldc_controller:
+  ros__parameters:
+    # joint limits enforced with a virtual spring (rad, same order as joints)
+    joint_lower_limits: [-1.0, -1.2217, 0.45, -1.0, -1.2217, 0.45, -1.0, -1.2217, 0.45, -1.0, -1.2217, 0.45]
+    joint_upper_limits: [1.0, 3.14, 2.3562, 1.0, 3.14, 2.3562, 1.0, 3.14, 2.3562, 1.0, 3.14, 2.3562]
+    limit_stiffness: 60.0        # [Nm/rad]
+    simulate_motor_dynamics: true    # false on the real robot (the driver closes the current loop)
+    command_timeout: 0.25        # [s] -> damping mode without fresh commands
+    timeout_kd: 1.0              # [Nm s/rad]
+    state_publish_rate: 200.0    # [Hz] ~/motor_states

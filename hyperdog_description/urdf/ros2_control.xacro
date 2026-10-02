@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+  <!-- initial (crouched) joint configuration used at spawn time -->
+  <xacro:property name="init_hip" value="0.0"/>
+  <xacro:property name="init_uleg" value="0.50"/>
+  <xacro:property name="init_lleg" value="0.85"/>
+
+  <xacro:macro name="hyperdog_ros2_control" params="sim can_interface controllers_file motors_file">
+    <ros2_control name="HyperDogSystem" type="system">
+      <hardware>
+        <xacro:if value="${sim}">
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </xacro:if>
+        <xacro:unless value="${sim}">
+          <plugin>hyperdog_bldc_control/MitCanSystem</plugin>
+          <param name="can_interface">${can_interface}</param>
+        </xacro:unless>
+      </hardware>
+      <xacro:macro name="bldc_joint" params="name init can_id direction">
+        <joint name="${name}">
+          <command_interface name="effort"/>
+          <state_interface name="position"><param name="initial_value">${init}</param></state_interface>
+          <state_interface name="velocity"/>
+          <state_interface name="effort"/>
+          <param name="can_id">${can_id}</param>
+          <param name="direction">${direction}</param>
+          <param name="offset">0.0</param>
+        </joint>
+      </xacro:macro>
+      <xacro:macro name="bldc_leg" params="leg index">
+        <xacro:bldc_joint name="${leg}_hip_joint" init="${init_hip}" can_id="${3 * index + 1}" direction="1"/>
+        <xacro:bldc_joint name="${leg}_uleg_joint" init="${init_uleg}" can_id="${3 * index + 2}" direction="1"/>
+        <xacro:bldc_joint name="${leg}_lleg_joint" init="${init_lleg}" can_id="${3 * index + 3}" direction="1"/>
+      </xacro:macro>
+      <xacro:bldc_leg leg="FR" index="0"/>
+      <xacro:bldc_leg leg="FL" index="1"/>
+      <xacro:bldc_leg leg="BR" index="2"/>
+      <xacro:bldc_leg leg="BL" index="3"/>
+    </ros2_control>
+
+    <xacro:if value="${sim}">
+      <gazebo>
+        <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+          <parameters>${controllers_file}</parameters>
+          <parameters>${motors_file}</parameters>
+        </plugin>
+      </gazebo>
+    </xacro:if>
+  </xacro:macro>
+</robot>

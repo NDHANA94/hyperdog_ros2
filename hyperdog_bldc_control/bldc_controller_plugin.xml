@@ -1,0 +1,10 @@
+<library path="hyperdog_bldc_control">
+  <class name="hyperdog_bldc_control/BldcImpedanceController"
+         type="hyperdog_bldc_control::BldcImpedanceController"
+         base_class_type="controller_interface::ControllerInterface">
+    <description>
+      MIT-mode impedance controller for BLDC actuators with an electro-mechanical motor model
+      (current, back-EMF voltage and thermal limits, current-loop lag, friction).
+    </description>
+  </class>
+</library>

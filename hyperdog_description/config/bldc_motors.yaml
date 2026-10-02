@@ -1,0 +1,83 @@
+# =============================================================================
+#  HyperDog BLDC actuator parameters
+#
+#  * Add a new motor type under `motors:` (any name) and reference it from
+#    `joint_motor_types` (one entry for all joints or one entry per joint).
+#  * The same file is read by:
+#      - the URDF (xacro) -> joint effort / velocity limits, actuator masses
+#      - BldcImpedanceController -> electro-mechanical motor model
+#  * Default motor: generic 10:1 planetary quasi-direct-drive outrunner,
+#    CubeMars AK70-10 class (48 V, ~25 Nm peak, ~8 Nm rated, ~22 rad/s).
+# =============================================================================
+bldc_controller:
+  ros__parameters:
+    joints:
+      - FR_hip_joint
+      - FR_uleg_joint
+      - FR_lleg_joint
+      - FL_hip_joint
+      - FL_uleg_joint
+      - FL_lleg_joint
+      - BR_hip_joint
+      - BR_uleg_joint
+      - BR_lleg_joint
+      - BL_hip_joint
+      - BL_uleg_joint
+      - BL_lleg_joint
+
+    # motor type per joint (same order as `joints`), or a single entry for all joints
+    joint_motor_types: ["qdd_10_1"]
+
+    motors:
+      qdd_10_1:
+        # --- electrical ------------------------------------------------------
+        torque_constant: 0.123        # Kt [Nm/A] rotor side (q-axis). <= 0 -> derived from kv
+        kv_rpm_per_volt: 100.0        # [rpm/V] only used if torque_constant <= 0
+        phase_resistance: 0.17        # [Ohm]
+        phase_inductance: 0.000057    # [H]
+        pole_pairs: 21.0
+        bus_voltage: 48.0             # [V]
+        voltage_utilization: 0.577    # usable fraction of bus voltage (SVPWM ~ 1/sqrt(3))
+        max_current: 25.0             # [A] peak q-axis current
+        rated_current: 8.0            # [A] continuous
+        current_loop_bandwidth: 1000.0  # [Hz] FOC current loop bandwidth
+        # --- mechanical ------------------------------------------------------
+        gear_ratio: 10.0
+        gearbox_efficiency: 0.9
+        rotor_inertia: 0.00006        # [kg m^2] rotor side
+        coulomb_friction: 0.05        # [Nm] output side
+        viscous_friction: 0.01        # [Nm s/rad] output side
+        max_velocity: 0.0             # [rad/s] output; <= 0 -> derived from back-EMF
+        mass: 0.52                    # [kg]
+        # --- thermal ---------------------------------------------------------
+        thermal_resistance: 2.5       # [K/W] winding -> ambient
+        thermal_capacitance: 50.0     # [J/K]
+        ambient_temperature: 25.0     # [degC]
+        derate_start_temperature: 90.0  # [degC]
+        max_winding_temperature: 120.0  # [degC]
+
+      # Example of a second motor type: a smaller 6:1 actuator for the hips.
+      # To use it set:  joint_motor_types: ["qdd_6_1", "qdd_10_1", "qdd_10_1", ... x4]
+      qdd_6_1:
+        torque_constant: 0.091
+        kv_rpm_per_volt: 105.0
+        phase_resistance: 0.25
+        phase_inductance: 0.00007
+        pole_pairs: 14.0
+        bus_voltage: 48.0
+        voltage_utilization: 0.577
+        max_current: 22.0
+        rated_current: 7.0
+        current_loop_bandwidth: 1000.0
+        gear_ratio: 6.0
+        gearbox_efficiency: 0.92
+        rotor_inertia: 0.00004
+        coulomb_friction: 0.04
+        viscous_friction: 0.008
+        max_velocity: 0.0
+        mass: 0.38
+        thermal_resistance: 3.0
+        thermal_capacitance: 40.0
+        ambient_temperature: 25.0
+        derate_start_temperature: 90.0
+        max_winding_temperature: 120.0

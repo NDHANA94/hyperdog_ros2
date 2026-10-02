@@ -1,0 +1,151 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ========================= IMU (500 Hz, noisy) ========================= -->
+  <xacro:macro name="hyperdog_imu">
+    <joint name="imu_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="imu_link"/>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+    </joint>
+    <link name="imu_link">
+      <inertial>
+        <mass value="0.01"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+    </link>
+    <gazebo reference="imu_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <gazebo reference="imu_link">
+      <sensor name="imu" type="imu">
+        <always_on>true</always_on>
+        <update_rate>500</update_rate>
+        <topic>hyperdog/imu</topic>
+        <gz_frame_id>imu_link</gz_frame_id>
+        <imu>
+          <angular_velocity>
+            <x><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></z>
+          </angular_velocity>
+          <linear_acceleration>
+            <x><noise type="gaussian"><mean>0</mean><stddev>0.02</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>0.02</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>0.02</stddev></noise></z>
+          </linear_acceleration>
+        </imu>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- ========================= foot contact sensors ========================= -->
+  <xacro:macro name="hyperdog_foot_contact" params="prefix">
+    <gazebo reference="${prefix}_foot">
+      <sensor name="${prefix}_foot_contact" type="contact">
+        <always_on>true</always_on>
+        <update_rate>500</update_rate>
+        <topic>hyperdog/foot_contact/${prefix}</topic>
+        <contact>
+          <collision>${prefix}_foot_collision</collision>
+        </contact>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- ========================= 3D lidar (16 beams) ========================= -->
+  <xacro:macro name="hyperdog_lidar">
+    <joint name="lidar_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="lidar_link"/>
+      <origin xyz="0.12 0 0.11" rpy="0 0 0"/>
+    </joint>
+    <link name="lidar_link">
+      <visual>
+        <geometry><cylinder radius="0.035" length="0.04"/></geometry>
+        <material name="lidar_black"><color rgba="0.05 0.05 0.05 1"/></material>
+      </visual>
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+    </link>
+    <gazebo reference="lidar_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <gazebo reference="lidar_link">
+      <sensor name="lidar" type="gpu_lidar">
+        <always_on>true</always_on>
+        <update_rate>10</update_rate>
+        <topic>hyperdog/lidar</topic>
+        <gz_frame_id>lidar_link</gz_frame_id>
+        <lidar>
+          <scan>
+            <horizontal><samples>900</samples><resolution>1</resolution><min_angle>-3.14159</min_angle><max_angle>3.14159</max_angle></horizontal>
+            <vertical><samples>16</samples><resolution>1</resolution><min_angle>-0.2618</min_angle><max_angle>0.2618</max_angle></vertical>
+          </scan>
+          <range><min>0.1</min><max>30.0</max><resolution>0.01</resolution></range>
+          <noise><type>gaussian</type><mean>0</mean><stddev>0.01</stddev></noise>
+        </lidar>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- ========================= RGB-D camera ========================= -->
+  <xacro:macro name="hyperdog_rgbd_camera">
+    <joint name="camera_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="camera_link"/>
+      <origin xyz="0.25 0 0.04" rpy="0 0.2 0"/>
+    </joint>
+    <link name="camera_link">
+      <visual>
+        <geometry><box size="0.02 0.09 0.025"/></geometry>
+        <material name="camera_black"><color rgba="0.05 0.05 0.05 1"/></material>
+      </visual>
+      <inertial>
+        <mass value="0.03"/>
+        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6"/>
+      </inertial>
+    </link>
+    <!-- optical frame (z forward) for image consumers -->
+    <joint name="camera_optical_joint" type="fixed">
+      <parent link="camera_link"/>
+      <child link="camera_optical_frame"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+    <link name="camera_optical_frame"/>
+    <gazebo reference="camera_joint">
+      <preserveFixedJoint>true</preserveFixedJoint>
+    </gazebo>
+    <gazebo reference="camera_link">
+      <sensor name="rgbd_camera" type="rgbd_camera">
+        <always_on>true</always_on>
+        <update_rate>15</update_rate>
+        <topic>hyperdog/camera</topic>
+        <gz_frame_id>camera_optical_frame</gz_frame_id>
+        <camera>
+          <horizontal_fov>1.2</horizontal_fov>
+          <image><width>640</width><height>480</height><format>R8G8B8</format></image>
+          <clip><near>0.1</near><far>10.0</far></clip>
+          <depth_camera><clip><near>0.1</near><far>10.0</far></clip></depth_camera>
+          <noise><type>gaussian</type><mean>0</mean><stddev>0.005</stddev></noise>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- ===== ground truth odometry (simulation only, used for validation) ===== -->
+  <xacro:macro name="hyperdog_ground_truth">
+    <gazebo>
+      <plugin filename="gz-sim-odometry-publisher-system" name="gz::sim::systems::OdometryPublisher">
+        <odom_frame>world</odom_frame>
+        <robot_base_frame>base_link</robot_base_frame>
+        <odom_publish_frequency>100</odom_publish_frequency>
+        <odom_topic>hyperdog/ground_truth</odom_topic>
+        <tf_topic>hyperdog/ground_truth_tf</tf_topic>
+        <dimensions>3</dimensions>
+      </plugin>
+    </gazebo>
+  </xacro:macro>
+</robot>

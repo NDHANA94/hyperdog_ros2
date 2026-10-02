@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(hyperdog_msgs)
 
 # Default to C99
@@ -8,7 +8,7 @@ endif()
 
 # Default to C++14
 if(NOT CMAKE_CXX_STANDARD)
-  set(CMAKE_CXX_STANDARD 14)
+  set(CMAKE_CXX_STANDARD 17)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
@@ -17,7 +17,6 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
-find_package(rclcpp REQUIRED)
 find_package(std_msgs REQUIRED)
 find_package(builtin_interfaces REQUIRED)
 find_package(rosidl_default_generators REQUIRED)
@@ -27,7 +26,11 @@ rosidl_generate_interfaces(hyperdog_msgs
   "msg/JoyCtrlCmds.msg"
   "msg/Limits.msg"
   "msg/Geometry.msg"
-  DEPENDENCIES builtin_interfaces geometry_msgs
+  "msg/MotorCommands.msg"
+  "msg/MotorStates.msg"
+  "msg/LocomotionCommand.msg"
+  "msg/LocomotionState.msg"
+  DEPENDENCIES builtin_interfaces std_msgs geometry_msgs
 )
 
 

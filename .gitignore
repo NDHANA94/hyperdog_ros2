@@ -1,4 +1,6 @@
 *.pyc
 *.ipynb
 .vscode/
-
+build/
+install/
+log/

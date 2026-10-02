@@ -1,0 +1,46 @@
+Panels:
+  - Class: rviz_common/Displays
+    Name: Displays
+Visualization Manager:
+  Class: ""
+  Displays:
+    - Class: rviz_default_plugins/Grid
+      Name: Grid
+      Reference Frame: odom
+      Value: true
+    - Class: rviz_default_plugins/RobotModel
+      Name: RobotModel
+      Description Topic:
+        Value: /robot_description
+      Value: true
+    - Class: rviz_default_plugins/TF
+      Name: TF
+      Value: false
+    - Class: rviz_default_plugins/PointCloud2
+      Name: Lidar
+      Topic:
+        Value: /hyperdog/lidar/points
+      Size (m): 0.02
+      Color Transformer: AxisColor
+      Value: true
+    - Class: rviz_default_plugins/Image
+      Name: Camera
+      Topic:
+        Value: /hyperdog/camera/image
+      Value: true
+    - Class: rviz_default_plugins/Odometry
+      Name: Odometry
+      Topic:
+        Value: /odom
+      Keep: 50
+      Value: true
+  Global Options:
+    Fixed Frame: odom
+  Tools:
+    - Class: rviz_default_plugins/MoveCamera
+  Views:
+    Current:
+      Class: rviz_default_plugins/Orbit
+      Distance: 2.0
+      Target Frame: base_link
+      Value: Orbit (rviz)

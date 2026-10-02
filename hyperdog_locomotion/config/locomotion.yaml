@@ -1,0 +1,124 @@
+# =============================================================================
+#  HyperDog locomotion controller parameters (ROS 2 parameter file)
+#  Every option of the controller is configurable here.
+# =============================================================================
+locomotion_controller:
+  ros__parameters:
+    control_rate: 500.0                 # [Hz] whole-body control loop rate
+    publish_tf: true                    # odom -> base_link from the state estimator
+    odom_frame: "odom"
+    base_frame: "base_link"
+    state_publish_rate: 50.0            # [Hz] hyperdog/state + odom
+    foot_contact_topics: ["hyperdog/foot_contact/FR", "hyperdog/foot_contact/FL",
+                          "hyperdog/foot_contact/BR", "hyperdog/foot_contact/BL"]
+
+    robot:
+      # geometry - must match hyperdog_description/urdf/common.xacro
+      hip_offset: [0.175, 0.066]        # [m] |x|, |y| of the hip (ab/ad) joints
+      abad_length: 0.104                # [m] hip -> thigh joint lateral offset
+      upper_length: 0.15                # [m] thigh length
+      lower_length: 0.14                # [m] knee -> foot sphere centre
+      foot_radius: 0.02                 # [m]
+      joint_lower_limits: [-1.0, -1.2217, 0.45]   # hip, uleg, lleg [rad]
+      joint_upper_limits: [1.0, 3.14, 2.3562]
+      # single rigid body model used by the MPC / QP
+      mass: 7.4                         # [kg] total robot mass
+      body_inertia: [0.06, 0.12, 0.14]  # [kg m^2] lumped body + hips inertia
+
+    locomotion:
+      auto_start: true                  # stand up automatically once sensors are available
+      start_mode: "locomotion"          # "stand" (balance only) | "locomotion" (follow /cmd_vel)
+      auto_start_delay: 1.0             # [s]
+      default_gait: "trot"              # trot | walk | pace | bound | pronk
+      body_height: 0.24                 # [m] nominal base height above ground
+      body_height_limits: [0.15, 0.28]
+      step_height: 0.06                 # [m] swing apex height
+      max_velocity: [0.8, 0.4, 1.5]     # vx [m/s], vy [m/s], wz [rad/s]
+      max_acceleration: [1.5, 1.0, 3.0] # ramps applied to /cmd_vel
+      command_timeout: 0.5              # [s] older /cmd_vel is treated as zero
+      idle_time_to_stand: 0.8           # [s] stop stepping without velocity command
+      terrain_adaptation: true          # align body + friction cones with the estimated ground plane
+      stand_up_time: 1.5                # [s]
+      sit_down_time: 1.2                # [s]
+
+    # gaits: period [s], duty factor, phase offsets (FR, FL, BR, BL)
+    gait_names: ["trot", "walk", "pace", "bound", "pronk"]
+    gaits:
+      trot:  {period: 0.36, duty: 0.55, offsets: [0.0, 0.5, 0.5, 0.0]}
+      walk:  {period: 0.80, duty: 0.75, offsets: [0.75, 0.25, 0.5, 0.0]}
+      pace:  {period: 0.36, duty: 0.55, offsets: [0.0, 0.5, 0.0, 0.5]}
+      bound: {period: 0.36, duty: 0.50, offsets: [0.0, 0.0, 0.5, 0.5]}
+      pronk: {period: 0.40, duty: 0.50, offsets: [0.0, 0.0, 0.0, 0.0]}
+
+    foothold:
+      capture_point_gain: 1.0           # velocity error feedback into the foot placement
+      centrifugal_gain: 0.5
+      max_step_offset: 0.12             # [m] max foothold offset from the nominal foot position
+      touchdown_depth: 0.0              # [m] extra swing depth below the ground estimate (late contacts are handled by reaching down)
+
+    balance:
+      controller: "mpc"                 # "mpc" (convex MPC while stepping) | "qp" (QP balance always)
+      friction_coefficient: 0.6
+      min_normal_force: 3.0             # [N]
+      max_normal_force: 160.0           # [N]
+      qp:                               # standing balance (and stepping when controller = "qp")
+        kp_position: [60.0, 60.0, 300.0]
+        kd_position: [14.0, 14.0, 30.0]
+        kp_orientation: [300.0, 300.0, 120.0]
+        kd_orientation: [30.0, 30.0, 18.0]
+        wrench_weights: [1.0, 1.0, 5.0, 20.0, 20.0, 10.0]
+        force_regularization: 0.001
+        force_smoothing: 0.001
+      mpc:
+        horizon: 10                     # steps
+        dt: 0.03                        # [s] step length
+        update_period: 0.01             # [s] re-solve period (100 Hz)
+        max_iterations: 200
+        # weights: roll pitch yaw, x y z, wx wy wz, vx vy vz, gravity
+        state_weights: [5.0, 5.0, 2.0, 2.0, 2.0, 50.0, 0.2, 0.2, 0.3, 1.0, 1.0, 0.5, 0.0]
+        force_weight: 0.00001
+
+    disturbance_recovery:
+      enabled: true                     # step automatically when a push cannot be rejected in stance
+      velocity_threshold: 0.25          # [m/s] body speed that triggers stepping
+      tilt_threshold: 0.2               # [rad] roll/pitch error that triggers stepping
+      capture_point_margin: 0.03        # [m] capture point this close to the support edge triggers stepping
+      settle_velocity: 0.06             # [m/s] settled below this speed ...
+      settle_time: 0.6                  # [s] ... for this long
+      gait: "trot"
+
+    joint_gains:                        # per joint [hip, uleg, lleg] (MIT mode kp / kd)
+      stand_up_kp: [60.0, 60.0, 60.0]
+      stand_up_kd: [1.5, 1.5, 1.5]
+      stance_kp: [5.0, 5.0, 5.0]
+      stance_kd: [0.5, 0.5, 0.5]
+      swing_kp: [10.0, 10.0, 10.0]
+      swing_kd: [0.8, 0.8, 0.8]
+      passive_kd: [1.0, 1.0, 1.0]
+      swing_cartesian_kp: [200.0, 200.0, 200.0]
+      swing_cartesian_kd: [6.0, 6.0, 6.0]
+      leg_gravity_compensation_mass: 0.6  # [kg]
+
+    estimation:
+      attitude_source: "imu_orientation"  # "imu_orientation" (IMU outputs a quaternion) | "mahony"
+      mahony_kp: 1.0
+      mahony_ki: 0.01
+      contact_source: "sensor"          # "sensor" (foot contact sensors) | "torque" (motor torques) | "schedule"
+      contact_timeout: 0.012            # [s] contact sensor message age considered "in contact"
+      contact_force_threshold: 12.0     # [N] contact_source = torque
+      early_contact_min_swing_progress: 0.6
+      late_contact_max_stance_progress: 0.4
+      stance_trust_ramp: 0.15
+      process_noise_position: 0.002
+      process_noise_velocity: 0.05
+      process_noise_foot: 0.002
+      measurement_noise_position: 0.002
+      measurement_noise_velocity: 0.05
+      measurement_noise_foot_height: 0.01
+      swing_noise_scale: 10000.0
+      ground_plane_filter: 0.02
+
+    safety:
+      fall_protection: true             # go to damping mode when the body tilts beyond fall_angle
+      fall_angle: 1.0                   # [rad]
+      max_joint_torque: [20.0, 20.0, 20.0]  # [Nm] clip of feed-forward torques (BLDC limits applied downstream)

@@ -1,0 +1,82 @@
+<?xml version="1.0"?>
+<!--
+  HyperDog in Gazebo Harmonic with the BLDC actuator controller and the closed-loop
+  locomotion controller.
+
+  ros2 launch hyperdog_gazebo sim.launch.xml [world:=flat|terrain] [headless:=false]
+        [use_lidar:=true] [use_camera:=true] [rviz:=false]
+        [locomotion_params:=<file>] [motors_file:=<file>]
+-->
+<launch>
+  <arg name="world" default="flat" description="flat | terrain | absolute path to an SDF world named 'hyperdog'"/>
+  <arg name="headless" default="false" description="run the Gazebo server only"/>
+  <arg name="use_lidar" default="true" description="simulate the 3D lidar (needs GPU rendering)"/>
+  <arg name="use_camera" default="true" description="simulate the RGB-D camera (needs GPU rendering)"/>
+  <arg name="rviz" default="false"/>
+  <arg name="x" default="0.0"/>
+  <arg name="y" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+  <arg name="motors_file" default="$(find-pkg-share hyperdog_description)/config/bldc_motors.yaml"/>
+  <arg name="controllers_file" default="$(find-pkg-share hyperdog_description)/config/controllers.yaml"/>
+  <arg name="locomotion_params" default="$(find-pkg-share hyperdog_locomotion)/config/locomotion.yaml"/>
+  <arg name="start_controller" default="true" description="start the locomotion controller"/>
+
+  <let name="world_file" value="$(find-pkg-share hyperdog_gazebo)/worlds/$(var world).sdf"
+       unless="$(eval '\'/\' in \'$(var world)\'')"/>
+  <let name="world_file" value="$(var world)" if="$(eval '\'/\' in \'$(var world)\'')"/>
+  <let name="gz_args" value="-r -s --headless-rendering $(var world_file)" if="$(var headless)"/>
+  <let name="gz_args" value="-r $(var world_file)" unless="$(var headless)"/>
+
+  <!-- make sure Gazebo finds the gz_ros2_control system plugin -->
+  <set_env name="GZ_SIM_SYSTEM_PLUGIN_PATH"
+           value="$(find-pkg-prefix gz_ros2_control)/lib:$(env GZ_SIM_SYSTEM_PLUGIN_PATH '')"/>
+
+  <!-- Gazebo -->
+  <include file="$(find-pkg-share ros_gz_sim)/launch/gz_sim.launch.py">
+    <arg name="gz_args" value="$(var gz_args)"/>
+    <arg name="on_exit_shutdown" value="true"/>
+  </include>
+
+  <!-- robot description -->
+  <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
+    <param name="use_sim_time" value="true"/>
+    <param name="robot_description" type="str"
+           value="$(command 'xacro $(find-pkg-share hyperdog_description)/urdf/hyperdog.urdf.xacro sim:=true use_lidar:=$(var use_lidar) use_camera:=$(var use_camera) motors_file:=$(var motors_file) controllers_file:=$(var controllers_file)')"/>
+  </node>
+
+  <!-- spawn (crouched, slightly above the ground) -->
+  <node pkg="ros_gz_sim" exec="create" output="screen"
+        args="-topic robot_description -name hyperdog -x $(var x) -y $(var y) -z 0.17 -Y $(var yaw)"/>
+
+  <!-- bridges -->
+  <node pkg="ros_gz_bridge" exec="parameter_bridge" name="gz_bridge" output="screen">
+    <param name="config_file" value="$(find-pkg-share hyperdog_gazebo)/config/bridge.yaml"/>
+    <param name="use_sim_time" value="true"/>
+  </node>
+  <node pkg="ros_gz_bridge" exec="parameter_bridge" name="gz_bridge_lidar" output="screen" if="$(var use_lidar)">
+    <param name="config_file" value="$(find-pkg-share hyperdog_gazebo)/config/bridge_lidar.yaml"/>
+    <param name="use_sim_time" value="true"/>
+  </node>
+  <node pkg="ros_gz_bridge" exec="parameter_bridge" name="gz_bridge_camera" output="screen" if="$(var use_camera)">
+    <param name="config_file" value="$(find-pkg-share hyperdog_gazebo)/config/bridge_camera.yaml"/>
+    <param name="use_sim_time" value="true"/>
+  </node>
+
+  <!-- ros2_control: joint states + BLDC impedance controller -->
+  <node pkg="controller_manager" exec="spawner" output="screen"
+        args="joint_state_broadcaster bldc_controller --controller-manager /controller_manager --controller-manager-timeout 60">
+    <param name="use_sim_time" value="true"/>
+  </node>
+
+  <!-- closed-loop locomotion controller -->
+  <node pkg="hyperdog_locomotion" exec="locomotion_node" name="locomotion_controller" output="screen"
+        if="$(var start_controller)">
+    <param from="$(var locomotion_params)"/>
+    <param name="use_sim_time" value="true"/>
+    <remap from="imu" to="/hyperdog/imu"/>
+  </node>
+
+  <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share hyperdog_gazebo)/rviz/hyperdog.rviz" if="$(var rviz)">
+    <param name="use_sim_time" value="true"/>
+  </node>
+</launch>

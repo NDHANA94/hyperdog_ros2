@@ -1,0 +1,34 @@
+<?xml version="1.0"?>
+<?xml-model href="http://download.ros.org/schema/package_format3.xsd" schematypens="http://www.w3.org/2001/XMLSchema"?>
+<package format="3">
+  <name>hyperdog_gazebo</name>
+  <version>2.0.0</version>
+  <description>Gazebo Harmonic simulation of HyperDog: worlds, ros_gz bridges, launch files and automated closed-loop validation.</description>
+  <maintainer email="nipun.dhananjaya@gmail.com">W.M. Nipun Dhananjaya Weerakkodi</maintainer>
+  <license>MIT</license>
+
+  <buildtool_depend>ament_cmake</buildtool_depend>
+
+  <depend>rclcpp</depend>
+  <depend>geometry_msgs</depend>
+  <depend>nav_msgs</depend>
+  <depend>hyperdog_msgs</depend>
+  <depend>ros_gz_interfaces</depend>
+
+  <exec_depend>hyperdog_description</exec_depend>
+  <exec_depend>hyperdog_bldc_control</exec_depend>
+  <exec_depend>hyperdog_locomotion</exec_depend>
+  <exec_depend>ros_gz_sim</exec_depend>
+  <exec_depend>ros_gz_bridge</exec_depend>
+  <exec_depend>gz_ros2_control</exec_depend>
+  <exec_depend>controller_manager</exec_depend>
+  <exec_depend>joint_state_broadcaster</exec_depend>
+  <exec_depend>robot_state_publisher</exec_depend>
+  <exec_depend>xacro</exec_depend>
+  <exec_depend>rviz2</exec_depend>
+  <exec_depend>launch_xml</exec_depend>
+
+  <export>
+    <build_type>ament_cmake</build_type>
+  </export>
+</package>
