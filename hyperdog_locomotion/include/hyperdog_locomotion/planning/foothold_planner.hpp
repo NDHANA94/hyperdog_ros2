@@ -24,9 +24,10 @@ namespace hyperdog_locomotion
 
 struct FootholdParams
 {
-  double capture_point_gain{1.0};
+  double capture_point_gain{1.5};
   double centrifugal_gain{0.5};
   double max_step_offset{0.12};
+  double max_prediction_velocity_error{0.15};  // [m/s] bound of v - v_des for the hip prediction
 };
 
 /// p_hip(t_td) is predicted with the measured velocity (v_world) and the commanded yaw rate.

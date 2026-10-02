@@ -55,7 +55,7 @@ public:
     gait_names_ = declare_parameter(
       "gaits",
       std::vector<std::string>{"trot", "walk", "pace", "bound"});
-    max_vx_ = declare_parameter("scale.vx", 0.5);
+    max_vx_ = declare_parameter("scale.vx", 0.7);
     max_vy_ = declare_parameter("scale.vy", 0.3);
     max_wz_ = declare_parameter("scale.wz", 1.2);
     max_roll_ = declare_parameter("scale.roll", 0.3);

@@ -35,6 +35,12 @@ struct KalmanParams
   double measurement_noise_velocity{0.05};
   double measurement_noise_foot_height{0.01};
   double swing_noise_scale{1e4};
+  // [m/s^2] clamp of the gravity compensated IMU acceleration used for prediction;
+  // rejects foot impact spikes (<= 0 disables)
+  double max_acceleration{20.0};
+  // [m/s] legs whose kinematic velocity differs more than this from the prediction are
+  // ignored for the update (slip / impact rejection; <= 0 disables)
+  double velocity_innovation_gate{0.5};
 };
 
 class KinematicKalmanFilter

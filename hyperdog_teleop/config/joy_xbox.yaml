@@ -14,7 +14,7 @@ hyperdog_teleop_joy:
       gaits: [0, 1, 2, 3]
     gaits: ["trot", "walk", "pace", "bound"]
     scale:
-      vx: 0.5        # [m/s]
+      vx: 0.7        # [m/s]
       vy: 0.3        # [m/s]
       wz: 1.2        # [rad/s]
       roll: 0.3      # [rad]

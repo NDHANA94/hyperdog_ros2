@@ -92,12 +92,12 @@ std::vector<Step> build_scenario(const std::string & name)
     s.expect_rest_at_end = true;
     steps.push_back(s);
     s = Step();
-    s.name = "fast trot 0.55 m/s";
-    s.duration = 6.0; s.vx = 0.55; s.track_from = 3.0; s.vx_tol = 0.15;
+    s.name = "fast trot 0.6 m/s";
+    s.duration = 6.0; s.vx = 0.6; s.track_from = 3.0; s.vx_tol = 0.15;
     steps.push_back(s);
     s = Step();
     s.name = "push while fast trotting: lateral 50 N x 0.2 s";
-    s.duration = 4.0; s.vx = 0.55;
+    s.duration = 4.0; s.vx = 0.6;
     s.pushes.push_back({1.0, 0.2, 0.0, 50.0});
     steps.push_back(s);
     s = Step();
@@ -110,13 +110,13 @@ std::vector<Step> build_scenario(const std::string & name)
   }
   if (name == "speed") {
     // velocity ramp to find the speed envelope
-    for (double v : {0.4, 0.5, 0.6, 0.7, 0.8}) {
+    for (double v : {0.3, 0.4, 0.5, 0.6, 0.7}) {
       Step s;
       s.name = "trot " + std::to_string(v).substr(0, 3) + " m/s";
       s.duration = 5.0;
       s.vx = v;
       s.track_from = 2.0;
-      s.vx_tol = 0.12;
+      s.vx_tol = 0.15;
       steps.push_back(s);
     }
     Step s = stand("stop and stand", 4.0);

@@ -33,7 +33,7 @@ locomotion_controller:
       body_height: 0.24                 # [m] nominal base height above ground
       body_height_limits: [0.15, 0.28]
       step_height: 0.06                 # [m] swing apex height
-      max_velocity: [0.5, 0.3, 1.2]     # vx [m/s], vy [m/s], wz [rad/s] (validated envelope, see README)
+      max_velocity: [0.7, 0.3, 1.2]     # vx [m/s], vy [m/s], wz [rad/s] (validated envelope, see README)
       max_acceleration: [1.5, 1.0, 3.0] # ramps applied to /cmd_vel
       command_timeout: 0.5              # [s] older /cmd_vel is treated as zero
       idle_time_to_stand: 0.8           # [s] stop stepping without velocity command
@@ -51,9 +51,10 @@ locomotion_controller:
       pronk: {period: 0.40, duty: 0.50, offsets: [0.0, 0.0, 0.0, 0.0]}
 
     foothold:
-      capture_point_gain: 1.0           # velocity error feedback into the foot placement
+      capture_point_gain: 1.5           # velocity error feedback into the foot placement
       centrifugal_gain: 0.5
       max_step_offset: 0.12             # [m] max foothold offset from the nominal foot position
+      max_prediction_velocity_error: 0.15  # [m/s] bound of (v - v_des) used to predict the hip at touchdown
 
     swing:
       touchdown_depth: 0.0              # [m] swing ends this far below the ground estimate
@@ -120,6 +121,8 @@ locomotion_controller:
       measurement_noise_velocity: 0.05
       measurement_noise_foot_height: 0.01
       swing_noise_scale: 10000.0
+      max_acceleration: 20.0            # [m/s^2] IMU acceleration clamp (rejects foot impact spikes)
+      velocity_innovation_gate: 0.5     # [m/s] reject leg velocity measurements this far from the prediction
       ground_plane_filter: 0.02
 
     safety:

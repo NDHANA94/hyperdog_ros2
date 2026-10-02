@@ -49,7 +49,11 @@ void KinematicKalmanFilter::update(
   const std::array<double, 4> & foot_ground_z)
 {
   const double dt = dt_;
-  const Vec3 a_world = R * accel_body - Vec3(0.0, 0.0, kGravity);
+  Vec3 a_world = R * accel_body - Vec3(0.0, 0.0, kGravity);
+  const double a_norm = a_world.norm();
+  if (p_.max_acceleration > 0.0 && a_norm > p_.max_acceleration) {
+    a_world *= p_.max_acceleration / a_norm;
+  }
   // predict
   x_ = A_ * x_ + B_ * a_world;
   Mat18 Q = Mat18::Zero();
@@ -68,7 +72,13 @@ void KinematicKalmanFilter::update(
   for (int i = 0; i < 4; ++i) {
     const Vec3 p_rel = R * feet_body.row(i).transpose();
     const Vec3 v_rel = R * feet_vel_body.row(i).transpose() + omega_w.cross(p_rel);
-    const double scale = 1.0 + (1.0 - trust[i]) * p_.swing_noise_scale;
+    double scale = 1.0 + (1.0 - trust[i]) * p_.swing_noise_scale;
+    // outlier gating: a leg whose velocity measurement disagrees strongly with the
+    // prediction (slipping or impacting foot) is ignored for this update
+    const double innovation = (-v_rel - x_.segment<3>(3)).norm();
+    if (p_.velocity_innovation_gate > 0.0 && innovation > p_.velocity_innovation_gate) {
+      scale = 1.0 + p_.swing_noise_scale;
+    }
     y.segment<3>(3 * i) = -p_rel;
     y.segment<3>(12 + 3 * i) = -v_rel;
     y(24 + i) = foot_ground_z[i];

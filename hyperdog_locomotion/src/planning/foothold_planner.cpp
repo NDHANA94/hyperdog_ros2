@@ -25,7 +25,14 @@ Vec3 plan_foothold(
   const double yaw_td = yaw + yaw_rate_des * t_remaining;
   // hip location at touchdown predicted with the *measured* velocity: predicting with the
   // commanded one cancels the capture point feedback when the robot lags the command
-  Vec3 v_xy = v_world;
+  // (bounded around the command so that estimation spikes do not throw the foot away)
+  Vec3 v_err = v_world - v_des_world;
+  v_err.z() = 0.0;
+  const double e = v_err.norm();
+  if (e > prm.max_prediction_velocity_error) {
+    v_err *= prm.max_prediction_velocity_error / e;
+  }
+  Vec3 v_xy = v_des_world + v_err;
   v_xy.z() = 0.0;
   const Vec3 hip_td = base_pos + v_xy * t_remaining + rot_z(yaw_td) * nominal_body;
   const double h = std::max(height, 0.05);

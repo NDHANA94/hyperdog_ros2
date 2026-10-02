@@ -116,6 +116,8 @@ ControllerConfig load_controller_config(rclcpp::Node & node)
   r.get("foothold.capture_point_gain", c.foothold.capture_point_gain);
   r.get("foothold.centrifugal_gain", c.foothold.centrifugal_gain);
   r.get("foothold.max_step_offset", c.foothold.max_step_offset);
+  r.get(
+    "foothold.max_prediction_velocity_error", c.foothold.max_prediction_velocity_error);
   r.get("swing.touchdown_depth", c.legs.touchdown_depth);
   r.get("swing.late_contact_reach", c.legs.late_contact_reach);
   r.get("swing.max_joint_velocity", c.legs.max_joint_velocity);
@@ -185,6 +187,8 @@ ControllerConfig load_controller_config(rclcpp::Node & node)
   r.get("estimation.measurement_noise_velocity", e.kalman.measurement_noise_velocity);
   r.get("estimation.measurement_noise_foot_height", e.kalman.measurement_noise_foot_height);
   r.get("estimation.swing_noise_scale", e.kalman.swing_noise_scale);
+  r.get("estimation.max_acceleration", e.kalman.max_acceleration);
+  r.get("estimation.velocity_innovation_gate", e.kalman.velocity_innovation_gate);
   r.get("estimation.ground_plane_filter", e.ground_plane_filter);
 
   // safety

@@ -80,11 +80,12 @@ TEST(Foothold, RaibertAndCapturePointOffsets)
   EXPECT_NEAR(f.x(), 0.175, 1e-9);
   EXPECT_NEAR(f.y(), -0.17, 1e-9);
   // moving faster than commanded: step further ahead of the predicted hip (capture point
-  // feedback), bounded; the hip keeps moving with the measured velocity for t_remaining
+  // feedback), bounded; the hip is predicted with the measured velocity, limited to
+  // v_des + max_prediction_velocity_error
   f = plan_foothold(
     p, nominal, Vec3(0, 0, 0.24), 0.0, Vec3(2.0, 0, 0), Vec3::Zero(), 0.0, 0.1, 0.2,
     0.24);
-  EXPECT_NEAR(f.x() - (0.175 + 2.0 * 0.1), p.max_step_offset, 1e-9);
+  EXPECT_NEAR(f.x() - (0.175 + p.max_prediction_velocity_error * 0.1), p.max_step_offset, 1e-9);
 }
 
 TEST(DisturbanceMonitor, DetectsPushAndSettles)
