@@ -34,6 +34,7 @@
 #include <cstring>
 #include <limits>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "hardware_interface/system_interface.hpp"
@@ -58,11 +59,7 @@ public:
     {
       return hardware_interface::CallbackReturn::ERROR;
     }
-    auto get = [](const std::unordered_map<std::string, std::string> & m, const std::string & k,
-      double def) {
-      auto it = m.find(k);
-      return it == m.end() ? def : std::stod(it->second);
-    };
+    const auto get = &MitCanSystem::param_or;
     auto it = info_.hardware_parameters.find("can_interface");
     can_if_ = it == info_.hardware_parameters.end() ? "can0" : it->second;
     const size_t n = info_.joints.size();
@@ -178,6 +175,13 @@ public:
   }
 
 private:
+  static double param_or(
+    const std::unordered_map<std::string, std::string> & m, const std::string & key, double def)
+  {
+    const auto it = m.find(key);
+    return it == m.end() ? def : std::stod(it->second);
+  }
+
   rclcpp::Logger logger() const {return rclcpp::get_logger("MitCanSystem");}
 
   void send(int id, const std::array<uint8_t, 8> & data)

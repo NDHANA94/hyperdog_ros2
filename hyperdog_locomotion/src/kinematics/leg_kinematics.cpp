@@ -109,7 +109,9 @@ bool LegKinematics::inverse(const Vec3 & p_foot, Vec3 & q) const
   if (q1 < q_min_[1] - 0.5) {q1 += 2.0 * M_PI;}
   q = Vec3(side_ * psi, q1, q2);
   for (int i = 0; i < 3; ++i) {
-    if (q[i]<q_min_[i] - 1e-6 || q[i]> q_max_[i] + 1e-6) {reachable = false;}
+    const bool below = q[i] < q_min_[i] - 1e-6;
+    const bool above = q[i] > q_max_[i] + 1e-6;
+    if (below || above) {reachable = false;}
     q[i] = std::clamp(q[i], q_min_[i], q_max_[i]);
   }
   return reachable;

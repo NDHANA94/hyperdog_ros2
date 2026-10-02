@@ -77,6 +77,7 @@ public:
     const rclcpp::Duration & period) override;
 
 private:
+  double motor_param(const std::string & type, const std::string & key, double def);
   BldcMotorParams load_motor(const std::string & motor_type);
   void command_callback(const hyperdog_msgs::msg::MotorCommands::SharedPtr msg);
 

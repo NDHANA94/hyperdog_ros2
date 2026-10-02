@@ -62,18 +62,23 @@ CallbackReturn BldcImpedanceController::on_init()
   return CallbackReturn::SUCCESS;
 }
 
+double BldcImpedanceController::motor_param(
+  const std::string & type, const std::string & key, double def)
+{
+  auto node = get_node();
+  const std::string name = "motors." + type + "." + key;
+  if (!node->has_parameter(name)) {
+    node->declare_parameter<double>(name, def);
+  }
+  return node->get_parameter(name).as_double();
+}
+
 BldcMotorParams BldcImpedanceController::load_motor(const std::string & type)
 {
   auto node = get_node();
   BldcMotorParams p;
   p.name = type;
-  auto get = [&](const std::string & key, double def) {
-    const std::string name = "motors." + type + "." + key;
-    if (!node->has_parameter(name)) {
-      node->declare_parameter<double>(name, def);
-    }
-    return node->get_parameter(name).as_double();
-  };
+  auto get = [&](const std::string & key, double def) {return motor_param(type, key, def);};
   p.kv_rpm_per_volt = get("kv_rpm_per_volt", p.kv_rpm_per_volt);
   p.torque_constant = get("torque_constant", p.torque_constant);
   p.phase_resistance = get("phase_resistance", p.phase_resistance);
