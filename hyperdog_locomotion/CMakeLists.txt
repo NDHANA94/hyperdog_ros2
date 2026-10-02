@@ -23,12 +23,20 @@ find_package(ros_gz_interfaces REQUIRED)
 
 # ---- ROS independent control library
 add_library(${PROJECT_NAME}_core SHARED
-  src/kinematics.cpp
-  src/qp_solver.cpp
-  src/gait_scheduler.cpp
-  src/swing.cpp
-  src/estimator.cpp
-  src/balance.cpp
+  src/kinematics/leg_kinematics.cpp
+  src/estimation/attitude_filter.cpp
+  src/estimation/contact_estimator.cpp
+  src/estimation/ground_plane_estimator.cpp
+  src/estimation/kinematic_kalman_filter.cpp
+  src/planning/gait_scheduler.cpp
+  src/planning/foothold_planner.cpp
+  src/planning/swing_trajectory.cpp
+  src/planning/disturbance_monitor.cpp
+  src/control/qp_solver.cpp
+  src/control/force_control_common.cpp
+  src/control/qp_balance_controller.cpp
+  src/control/convex_mpc.cpp
+  src/control/leg_controller.cpp
   src/locomotion_controller.cpp
 )
 target_include_directories(${PROJECT_NAME}_core PUBLIC
@@ -37,7 +45,10 @@ target_include_directories(${PROJECT_NAME}_core PUBLIC
 target_link_libraries(${PROJECT_NAME}_core PUBLIC Eigen3::Eigen)
 
 # ---- ROS 2 node
-add_executable(locomotion_node src/locomotion_node.cpp)
+add_executable(locomotion_node
+  src/ros/locomotion_node.cpp
+  src/ros/parameter_loader.cpp
+)
 target_link_libraries(locomotion_node ${PROJECT_NAME}_core)
 ament_target_dependencies(locomotion_node
   rclcpp geometry_msgs nav_msgs sensor_msgs tf2_ros hyperdog_msgs ros_gz_interfaces)
@@ -50,11 +61,10 @@ install(DIRECTORY config DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_cmake_gtest REQUIRED)
-  ament_add_gtest(test_locomotion_core
-    test/test_kinematics.cpp
-    test/test_qp_balance.cpp
-    test/test_gait_estimator.cpp)
-  target_link_libraries(test_locomotion_core ${PROJECT_NAME}_core)
+  foreach(test_name kinematics estimation planning control)
+    ament_add_gtest(test_${test_name} test/test_${test_name}.cpp)
+    target_link_libraries(test_${test_name} ${PROJECT_NAME}_core)
+  endforeach()
 endif()
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)

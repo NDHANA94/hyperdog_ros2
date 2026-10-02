@@ -1,8 +1,8 @@
 // MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
-// Rotation / linear algebra helpers.
+// Common types and rotation / linear algebra helpers.
 
-#ifndef HYPERDOG_LOCOMOTION__MATH_UTILS_HPP_
-#define HYPERDOG_LOCOMOTION__MATH_UTILS_HPP_
+#ifndef HYPERDOG_LOCOMOTION__COMMON__MATH_HPP_
+#define HYPERDOG_LOCOMOTION__COMMON__MATH_HPP_
 
 #include <Eigen/Dense>
 
@@ -72,4 +72,4 @@ inline double smoothstep_cos(double a)
 
 }  // namespace hyperdog_locomotion
 
-#endif  // HYPERDOG_LOCOMOTION__MATH_UTILS_HPP_
+#endif  // HYPERDOG_LOCOMOTION__COMMON__MATH_HPP_

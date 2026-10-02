@@ -7,14 +7,14 @@
 //   foot sphere centre lower_length along +x of the knee frame
 // Leg order everywhere: FR, FL, BR, BL. Joint order per leg: hip, uleg, lleg.
 
-#ifndef HYPERDOG_LOCOMOTION__KINEMATICS_HPP_
-#define HYPERDOG_LOCOMOTION__KINEMATICS_HPP_
+#ifndef HYPERDOG_LOCOMOTION__KINEMATICS__LEG_KINEMATICS_HPP_
+#define HYPERDOG_LOCOMOTION__KINEMATICS__LEG_KINEMATICS_HPP_
 
 #include <array>
 #include <string>
 #include <vector>
 
-#include "hyperdog_locomotion/math_utils.hpp"
+#include "hyperdog_locomotion/common/math.hpp"
 
 namespace hyperdog_locomotion
 {
@@ -78,4 +78,4 @@ private:
 
 }  // namespace hyperdog_locomotion
 
-#endif  // HYPERDOG_LOCOMOTION__KINEMATICS_HPP_
+#endif  // HYPERDOG_LOCOMOTION__KINEMATICS__LEG_KINEMATICS_HPP_

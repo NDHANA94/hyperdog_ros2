@@ -5,15 +5,15 @@
 // legs on the ground stay down and swinging legs finish their step, so a leg
 // is never dropped mid-swing.
 
-#ifndef HYPERDOG_LOCOMOTION__GAIT_SCHEDULER_HPP_
-#define HYPERDOG_LOCOMOTION__GAIT_SCHEDULER_HPP_
+#ifndef HYPERDOG_LOCOMOTION__PLANNING__GAIT_SCHEDULER_HPP_
+#define HYPERDOG_LOCOMOTION__PLANNING__GAIT_SCHEDULER_HPP_
 
 #include <array>
 #include <map>
 #include <string>
 #include <vector>
 
-#include "hyperdog_locomotion/math_utils.hpp"
+#include "hyperdog_locomotion/common/math.hpp"
 
 namespace hyperdog_locomotion
 {
@@ -67,4 +67,4 @@ private:
 
 }  // namespace hyperdog_locomotion
 
-#endif  // HYPERDOG_LOCOMOTION__GAIT_SCHEDULER_HPP_
+#endif  // HYPERDOG_LOCOMOTION__PLANNING__GAIT_SCHEDULER_HPP_

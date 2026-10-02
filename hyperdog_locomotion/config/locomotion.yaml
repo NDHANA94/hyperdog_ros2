@@ -54,7 +54,11 @@ locomotion_controller:
       capture_point_gain: 1.0           # velocity error feedback into the foot placement
       centrifugal_gain: 0.5
       max_step_offset: 0.12             # [m] max foothold offset from the nominal foot position
-      touchdown_depth: 0.0              # [m] extra swing depth below the ground estimate (late contacts are handled by reaching down)
+
+    swing:
+      touchdown_depth: 0.0              # [m] swing ends this far below the ground estimate
+      late_contact_reach: 0.02          # [m] a leg without contact at the start of stance keeps reaching down
+      max_joint_velocity: 20.0          # [rad/s] clamp of the joint velocity reference
 
     balance:
       controller: "mpc"                 # "mpc" (convex MPC while stepping) | "qp" (QP balance always)

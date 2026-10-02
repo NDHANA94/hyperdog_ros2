@@ -1,6 +1,6 @@
 // MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
 
-#include "hyperdog_locomotion/qp_solver.hpp"
+#include "hyperdog_locomotion/control/qp_solver.hpp"
 
 #include <algorithm>
 #include <cmath>

@@ -1,6 +1,6 @@
 // MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
 
-#include "hyperdog_locomotion/gait_scheduler.hpp"
+#include "hyperdog_locomotion/planning/gait_scheduler.hpp"
 
 #include <cmath>
 #include <stdexcept>

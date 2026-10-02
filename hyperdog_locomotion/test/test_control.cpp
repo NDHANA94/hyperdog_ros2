@@ -1,7 +1,9 @@
 // MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
 #include <gtest/gtest.h>
 
-#include "hyperdog_locomotion/balance.hpp"
+#include "hyperdog_locomotion/control/convex_mpc.hpp"
+#include "hyperdog_locomotion/control/leg_controller.hpp"
+#include "hyperdog_locomotion/control/qp_balance_controller.hpp"
 
 using namespace hyperdog_locomotion;
 
@@ -82,4 +84,31 @@ TEST(ConvexMPC, AcceleratesTowardsVelocityReference)
   EXPECT_NEAR(fz, 7.4 * kGravity, 25.0);
   EXPECT_NEAR(f.segment<3>(3).norm(), 0.0, 1e-9);
   EXPECT_LT(mpc.solve_time(), 0.05);
+}
+
+TEST(LegController, StanceTorqueSupportsWeight)
+{
+  RobotKinematics kin;
+  LegController legs(LegControllerParams(), kin);
+  LegControlInput in;
+  in.p = Vec3(0, 0, 0.24);
+  Mat43 feet_b;
+  for (int i = 0; i < 4; ++i) {feet_b.row(i) = kin.leg(i).nominal_foot(0.22).transpose();}
+  kin.inverse_all(feet_b, in.q);
+  in.feet_body = feet_b;
+  for (int i = 0; i < 4; ++i) {
+    in.anchor.row(i) = (in.p + feet_b.row(i).transpose()).transpose();
+    in.forces.segment<3>(3 * i) = Vec3(0, 0, 18.0);
+  }
+  MotorCommand out;
+  const Mat43 targets = legs.compute(in, out);
+  const auto J = kin.jacobians(in.q);
+  for (int i = 0; i < 4; ++i) {
+    // tau = -J^T f: the foot pushes down with the commanded force
+    const Vec3 f_foot = J[i].transpose().fullPivLu().solve(Vec3(out.tau.segment<3>(3 * i)));
+    EXPECT_NEAR(f_foot.z(), -18.0, 1e-6);
+    // impedance set point is the current configuration (foot on its anchor)
+    EXPECT_LT((out.q.segment<3>(3 * i) - in.q.segment<3>(3 * i)).norm(), 1e-6);
+    EXPECT_LT((targets.row(i) - in.anchor.row(i)).norm(), 1e-9);
+  }
 }

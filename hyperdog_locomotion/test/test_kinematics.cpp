@@ -3,7 +3,7 @@
 
 #include <random>
 
-#include "hyperdog_locomotion/kinematics.hpp"
+#include "hyperdog_locomotion/kinematics/leg_kinematics.hpp"
 
 using namespace hyperdog_locomotion;
 

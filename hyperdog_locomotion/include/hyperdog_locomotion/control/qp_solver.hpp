@@ -5,8 +5,8 @@
 // with diagonal pre-conditioning, over-relaxation and warm starting.
 // Sized for the balance QP (12 variables) and the condensed MPC (12*N).
 
-#ifndef HYPERDOG_LOCOMOTION__QP_SOLVER_HPP_
-#define HYPERDOG_LOCOMOTION__QP_SOLVER_HPP_
+#ifndef HYPERDOG_LOCOMOTION__CONTROL__QP_SOLVER_HPP_
+#define HYPERDOG_LOCOMOTION__CONTROL__QP_SOLVER_HPP_
 
 #include <Eigen/Dense>
 
@@ -47,4 +47,4 @@ private:
 
 }  // namespace hyperdog_locomotion
 
-#endif  // HYPERDOG_LOCOMOTION__QP_SOLVER_HPP_
+#endif  // HYPERDOG_LOCOMOTION__CONTROL__QP_SOLVER_HPP_

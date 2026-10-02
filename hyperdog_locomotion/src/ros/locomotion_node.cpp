@@ -24,6 +24,7 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "hyperdog_locomotion/locomotion_controller.hpp"
+#include "parameter_loader.hpp"
 #include "hyperdog_msgs/msg/locomotion_command.hpp"
 #include "hyperdog_msgs/msg/locomotion_state.hpp"
 #include "hyperdog_msgs/msg/motor_commands.hpp"
@@ -43,7 +44,7 @@ public:
   LocomotionNode()
   : Node("locomotion_controller")
   {
-    cfg_ = load_config();
+    cfg_ = hl::load_controller_config(*this);
     controller_ = std::make_unique<hl::LocomotionController>(cfg_);
     names_ = hl::joint_names();
 
@@ -146,138 +147,10 @@ public:
     timer_ = rclcpp::create_timer(this, get_clock(),
         rclcpp::Duration::from_seconds(1.0 / cfg_.control_rate), [this]() {control_step();});
     RCLCPP_INFO(get_logger(), "HyperDog locomotion controller ready: %.0f Hz, balance=%s, contact=%s",
-      cfg_.control_rate, cfg_.balance_controller.c_str(), cfg_.contact.source.c_str());
+      cfg_.control_rate, cfg_.balance.controller.c_str(), cfg_.estimation.contact.source.c_str());
   }
 
 private:
-  template<typename T>
-  T p(const std::string & name, const T & def) {return declare_parameter<T>(name, def);}
-  hl::Vec3 p3(const std::string & name, const hl::Vec3 & def)
-  {
-    auto v = declare_parameter<std::vector<double>>(name, {def.x(), def.y(), def.z()});
-    if (v.size() != 3) {
-      throw std::runtime_error("parameter " + name + " must have 3 elements");
-    }
-    return hl::Vec3(v[0], v[1], v[2]);
-  }
-
-  hl::ControllerConfig load_config()
-  {
-    hl::ControllerConfig c;
-    c.control_rate = p("control_rate", c.control_rate);
-    auto & g = c.geometry;
-    auto hip = declare_parameter<std::vector<double>>("robot.hip_offset", {g.hip_x, g.hip_y});
-    g.hip_x = hip.at(0);
-    g.hip_y = hip.at(1);
-    g.abad_length = p("robot.abad_length", g.abad_length);
-    g.upper_length = p("robot.upper_length", g.upper_length);
-    g.lower_length = p("robot.lower_length", g.lower_length);
-    g.foot_radius = p("robot.foot_radius", g.foot_radius);
-    g.q_min = p3("robot.joint_lower_limits", g.q_min);
-    g.q_max = p3("robot.joint_upper_limits", g.q_max);
-    c.mass = p("robot.mass", c.mass);
-    c.body_inertia = p3("robot.body_inertia", c.body_inertia);
-
-    c.body_height = p("locomotion.body_height", c.body_height);
-    auto hl_lim = declare_parameter<std::vector<double>>("locomotion.body_height_limits",
-        {c.body_height_min, c.body_height_max});
-    c.body_height_min = hl_lim.at(0);
-    c.body_height_max = hl_lim.at(1);
-    c.step_height = p("locomotion.step_height", c.step_height);
-    c.max_velocity = p3("locomotion.max_velocity", c.max_velocity);
-    c.max_acceleration = p3("locomotion.max_acceleration", c.max_acceleration);
-    c.idle_time_to_stand = p("locomotion.idle_time_to_stand", c.idle_time_to_stand);
-    c.terrain_adaptation = p("locomotion.terrain_adaptation", c.terrain_adaptation);
-    c.stand_up_time = p("locomotion.stand_up_time", c.stand_up_time);
-    c.sit_down_time = p("locomotion.sit_down_time", c.sit_down_time);
-
-    auto gait_names = declare_parameter<std::vector<std::string>>("gait_names",
-        {"trot", "walk", "pace", "bound", "pronk"});
-    for (const auto & n : gait_names) {
-      hl::Gait gt = c.gaits.count(n) ? c.gaits[n] : c.gaits["trot"];
-      gt.name = n;
-      gt.period = p("gaits." + n + ".period", gt.period);
-      gt.duty = p("gaits." + n + ".duty", gt.duty);
-      auto off = declare_parameter<std::vector<double>>("gaits." + n + ".offsets",
-          {gt.offsets[0], gt.offsets[1], gt.offsets[2], gt.offsets[3]});
-      for (int i = 0; i < 4; ++i) {gt.offsets[i] = off.at(i);}
-      c.gaits[n] = gt;
-    }
-
-    c.foothold.capture_point_gain = p("foothold.capture_point_gain", c.foothold.capture_point_gain);
-    c.foothold.centrifugal_gain = p("foothold.centrifugal_gain", c.foothold.centrifugal_gain);
-    c.foothold.max_step_offset = p("foothold.max_step_offset", c.foothold.max_step_offset);
-    c.foothold.touchdown_depth = p("foothold.touchdown_depth", c.foothold.touchdown_depth);
-
-    c.balance_controller = p("balance.controller", c.balance_controller);
-    c.contact_limits.mu = p("balance.friction_coefficient", c.contact_limits.mu);
-    c.contact_limits.fz_min = p("balance.min_normal_force", c.contact_limits.fz_min);
-    c.contact_limits.fz_max = p("balance.max_normal_force", c.contact_limits.fz_max);
-    c.qp.kp_position = p3("balance.qp.kp_position", c.qp.kp_position);
-    c.qp.kd_position = p3("balance.qp.kd_position", c.qp.kd_position);
-    c.qp.kp_orientation = p3("balance.qp.kp_orientation", c.qp.kp_orientation);
-    c.qp.kd_orientation = p3("balance.qp.kd_orientation", c.qp.kd_orientation);
-    auto ww = declare_parameter<std::vector<double>>("balance.qp.wrench_weights",
-        std::vector<double>(c.qp.wrench_weights.data(), c.qp.wrench_weights.data() + 6));
-    for (int i = 0; i < 6; ++i) {c.qp.wrench_weights[i] = ww.at(i);}
-    c.qp.force_regularization = p("balance.qp.force_regularization", c.qp.force_regularization);
-    c.qp.force_smoothing = p("balance.qp.force_smoothing", c.qp.force_smoothing);
-    c.mpc.horizon = static_cast<int>(p<int64_t>("balance.mpc.horizon", c.mpc.horizon));
-    c.mpc.dt = p("balance.mpc.dt", c.mpc.dt);
-    c.mpc.update_period = p("balance.mpc.update_period", c.mpc.update_period);
-    c.mpc.max_iterations = static_cast<int>(p<int64_t>("balance.mpc.max_iterations", c.mpc.max_iterations));
-    auto sw = declare_parameter<std::vector<double>>("balance.mpc.state_weights",
-        std::vector<double>(c.mpc.state_weights.begin(), c.mpc.state_weights.end()));
-    for (int i = 0; i < 13; ++i) {c.mpc.state_weights[i] = sw.at(i);}
-    c.mpc.force_weight = p("balance.mpc.force_weight", c.mpc.force_weight);
-
-    c.recovery_enabled = p("disturbance_recovery.enabled", c.recovery_enabled);
-    c.recovery_velocity_threshold = p("disturbance_recovery.velocity_threshold", c.recovery_velocity_threshold);
-    c.recovery_tilt_threshold = p("disturbance_recovery.tilt_threshold", c.recovery_tilt_threshold);
-    c.recovery_capture_margin = p("disturbance_recovery.capture_point_margin", c.recovery_capture_margin);
-    c.recovery_settle_velocity = p("disturbance_recovery.settle_velocity", c.recovery_settle_velocity);
-    c.recovery_settle_time = p("disturbance_recovery.settle_time", c.recovery_settle_time);
-    c.recovery_gait = p("disturbance_recovery.gait", c.recovery_gait);
-
-    c.stand_up_kp = p3("joint_gains.stand_up_kp", c.stand_up_kp);
-    c.stand_up_kd = p3("joint_gains.stand_up_kd", c.stand_up_kd);
-    c.stance_kp = p3("joint_gains.stance_kp", c.stance_kp);
-    c.stance_kd = p3("joint_gains.stance_kd", c.stance_kd);
-    c.swing_kp = p3("joint_gains.swing_kp", c.swing_kp);
-    c.swing_kd = p3("joint_gains.swing_kd", c.swing_kd);
-    c.passive_kd = p3("joint_gains.passive_kd", c.passive_kd);
-    c.swing_cartesian_kp = p3("joint_gains.swing_cartesian_kp", c.swing_cartesian_kp);
-    c.swing_cartesian_kd = p3("joint_gains.swing_cartesian_kd", c.swing_cartesian_kd);
-    c.leg_gravity_compensation_mass = p("joint_gains.leg_gravity_compensation_mass",
-        c.leg_gravity_compensation_mass);
-
-    c.attitude_source = p("estimation.attitude_source", c.attitude_source);
-    c.mahony_kp = p("estimation.mahony_kp", c.mahony_kp);
-    c.mahony_ki = p("estimation.mahony_ki", c.mahony_ki);
-    c.contact.source = p("estimation.contact_source", c.contact.source);
-    c.contact.force_threshold = p("estimation.contact_force_threshold", c.contact.force_threshold);
-    c.contact.early_contact_min_progress = p("estimation.early_contact_min_swing_progress",
-        c.contact.early_contact_min_progress);
-    c.contact.late_contact_max_progress = p("estimation.late_contact_max_stance_progress",
-        c.contact.late_contact_max_progress);
-    c.contact.stance_trust_ramp = p("estimation.stance_trust_ramp", c.contact.stance_trust_ramp);
-    auto & k = c.kalman;
-    k.process_noise_position = p("estimation.process_noise_position", k.process_noise_position);
-    k.process_noise_velocity = p("estimation.process_noise_velocity", k.process_noise_velocity);
-    k.process_noise_foot = p("estimation.process_noise_foot", k.process_noise_foot);
-    k.measurement_noise_position = p("estimation.measurement_noise_position", k.measurement_noise_position);
-    k.measurement_noise_velocity = p("estimation.measurement_noise_velocity", k.measurement_noise_velocity);
-    k.measurement_noise_foot_height = p("estimation.measurement_noise_foot_height",
-        k.measurement_noise_foot_height);
-    k.swing_noise_scale = p("estimation.swing_noise_scale", k.swing_noise_scale);
-    c.ground_plane_filter = p("estimation.ground_plane_filter", c.ground_plane_filter);
-
-    c.fall_protection = p("safety.fall_protection", c.fall_protection);
-    c.fall_angle = p("safety.fall_angle", c.fall_angle);
-    c.max_joint_torque = p3("safety.max_joint_torque", c.max_joint_torque);
-    return c;
-  }
-
   void control_step()
   {
     hl::SensorData s;

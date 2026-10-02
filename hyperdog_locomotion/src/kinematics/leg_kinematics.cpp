@@ -1,6 +1,6 @@
 // MIT License - Copyright (c) 2024 W.M. Nipun Dhananjaya Weerakkodi
 
-#include "hyperdog_locomotion/kinematics.hpp"
+#include "hyperdog_locomotion/kinematics/leg_kinematics.hpp"
 
 #include <complex>
 
