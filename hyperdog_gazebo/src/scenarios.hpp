@@ -44,7 +44,7 @@ struct Step
   bool expect_rest_at_end{false};
 };
 
-/// Scenario names: "full", "push", "walk", "stress", "terrain" (world:=terrain).
+/// Scenario names: "full", "push", "walk", "stress", "speed", "terrain" (world:=terrain).
 /// Returns an empty list for unknown names.
 std::vector<Step> build_scenario(const std::string & name);
 

@@ -108,6 +108,21 @@ std::vector<Step> build_scenario(const std::string & name)
     s.expect_rest_at_end = true;
     steps.push_back(s);
   }
+  if (name == "speed") {
+    // velocity ramp to find the speed envelope
+    for (double v : {0.4, 0.5, 0.6, 0.7, 0.8}) {
+      Step s;
+      s.name = "trot " + std::to_string(v).substr(0, 3) + " m/s";
+      s.duration = 5.0;
+      s.vx = v;
+      s.track_from = 2.0;
+      s.vx_tol = 0.12;
+      steps.push_back(s);
+    }
+    Step s = stand("stop and stand", 4.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
   if (name == "terrain") {
     // terrain.sdf: 8 deg ramp up (x = 2 .. 4), plateau, 8 deg ramp down
     Step s;
