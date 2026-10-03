@@ -19,8 +19,18 @@
   <xacro:arg name="motors_file" default="$(find hyperdog_description)/config/bldc_motors.yaml"/>
   <xacro:arg name="controllers_file" default="$(find hyperdog_description)/config/controllers.yaml"/>
   <xacro:arg name="can_interface" default="can0"/>
+  <!-- model variations (robustness testing / payloads) -->
+  <xacro:arg name="payload_mass" default="0.0"/>
+  <xacro:arg name="payload_x" default="0.0"/>
+  <xacro:arg name="payload_y" default="0.0"/>
+  <xacro:arg name="foot_mu" default="1.0"/>
+  <xacro:arg name="imu_noise_scale" default="1.0"/>
+  <!-- optional extra ros2_control parameter file (overrides, e.g. motor variations) -->
+  <xacro:arg name="extra_controller_params" default=""/>
 
   <xacro:property name="motors_file" value="$(arg motors_file)"/>
+  <xacro:property name="foot_mu" value="$(arg foot_mu)"/>
+  <xacro:property name="imu_noise_scale" value="$(arg imu_noise_scale)"/>
   <xacro:include filename="$(find hyperdog_description)/urdf/common.xacro"/>
   <xacro:include filename="$(find hyperdog_description)/urdf/leg.xacro"/>
   <xacro:include filename="$(find hyperdog_description)/urdf/sensors.xacro"/>
@@ -50,6 +60,21 @@
     </inertial>
   </link>
 
+  <!-- optional payload (point mass) -->
+  <xacro:if value="${$(arg payload_mass) > 0.0}">
+    <joint name="payload_joint" type="fixed">
+      <parent link="base_link"/>
+      <child link="payload_link"/>
+      <origin xyz="$(arg payload_x) $(arg payload_y) 0.08" rpy="0 0 0"/>
+    </joint>
+    <link name="payload_link">
+      <inertial>
+        <mass value="$(arg payload_mass)"/>
+        <inertia ixx="0.001" ixy="0" ixz="0" iyy="0.001" iyz="0" izz="0.001"/>
+      </inertial>
+    </link>
+  </xacro:if>
+
   <!-- ============================== legs ============================== -->
   <xacro:hyperdog_leg prefix="FR" front="1" left="-1"/>
   <xacro:hyperdog_leg prefix="FL" front="1" left="1"/>
@@ -73,5 +98,6 @@
   <!-- ========================== ros2_control ========================== -->
   <xacro:hyperdog_ros2_control sim="$(arg sim)" can_interface="$(arg can_interface)"
                                controllers_file="$(arg controllers_file)"
-                               motors_file="$(arg motors_file)"/>
+                               motors_file="$(arg motors_file)"
+                               extra_params="$(arg extra_controller_params)"/>
 </robot>

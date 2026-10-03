@@ -20,6 +20,13 @@
   <arg name="controllers_file" default="$(find-pkg-share hyperdog_description)/config/controllers.yaml"/>
   <arg name="locomotion_params" default="$(find-pkg-share hyperdog_locomotion)/config/locomotion.yaml"/>
   <arg name="start_controller" default="true" description="start the locomotion controller"/>
+  <!-- model variations (robustness testing) -->
+  <arg name="payload_mass" default="0.0" description="extra point mass on the body [kg]"/>
+  <arg name="payload_x" default="0.0" description="payload x position [m]"/>
+  <arg name="payload_y" default="0.0" description="payload y position [m]"/>
+  <arg name="foot_mu" default="1.0" description="foot friction coefficient"/>
+  <arg name="imu_noise_scale" default="1.0" description="IMU noise multiplier"/>
+  <arg name="extra_controller_params" default="" description="extra ros2_control parameter file (overrides)"/>
 
   <let name="world_file" value="$(find-pkg-share hyperdog_gazebo)/worlds/$(var world).sdf"
        unless="$(eval '\'/\' in \'$(var world)\'')"/>
@@ -41,7 +48,7 @@
   <node pkg="robot_state_publisher" exec="robot_state_publisher" output="screen">
     <param name="use_sim_time" value="true"/>
     <param name="robot_description" type="str"
-           value="$(command 'xacro $(find-pkg-share hyperdog_description)/urdf/hyperdog.urdf.xacro sim:=true use_lidar:=$(var use_lidar) use_camera:=$(var use_camera) motors_file:=$(var motors_file) controllers_file:=$(var controllers_file)')"/>
+           value="$(command 'xacro $(find-pkg-share hyperdog_description)/urdf/hyperdog.urdf.xacro sim:=true use_lidar:=$(var use_lidar) use_camera:=$(var use_camera) motors_file:=$(var motors_file) controllers_file:=$(var controllers_file) payload_mass:=$(var payload_mass) payload_x:=$(var payload_x) payload_y:=$(var payload_y) foot_mu:=$(var foot_mu) imu_noise_scale:=$(var imu_noise_scale) extra_controller_params:=$(var extra_controller_params)')"/>
   </node>
 
   <!-- spawn (crouched, slightly above the ground) -->

@@ -21,6 +21,7 @@ set(DEPS
 foreach(dep IN ITEMS ${DEPS})
   find_package(${dep} REQUIRED)
 endforeach()
+find_package(sensor_msgs REQUIRED)
 
 add_library(${PROJECT_NAME} SHARED
   src/bldc_impedance_controller.cpp
@@ -31,6 +32,13 @@ target_include_directories(${PROJECT_NAME} PUBLIC
   $<INSTALL_INTERFACE:include/${PROJECT_NAME}>
 )
 ament_target_dependencies(${PROJECT_NAME} PUBLIC ${DEPS})
+
+# bring-up tools
+add_executable(mit_can_probe src/tools/mit_can_probe.cpp)
+target_include_directories(mit_can_probe PRIVATE include)
+add_executable(joint_test src/tools/joint_test.cpp)
+ament_target_dependencies(joint_test rclcpp hyperdog_msgs sensor_msgs)
+install(TARGETS mit_can_probe joint_test DESTINATION lib/${PROJECT_NAME})
 
 pluginlib_export_plugin_description_file(controller_interface bldc_controller_plugin.xml)
 pluginlib_export_plugin_description_file(hardware_interface hardware_plugin.xml)

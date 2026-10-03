@@ -25,6 +25,7 @@
 #include "hyperdog_locomotion/control/convex_mpc.hpp"
 #include "hyperdog_locomotion/control/leg_controller.hpp"
 #include "hyperdog_locomotion/control/qp_balance_controller.hpp"
+#include "hyperdog_locomotion/control/self_righting.hpp"
 #include "hyperdog_locomotion/estimation/contact_estimator.hpp"
 #include "hyperdog_locomotion/estimation/kinematic_kalman_filter.hpp"
 #include "hyperdog_locomotion/kinematics/leg_kinematics.hpp"
@@ -107,6 +108,7 @@ struct ControllerConfig
   LegControllerParams legs;
   EstimationParams estimation;
   SafetyParams safety;
+  SelfRightingParams self_righting;
 };
 
 }  // namespace hyperdog_locomotion

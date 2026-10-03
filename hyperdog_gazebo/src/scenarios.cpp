@@ -123,6 +123,91 @@ std::vector<Step> build_scenario(const std::string & name)
     s.expect_rest_at_end = true;
     steps.push_back(s);
   }
+  if (name == "rough") {
+    // rough.sdf: random 1-3 cm slabs between x = 1.5 m and 7.5 m
+    Step s;
+    s.name = "trot over rough ground (1-3 cm) at 0.3 m/s";
+    s.duration = 26.0; s.vx = 0.3; s.track_from = 2.0; s.vx_tol = 0.15; s.vy_tol = 0.15;
+    steps.push_back(s);
+    s = stand("stop and stand", 4.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
+  if (name == "stairs") {
+    // stairs.sdf: 5 steps up (4 cm rise, 35 cm run) from x = 1.5 m, landing, 5 steps down
+    Step s;
+    s.name = "trot up and down 4 cm stairs at 0.25 m/s";
+    s.duration = 26.0; s.vx = 0.25; s.track_from = 2.0; s.vx_tol = 0.15; s.vy_tol = 0.15;
+    steps.push_back(s);
+    s = stand("stop and stand", 4.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
+  if (name == "slippery") {
+    // slippery.sdf: friction 0.3 patch between x = 2 m and 5 m
+    Step s;
+    s.name = "trot across a slippery patch (mu 0.3) at 0.3 m/s";
+    s.duration = 20.0; s.vx = 0.3; s.track_from = 2.0; s.vx_tol = 0.15; s.vy_tol = 0.15;
+    steps.push_back(s);
+    s = stand("stop and stand", 4.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
+  if (name == "robust") {
+    // short scenario used by the randomized robustness campaign
+    Step s = stand("stand, lateral push 40 N x 0.2 s", 5.0);
+    s.pushes.push_back({1.0, 0.2, 0.0, 40.0});
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+    s = Step();
+    s.name = "trot forward 0.4 m/s";
+    s.duration = 5.0; s.vx = 0.4; s.track_from = 2.0; s.vx_tol = 0.15;
+    steps.push_back(s);
+    s = Step();
+    s.name = "trot + turn 0.3 m/s, 0.6 rad/s";
+    s.duration = 4.0; s.vx = 0.3; s.wz = 0.6; s.track_from = 1.5; s.vx_tol = 0.15;
+    steps.push_back(s);
+    s = stand("stop and stand", 4.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
+  if (name == "fall") {
+    // knock the robot over with a roll torque; it has to get up again by itself
+    steps.push_back(stand("stand", 3.0));
+    Step s = stand("knocked over (roll torque) -> self-right + stand up", 20.0);
+    Push p;
+    p.start = 1.0; p.duration = 0.3; p.fy = 120.0; p.tx = 40.0;
+    s.pushes.push_back(p);
+    s.allow_fall = true;
+    steps.push_back(s);
+    s = Step();
+    s.name = "trot forward 0.3 m/s after recovery";
+    s.duration = 6.0; s.vx = 0.3; s.track_from = 2.0; s.vx_tol = 0.15;
+    steps.push_back(s);
+    s = stand("dropped on its right side -> self-right + stand up", 18.0);
+    s.place_roll = M_PI / 2.0;
+    s.allow_fall = true;
+    steps.push_back(s);
+    s = Step();
+    s.name = "trot forward 0.3 m/s after recovery";
+    s.duration = 6.0; s.vx = 0.3; s.track_from = 2.0; s.vx_tol = 0.15;
+    steps.push_back(s);
+    s = stand("stop and stand", 4.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
+  if (name == "fall_back") {
+    // self-righting from the back: a known limitation (see self_righting.hpp), not part
+    // of the validation set
+    steps.push_back(stand("stand", 2.0));
+    Step s = stand("dropped on its back -> self-right + stand up", 25.0);
+    s.place_roll = M_PI - 0.1;
+    s.allow_fall = true;
+    steps.push_back(s);
+    s = stand("stand", 3.0);
+    s.expect_rest_at_end = true;
+    steps.push_back(s);
+  }
   if (name == "terrain") {
     // terrain.sdf: 8 deg ramp up (x = 2 .. 4), plateau, 8 deg ramp down
     Step s;

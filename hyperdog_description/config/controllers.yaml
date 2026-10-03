@@ -17,3 +17,4 @@ bldc_controller:
     command_timeout: 0.25        # [s] -> damping mode without fresh commands
     timeout_kd: 1.0              # [Nm s/rad]
     state_publish_rate: 200.0    # [Hz] ~/motor_states
+    command_latency: 0.0         # [s] emulated command latency (simulation robustness tests)

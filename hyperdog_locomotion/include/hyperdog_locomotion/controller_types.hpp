@@ -27,7 +27,7 @@
 namespace hyperdog_locomotion
 {
 
-enum class Mode {PASSIVE, STAND_UP, BALANCE, LOCOMOTION, SIT};
+enum class Mode {PASSIVE, STAND_UP, BALANCE, LOCOMOTION, SIT, SELF_RIGHT};
 const char * to_string(Mode m);
 
 /// Measurements for one control tick.

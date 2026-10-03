@@ -11,7 +11,15 @@
   <arg name="headless" default="true"/>
   <arg name="report" default="hyperdog_validation_report.md"/>
   <arg name="locomotion_params" default="$(find-pkg-share hyperdog_locomotion)/config/locomotion.yaml"/>
-  <arg name="scenario" default="full" description="full | push | walk | stress | terrain (use world:=terrain)"/>
+  <arg name="payload_mass" default="0.0"/>
+  <arg name="payload_x" default="0.0"/>
+  <arg name="payload_y" default="0.0"/>
+  <arg name="foot_mu" default="1.0"/>
+  <arg name="imu_noise_scale" default="1.0"/>
+  <arg name="extra_controller_params" default=""/>
+  <arg name="motors_file" default="$(find-pkg-share hyperdog_description)/config/bldc_motors.yaml"/>
+  <arg name="controllers_file" default="$(find-pkg-share hyperdog_description)/config/controllers.yaml"/>
+  <arg name="scenario" default="full" description="full | push | walk | stress | speed | robust | fall | fall_back (flat); terrain | rough | stairs | slippery (matching world)"/>
 
   <include file="$(find-pkg-share hyperdog_gazebo)/launch/sim.launch.xml">
     <arg name="world" value="$(var world)"/>
@@ -19,6 +27,14 @@
     <arg name="use_lidar" value="false"/>
     <arg name="use_camera" value="false"/>
     <arg name="locomotion_params" value="$(var locomotion_params)"/>
+    <arg name="payload_mass" value="$(var payload_mass)"/>
+    <arg name="payload_x" value="$(var payload_x)"/>
+    <arg name="payload_y" value="$(var payload_y)"/>
+    <arg name="foot_mu" value="$(var foot_mu)"/>
+    <arg name="imu_noise_scale" value="$(var imu_noise_scale)"/>
+    <arg name="extra_controller_params" value="$(var extra_controller_params)"/>
+    <arg name="motors_file" value="$(var motors_file)"/>
+    <arg name="controllers_file" value="$(var controllers_file)"/>
   </include>
 
   <node pkg="hyperdog_gazebo" exec="scenario_runner" name="scenario_runner" output="screen" on_exit="shutdown">

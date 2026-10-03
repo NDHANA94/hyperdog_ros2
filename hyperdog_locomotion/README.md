@@ -24,12 +24,14 @@ include/hyperdog_locomotion/
     qp_balance_controller.hpp        PD wrench + QP force distribution (standing)
     convex_mpc.hpp                   single rigid body convex MPC (stepping)
     leg_controller.hpp               stance / swing -> MIT-mode joint commands
+    self_righting.hpp                getting back up after a fall
   controller_types.hpp               SensorData, Command, MotorCommand, Diagnostics
   controller_config.hpp              ControllerConfig (mirrors config/locomotion.yaml)
   locomotion_controller.hpp          state machine + per tick pipeline
 src/<same layout>.cpp
 src/ros/locomotion_node.cpp          ROS 2 node (topics, timers, TF)
 src/ros/parameter_loader.cpp         ROS parameters -> ControllerConfig
+src/ros/markers.cpp                  RViz markers (feet, targets, support polygon, forces)
 test/test_{kinematics,estimation,planning,control}.cpp
 config/locomotion.yaml               every tunable parameter
 ```
@@ -50,5 +52,6 @@ monitor -> gait scheduler -> body reference -> footholds -> ground reaction forc
 | out | `bldc_controller/commands` | `hyperdog_msgs/MotorCommands` |
 | out | `hyperdog/state` | `hyperdog_msgs/LocomotionState` |
 | out | `odom`, TF `odom -> base_link` | `nav_msgs/Odometry` |
+| out | `hyperdog/markers` (`publish_markers`) | `visualization_msgs/MarkerArray` |
 
 Set `debug_log_file` to write a per-tick CSV (feet, targets, forces, state) for tuning.

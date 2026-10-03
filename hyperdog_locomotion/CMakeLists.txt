@@ -18,6 +18,7 @@ find_package(geometry_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(tf2_ros REQUIRED)
+find_package(visualization_msgs REQUIRED)
 find_package(hyperdog_msgs REQUIRED)
 find_package(ros_gz_interfaces REQUIRED)
 
@@ -37,6 +38,7 @@ add_library(${PROJECT_NAME}_core SHARED
   src/control/qp_balance_controller.cpp
   src/control/convex_mpc.cpp
   src/control/leg_controller.cpp
+  src/control/self_righting.cpp
   src/locomotion_controller.cpp
 )
 target_include_directories(${PROJECT_NAME}_core PUBLIC
@@ -48,10 +50,12 @@ target_link_libraries(${PROJECT_NAME}_core PUBLIC Eigen3::Eigen)
 add_executable(locomotion_node
   src/ros/locomotion_node.cpp
   src/ros/parameter_loader.cpp
+  src/ros/markers.cpp
 )
 target_link_libraries(locomotion_node ${PROJECT_NAME}_core)
 ament_target_dependencies(locomotion_node
-  rclcpp geometry_msgs nav_msgs sensor_msgs tf2_ros hyperdog_msgs ros_gz_interfaces)
+  rclcpp geometry_msgs nav_msgs sensor_msgs tf2_ros visualization_msgs hyperdog_msgs
+  ros_gz_interfaces)
 
 install(DIRECTORY include/ DESTINATION include/${PROJECT_NAME})
 install(TARGETS ${PROJECT_NAME}_core EXPORT export_${PROJECT_NAME}

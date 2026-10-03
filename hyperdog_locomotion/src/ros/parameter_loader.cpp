@@ -41,6 +41,19 @@ public:
     value = static_cast<int>(node_.declare_parameter<int64_t>(name, value));
   }
 
+  // doubles also accept integers in the YAML ("kp: 80" as well as "kp: 80.0")
+  void get(const std::string & name, double & value)
+  {
+    const auto p = declare(name, rclcpp::ParameterValue(value));
+    if (p.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER) {
+      value = static_cast<double>(p.get<int64_t>());
+    } else if (p.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE) {
+      value = p.get<double>();
+    } else {
+      throw std::invalid_argument("parameter '" + name + "' must be a number");
+    }
+  }
+
   void get(const std::string & name, Vec3 & value)
   {
     std::vector<double> v{value.x(), value.y(), value.z()};
@@ -50,7 +63,15 @@ public:
 
   void get_array(const std::string & name, std::vector<double> & value, size_t size)
   {
-    value = node_.declare_parameter<std::vector<double>>(name, value);
+    const auto p = declare(name, rclcpp::ParameterValue(value));
+    if (p.get_type() == rclcpp::ParameterType::PARAMETER_INTEGER_ARRAY) {
+      const auto v = p.get<std::vector<int64_t>>();
+      value.assign(v.begin(), v.end());
+    } else if (p.get_type() == rclcpp::ParameterType::PARAMETER_DOUBLE_ARRAY) {
+      value = p.get<std::vector<double>>();
+    } else {
+      throw std::invalid_argument("parameter '" + name + "' must be a list of numbers");
+    }
     if (value.size() != size) {
       throw std::invalid_argument(
               "parameter '" + name + "' must have " + std::to_string(size) + " elements");
@@ -58,6 +79,13 @@ public:
   }
 
 private:
+  rclcpp::ParameterValue declare(const std::string & name, const rclcpp::ParameterValue & def)
+  {
+    rcl_interfaces::msg::ParameterDescriptor d;
+    d.dynamic_typing = true;   // the type is checked above
+    return node_.declare_parameter(name, def, d);
+  }
+
   rclcpp::Node & node_;
 };
 }  // namespace
@@ -195,6 +223,24 @@ ControllerConfig load_controller_config(rclcpp::Node & node)
   r.get("safety.fall_protection", c.safety.fall_protection);
   r.get("safety.fall_angle", c.safety.fall_angle);
   r.get("safety.max_joint_torque", c.safety.max_joint_torque);
+
+  // self-righting
+  auto & sr = c.self_righting;
+  r.get("self_righting.enabled", sr.enabled);
+  r.get("self_righting.max_attempts", sr.max_attempts);
+  r.get("self_righting.settle_time", sr.settle_time);
+  r.get("self_righting.tuck_time", sr.tuck_time);
+  r.get("self_righting.roll_time", sr.roll_time);
+  r.get("self_righting.upright_angle", sr.upright_angle);
+  r.get("self_righting.rest_rate", sr.rest_rate);
+  r.get("self_righting.push_pose", sr.push_pose);
+  r.get("self_righting.flip_time", sr.flip_time);
+  r.get("self_righting.flip_kp", sr.flip_kp);
+  r.get("self_righting.flip_push_pose", sr.flip_push_pose);
+  r.get("self_righting.flip_pivot_pose", sr.flip_pivot_pose);
+  r.get("self_righting.release_tilt", sr.release_tilt);
+  r.get("self_righting.kp", sr.kp);
+  r.get("self_righting.kd", sr.kd);
   return c;
 }
 

@@ -29,6 +29,7 @@
 #include <cmath>
 #include <fstream>
 #include <functional>
+#include <iomanip>
 #include <memory>
 #include <set>
 #include <sstream>
@@ -42,6 +43,7 @@
 #include "rclcpp/rclcpp.hpp"
 #include "ros_gz_interfaces/msg/entity.hpp"
 #include "ros_gz_interfaces/msg/entity_wrench.hpp"
+#include "ros_gz_interfaces/srv/set_entity_pose.hpp"
 #include "scenarios.hpp"
 
 namespace
@@ -58,6 +60,9 @@ struct Stats
   int n_track{0};
   int n{0};
   double end_speed{0.0};
+  bool fell{false};
+  double end_tilt{0.0}, end_height{0.0};
+  std::string end_mode;
   bool auto_step{false};
 };
 
@@ -91,6 +96,7 @@ public:
     hl_pub_ = create_publisher<hyperdog_msgs::msg::LocomotionCommand>("hyperdog/command", 10);
     wrench_pub_ = create_publisher<ros_gz_interfaces::msg::EntityWrench>(
       "/world/hyperdog/wrench/persistent", 10);
+    set_pose_ = create_client<ros_gz_interfaces::srv::SetEntityPose>("/world/hyperdog/set_pose");
     clear_pub_ = create_publisher<ros_gz_interfaces::msg::Entity>(
       "/world/hyperdog/wrench/clear",
       10);
@@ -121,13 +127,14 @@ private:
     stats_.resize(steps_.size());
   }
 
-  void send_push(double fx, double fy)
+  void send_push(double fx, double fy, double tx)
   {
     ros_gz_interfaces::msg::EntityWrench w;
     w.entity.name = "hyperdog::base_link";
     w.entity.type = ros_gz_interfaces::msg::Entity::LINK;
     w.wrench.force.x = fx;
     w.wrench.force.y = fy;
+    w.wrench.torque.x = tx;
     wrench_pub_->publish(w);
   }
   void clear_push()
@@ -136,6 +143,28 @@ private:
     e.name = "hyperdog::base_link";
     e.type = ros_gz_interfaces::msg::Entity::LINK;
     clear_pub_->publish(e);
+  }
+
+  void place(double roll, double height)
+  {
+    if (!set_pose_->service_is_ready()) {
+      RCLCPP_ERROR(get_logger(), "set_pose service not available: cannot place the robot");
+      return;
+    }
+    auto req = std::make_shared<ros_gz_interfaces::srv::SetEntityPose::Request>();
+    req->entity.name = "hyperdog";
+    req->entity.type = ros_gz_interfaces::msg::Entity::MODEL;
+    req->pose.position.x = gt_.pose.pose.position.x;
+    req->pose.position.y = gt_.pose.pose.position.y;
+    req->pose.position.z = height;
+    const double yaw = yaw_of(gt_.pose.pose.orientation);
+    // q = Rz(yaw) * Rx(roll)
+    req->pose.orientation.w = std::cos(yaw / 2) * std::cos(roll / 2);
+    req->pose.orientation.x = std::cos(yaw / 2) * std::sin(roll / 2);
+    req->pose.orientation.y = std::sin(yaw / 2) * std::sin(roll / 2);
+    req->pose.orientation.z = std::sin(yaw / 2) * std::cos(roll / 2);
+    set_pose_->async_send_request(req);
+    RCLCPP_INFO(get_logger(), "placing the robot: roll %.2f rad, height %.2f m", roll, height);
   }
 
   void tick()
@@ -180,6 +209,10 @@ private:
     Step & s = steps_[step_];
     Stats & st = stats_[step_];
     const double ts = t - step_t0_;
+    if (!std::isnan(s.place_roll) && placed_step_ != static_cast<int>(step_)) {
+      place(s.place_roll, s.place_height);
+      placed_step_ = static_cast<int>(step_);
+    }
     // commands
     geometry_msgs::msg::Twist cmd;
     cmd.linear.x = s.vx;
@@ -197,9 +230,11 @@ private:
       const auto & p = s.pushes[k];
       const int key = static_cast<int>(step_ * 10 + k);
       if (ts >= p.start && push_active_ != key && push_done_.count(key) == 0) {
-        send_push(p.fx, p.fy);
+        send_push(p.fx, p.fy, p.tx);
         push_active_ = key;
-        RCLCPP_INFO(get_logger(), "push: F = (%.0f, %.0f) N for %.2f s", p.fx, p.fy, p.duration);
+        RCLCPP_INFO(
+          get_logger(), "push: F = (%.0f, %.0f) N, Mx = %.0f Nm for %.2f s", p.fx, p.fy, p.tx,
+          p.duration);
       }
       if (push_active_ == key && ts >= p.start + p.duration) {
         clear_push();
@@ -247,9 +282,19 @@ private:
       st.n_track++;
     }
     st.end_speed = std::hypot(vxb, vyb);
+    st.end_tilt = std::max(std::abs(r), std::abs(pch));
+    st.end_height = z;
+    st.end_mode = state_.mode;
     if (std::abs(r) > fall_tilt_ || std::abs(pch) > fall_tilt_ || z < fall_height_) {
-      fell_ = true;
-      fall_step_ = step_;
+      if (s.allow_fall) {
+        if (!st.fell) {
+          RCLCPP_INFO(get_logger(), "robot is down (expected in '%s')", s.name.c_str());
+        }
+        st.fell = true;
+      } else {
+        fell_ = true;
+        fall_step_ = step_;
+      }
     }
     csv_ << t << "," << step_ << "," << gt_.pose.pose.position.x << "," <<
       gt_.pose.pose.position.y << "," << z <<
@@ -319,7 +364,17 @@ private:
           trk << "end speed " << std::fixed << st.end_speed << " m/s";
           ok = ok && st.end_speed < 0.1;
         }
-        ok = ok && st.max_tilt < 0.5;
+        if (s.allow_fall) {
+          // must be standing upright again: small tilt, near the standing height, active mode
+          const bool up = st.end_tilt<0.2 && st.end_height>0.8 * stand_height_ &&
+            (st.end_mode == "BALANCE" || st.end_mode == "LOCOMOTION");
+          if (!trk.str().empty()) {trk << ", ";}
+          trk << (st.fell ? "fell" : "did not fall") << ", end: " << st.end_mode << " tilt " <<
+            std::fixed << std::setprecision(1) << st.end_tilt * 180.0 / M_PI << " deg";
+          ok = ok && up && st.fell;   // the scenario is meaningless without the fall
+        } else {
+          ok = ok && st.max_tilt < 0.5;
+        }
         all_ok = all_ok && ok;
         md.precision(3);
         md << "| " << s.name << " | " << (ok ? "PASS" : "**FAIL**") << " | " << std::fixed <<
@@ -362,6 +417,8 @@ private:
   rclcpp::Publisher<hyperdog_msgs::msg::LocomotionCommand>::SharedPtr hl_pub_;
   rclcpp::Publisher<ros_gz_interfaces::msg::EntityWrench>::SharedPtr wrench_pub_;
   rclcpp::Publisher<ros_gz_interfaces::msg::Entity>::SharedPtr clear_pub_;
+  rclcpp::Client<ros_gz_interfaces::srv::SetEntityPose>::SharedPtr set_pose_;
+  int placed_step_{-1};
   rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr gt_sub_;
   rclcpp::Subscription<hyperdog_msgs::msg::LocomotionState>::SharedPtr st_sub_;
   rclcpp::TimerBase::SharedPtr timer_;

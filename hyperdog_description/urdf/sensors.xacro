@@ -25,14 +25,14 @@
         <gz_frame_id>imu_link</gz_frame_id>
         <imu>
           <angular_velocity>
-            <x><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></x>
-            <y><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></y>
-            <z><noise type="gaussian"><mean>0</mean><stddev>0.002</stddev></noise></z>
+            <x><noise type="gaussian"><mean>0</mean><stddev>${0.002 * imu_noise_scale}</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>${0.002 * imu_noise_scale}</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>${0.002 * imu_noise_scale}</stddev></noise></z>
           </angular_velocity>
           <linear_acceleration>
-            <x><noise type="gaussian"><mean>0</mean><stddev>0.02</stddev></noise></x>
-            <y><noise type="gaussian"><mean>0</mean><stddev>0.02</stddev></noise></y>
-            <z><noise type="gaussian"><mean>0</mean><stddev>0.02</stddev></noise></z>
+            <x><noise type="gaussian"><mean>0</mean><stddev>${0.02 * imu_noise_scale}</stddev></noise></x>
+            <y><noise type="gaussian"><mean>0</mean><stddev>${0.02 * imu_noise_scale}</stddev></noise></y>
+            <z><noise type="gaussian"><mean>0</mean><stddev>${0.02 * imu_noise_scale}</stddev></noise></z>
           </linear_acceleration>
         </imu>
       </sensor>

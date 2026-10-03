@@ -16,6 +16,7 @@
 #include "hyperdog_locomotion/control/convex_mpc.hpp"
 #include "hyperdog_locomotion/control/leg_controller.hpp"
 #include "hyperdog_locomotion/control/qp_balance_controller.hpp"
+#include "hyperdog_locomotion/control/self_righting.hpp"
 
 using hyperdog_locomotion::BodyState;
 using hyperdog_locomotion::Bool4;
@@ -32,6 +33,8 @@ using hyperdog_locomotion::QPBalanceController;
 using hyperdog_locomotion::QPBalanceParams;
 using hyperdog_locomotion::QPSolver;
 using hyperdog_locomotion::RobotKinematics;
+using hyperdog_locomotion::SelfRighting;
+using hyperdog_locomotion::SelfRightingParams;
 using hyperdog_locomotion::Vec12;
 using hyperdog_locomotion::Vec3;
 using hyperdog_locomotion::kGravity;
@@ -150,4 +153,77 @@ TEST(LegController, StanceTorqueSupportsWeight)
     EXPECT_LT((out.q.segment<3>(3 * i) - in.q.segment<3>(3 * i)).norm(), 1e-6);
     EXPECT_LT((targets.row(i) - in.anchor.row(i)).norm(), 1e-9);
   }
+}
+
+TEST(SelfRighting, SequenceAndGroundSideLegs)
+{
+  SelfRightingParams p;
+  p.max_attempts = 2;
+  SelfRighting sr(p);
+  const double dt = 0.002;
+  const Vec12 q0 = Vec12::Zero();
+  Vec12 tuck;
+  for (int i = 0; i < 4; ++i) {
+    tuck.segment<3>(3 * i) = Vec3(0.0, 1.0, 2.5);
+  }
+  MotorCommand out;
+  const Vec3 on_right_side(1.4, 0.0, 0.0);   // positive roll: lying on the right side
+
+  sr.start(q0);
+  // SETTLE: pure damping
+  EXPECT_EQ(sr.step(dt, on_right_side, Vec3::Zero(), q0, tuck, out), SelfRighting::Phase::SETTLE);
+  EXPECT_DOUBLE_EQ(out.kp.norm(), 0.0);
+  EXPECT_GT(out.kd.minCoeff(), 0.0);
+  double t = dt;
+  for (; t < p.settle_time + dt / 2; t += dt) {
+    sr.step(dt, on_right_side, Vec3::Zero(), q0, tuck, out);
+  }
+  EXPECT_EQ(sr.phase(), SelfRighting::Phase::TUCK);
+  // TUCK ends in the tuck pose
+  for (double tt = 0.0; tt < p.tuck_time - dt / 2; tt += dt) {
+    sr.step(dt, on_right_side, Vec3::Zero(), q0, tuck, out);
+  }
+  EXPECT_LT((out.q - tuck).norm(), 1e-3);
+  EXPECT_EQ(sr.step(dt, on_right_side, Vec3::Zero(), q0, tuck, out), SelfRighting::Phase::ROLL);
+  // ROLL: the right legs (FR = 0, BR = 2) push, the left legs stay tucked
+  for (double tt = 0.0; tt < p.roll_time; tt += dt) {
+    sr.step(dt, on_right_side, Vec3::Zero(), q0, tuck, out);
+  }
+  EXPECT_LT((out.q.segment<3>(0) - p.push_pose).norm(), 1e-3);
+  EXPECT_LT((out.q.segment<3>(6) - p.push_pose).norm(), 1e-3);
+  EXPECT_LT((out.q.segment<3>(3) - tuck.segment<3>(3)).norm(), 1e-9);
+  EXPECT_LT((out.q.segment<3>(9) - tuck.segment<3>(9)).norm(), 1e-9);
+  // still on its side after the attempt -> retry, then fail after max_attempts
+  for (int k = 0; k < 20000 && sr.phase() != SelfRighting::Phase::FAILED; ++k) {
+    sr.step(dt, on_right_side, Vec3::Zero(), q0, tuck, out);
+  }
+  EXPECT_EQ(sr.phase(), SelfRighting::Phase::FAILED);
+  EXPECT_EQ(sr.attempts(), 2);
+
+  // lying on the back: fast, stiff kick of the lower side legs, the others fold inwards
+  const Vec3 on_back(M_PI - 0.2, 0.0, 0.0);   // slightly rolled: the left side is up
+  sr.start(q0);
+  for (int k = 0; k < 20000 && sr.phase() != SelfRighting::Phase::ROLL; ++k) {
+    sr.step(dt, on_back, Vec3::Zero(), q0, tuck, out);
+  }
+  for (double tt = 0.0; tt < p.flip_time; tt += dt) {
+    sr.step(dt, on_back, Vec3::Zero(), q0, tuck, out);
+  }
+  EXPECT_LT((out.q.segment<3>(0) - p.flip_push_pose).norm(), 1e-3);
+  EXPECT_LT((out.q.segment<3>(3) - p.flip_pivot_pose).norm(), 1e-3);
+  EXPECT_DOUBLE_EQ(out.kp(0), p.flip_kp(0));
+
+  // still moving: stays in SETTLE (damping)
+  sr.start(q0);
+  for (int k = 0; k < 2000; ++k) {
+    sr.step(dt, on_back, Vec3(0, 0, 2.0), q0, tuck, out);
+  }
+  EXPECT_EQ(sr.phase(), SelfRighting::Phase::SETTLE);
+
+  // upright after settling: done without moving
+  sr.start(q0);
+  for (int k = 0; k < 1000; ++k) {
+    sr.step(dt, Vec3(0.1, 0.0, 0.0), Vec3::Zero(), q0, tuck, out);
+  }
+  EXPECT_EQ(sr.phase(), SelfRighting::Phase::DONE);
 }

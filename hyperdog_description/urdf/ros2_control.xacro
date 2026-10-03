@@ -5,7 +5,7 @@
   <xacro:property name="init_uleg" value="0.50"/>
   <xacro:property name="init_lleg" value="0.85"/>
 
-  <xacro:macro name="hyperdog_ros2_control" params="sim can_interface controllers_file motors_file">
+  <xacro:macro name="hyperdog_ros2_control" params="sim can_interface controllers_file motors_file extra_params:=''">
     <ros2_control name="HyperDogSystem" type="system">
       <hardware>
         <xacro:if value="${sim}">
@@ -43,6 +43,9 @@
         <plugin filename="gz_ros2_control-system" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
           <parameters>${controllers_file}</parameters>
           <parameters>${motors_file}</parameters>
+          <xacro:if value="${extra_params != ''}">
+            <parameters>${extra_params}</parameters>
+          </xacro:if>
         </plugin>
       </gazebo>
     </xacro:if>

@@ -31,7 +31,9 @@
 #ifndef HYPERDOG_BLDC_CONTROL__BLDC_IMPEDANCE_CONTROLLER_HPP_
 #define HYPERDOG_BLDC_CONTROL__BLDC_IMPEDANCE_CONTROLLER_HPP_
 
+#include <deque>
 #include <memory>
+#include <utility>
 #include <string>
 #include <vector>
 
@@ -94,6 +96,11 @@ private:
   std::vector<double> last_torque_cmd_;
   std::shared_ptr<CommandFrame> last_frame_;
   double command_age_{0.0};
+  // emulated command latency: frames are applied `command_latency` seconds after arrival
+  double command_latency_{0.0};
+  std::deque<std::pair<double, std::shared_ptr<CommandFrame>>> delayed_frames_;
+  std::shared_ptr<CommandFrame> active_frame_;
+  double clock_{0.0};
 
   realtime_tools::RealtimeBuffer<std::shared_ptr<CommandFrame>> command_buffer_;
   rclcpp::Subscription<hyperdog_msgs::msg::MotorCommands>::SharedPtr command_sub_;

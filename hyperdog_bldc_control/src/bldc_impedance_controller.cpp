@@ -55,6 +55,7 @@ CallbackReturn BldcImpedanceController::on_init()
     auto_declare<double>("command_timeout", 0.25);
     auto_declare<double>("timeout_kd", 1.0);
     auto_declare<double>("state_publish_rate", 100.0);
+    auto_declare<double>("command_latency", 0.0);
   } catch (const std::exception & e) {
     RCLCPP_ERROR(get_node()->get_logger(), "on_init failed: %s", e.what());
     return CallbackReturn::ERROR;
@@ -141,6 +142,7 @@ CallbackReturn BldcImpedanceController::on_configure(const rclcpp_lifecycle::Sta
   limit_stiffness_ = node->get_parameter("limit_stiffness").as_double();
   simulate_dynamics_ = node->get_parameter("simulate_motor_dynamics").as_bool();
   command_timeout_ = node->get_parameter("command_timeout").as_double();
+  command_latency_ = node->get_parameter("command_latency").as_double();
   timeout_kd_ = node->get_parameter("timeout_kd").as_double();
   const double rate = node->get_parameter("state_publish_rate").as_double();
   state_publish_period_ = rate > 0.0 ? 1.0 / rate : 0.0;
@@ -239,8 +241,24 @@ controller_interface::return_type BldcImpedanceController::update(
   const rclcpp::Time & time, const rclcpp::Duration & period)
 {
   const auto frame_ptr = command_buffer_.readFromRT();
-  const std::shared_ptr<CommandFrame> frame = frame_ptr ? *frame_ptr : nullptr;
+  const std::shared_ptr<CommandFrame> latest = frame_ptr ? *frame_ptr : nullptr;
   const double dt = period.seconds();
+  clock_ += dt;
+  std::shared_ptr<CommandFrame> frame = latest;
+  if (command_latency_ > 0.0) {
+    // emulated communication latency (robustness testing): apply each command frame
+    // `command_latency` seconds after it arrived
+    if (latest && (delayed_frames_.empty() || delayed_frames_.back().second != latest)) {
+      delayed_frames_.emplace_back(clock_, latest);
+    }
+    while (!delayed_frames_.empty() &&
+      clock_ - delayed_frames_.front().first >= command_latency_)
+    {
+      active_frame_ = delayed_frames_.front().second;
+      delayed_frames_.pop_front();
+    }
+    frame = active_frame_;
+  }
   // command age is measured in controller time (works with sim time and wall time)
   if (frame != last_frame_) {
     last_frame_ = frame;

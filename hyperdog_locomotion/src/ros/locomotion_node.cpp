@@ -36,7 +36,9 @@
 #include "geometry_msgs/msg/transform_stamped.hpp"
 #include "geometry_msgs/msg/twist.hpp"
 #include "hyperdog_locomotion/locomotion_controller.hpp"
+#include "markers.hpp"
 #include "parameter_loader.hpp"
+#include "visualization_msgs/msg/marker_array.hpp"
 #include "hyperdog_msgs/msg/locomotion_command.hpp"
 #include "hyperdog_msgs/msg/locomotion_state.hpp"
 #include "hyperdog_msgs/msg/motor_commands.hpp"
@@ -66,6 +68,7 @@ public:
     cmd_timeout_ = declare_parameter("locomotion.command_timeout", 0.5);
     contact_timeout_ = declare_parameter("estimation.contact_timeout", 0.012);
     publish_tf_ = declare_parameter("publish_tf", true);
+    publish_markers_ = declare_parameter("publish_markers", true);
     odom_frame_ = declare_parameter("odom_frame", std::string("odom"));
     base_frame_ = declare_parameter("base_frame", std::string("base_link"));
     const double state_rate = declare_parameter("state_publish_rate", 50.0);
@@ -167,6 +170,7 @@ public:
       10);
     state_pub_ = create_publisher<hyperdog_msgs::msg::LocomotionState>("hyperdog/state", 10);
     odom_pub_ = create_publisher<nav_msgs::msg::Odometry>("odom", 10);
+    marker_pub_ = create_publisher<visualization_msgs::msg::MarkerArray>("hyperdog/markers", 10);
     tf_ = std::make_unique<tf2_ros::TransformBroadcaster>(*this);
     state_decimation_ = std::max(
       1,
@@ -280,6 +284,9 @@ private:
     st.disturbance_recovery = d.recovering;
     st.solve_time_ms = d.solve_time_ms;
     state_pub_->publish(st);
+    if (publish_markers_ && (d.mode == hl::Mode::BALANCE || d.mode == hl::Mode::LOCOMOTION)) {
+      marker_pub_->publish(hl::make_markers(d, odom_frame_, stamp));
+    }
 
     if (d.mode == hl::Mode::BALANCE || d.mode == hl::Mode::LOCOMOTION) {
       const Eigen::Quaterniond q(hl::rpy_to_rot(d.rpy));
@@ -336,6 +343,7 @@ private:
   double cmd_timeout_{0.5};
   double contact_timeout_{0.012};
   bool publish_tf_{true};
+  bool publish_markers_{true};
   std::string odom_frame_, base_frame_;
   int state_decimation_{10};
   int64_t tick_{0};
@@ -349,6 +357,7 @@ private:
   rclcpp::Publisher<hyperdog_msgs::msg::MotorCommands>::SharedPtr motor_pub_;
   rclcpp::Publisher<hyperdog_msgs::msg::LocomotionState>::SharedPtr state_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;
+  rclcpp::Publisher<visualization_msgs::msg::MarkerArray>::SharedPtr marker_pub_;
   std::unique_ptr<tf2_ros::TransformBroadcaster> tf_;
   rclcpp::TimerBase::SharedPtr timer_;
 };

@@ -23,8 +23,7 @@
   <xacro:property name="lleg_mass" value="0.2"/>
   <xacro:property name="foot_mass" value="0.1"/>
 
-  <!-- foot contact -->
-  <xacro:property name="foot_mu" value="1.0"/>
+  <!-- foot friction (foot_mu) and IMU noise scale (imu_noise_scale) are xacro args of the top level file -->
 
   <!-- ===== BLDC actuator limits derived from the motor parameter file ===== -->
   <xacro:property name="bldc" value="${xacro.load_yaml(motors_file)['bldc_controller']['ros__parameters']}"/>

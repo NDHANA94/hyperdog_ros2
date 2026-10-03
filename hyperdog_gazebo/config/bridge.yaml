@@ -44,3 +44,8 @@
   ros_type_name: "ros_gz_interfaces/msg/Entity"
   gz_type_name: "gz.msgs.Entity"
   direction: ROS_TO_GZ
+# used by the scenario runner to place the robot (e.g. on its back for self-righting tests)
+- service_name: "/world/hyperdog/set_pose"
+  ros_type_name: "ros_gz_interfaces/srv/SetEntityPose"
+  gz_req_type_name: "gz.msgs.Pose"
+  gz_rep_type_name: "gz.msgs.Boolean"

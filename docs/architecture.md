@@ -38,7 +38,15 @@ PASSIVE --(LOCOMOTION / STAND requested)--> STAND_UP --(done)--> BALANCE <--> LO
    ^                                                                |   SIT requested
    +---------------- SIT (lower the body) <-------------------------+
    +---------------- fall detected (|roll| or |pitch| > fall_angle) from BALANCE / LOCOMOTION
+                     (self_righting.enabled: false)
+
+fall detected --> SELF_RIGHT --(upright)--> STAND_UP --> commanded mode
+                      |  (max_attempts failed, or PASSIVE / SIT requested)
+                      +--> PASSIVE
 ```
+SELF_RIGHT waits in damping until the body is at rest and then decides from its orientation:
+lying on a side, the lower legs swing over the body and roll it onto its belly; lying on the
+back, a fast kick of the lower legs tips it onto a side first.
 In BALANCE (and LOCOMOTION without a velocity command) the robot stands on four legs
 using the QP balance controller. When the `DisturbanceMonitor` sees the capture point
 leave the support polygon, or the body moves or tilts too much, the controller steps

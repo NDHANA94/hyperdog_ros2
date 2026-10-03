@@ -42,9 +42,9 @@ All code in this branch is C++; configuration is done with YAML parameter files 
 |---|---|
 | `hyperdog_msgs` | `MotorCommands`, `MotorStates`, `LocomotionCommand`, `LocomotionState` (+ legacy Foxy messages) |
 | `hyperdog_description` | xacro model, **`config/bldc_motors.yaml`** (actuator parameters), `config/controllers.yaml`, sensors |
-| `hyperdog_bldc_control` | `BldcImpedanceController` (ros2_control controller + BLDC motor model), `MitCanSystem` hardware interface, unit tests |
+| `hyperdog_bldc_control` | `BldcImpedanceController` (ros2_control controller + BLDC motor model), `MitCanSystem` hardware interface, bring-up tools `mit_can_probe` and `joint_test`, unit tests |
 | `hyperdog_locomotion` | locomotion library (`*_core`), `locomotion_node`, **`config/locomotion.yaml`**, unit tests |
-| `hyperdog_gazebo` | Gazebo Harmonic worlds (`flat`, `terrain`), ros_gz bridges, `sim.launch.xml`, `validate.launch.xml`, `scenario_runner` |
+| `hyperdog_gazebo` | Gazebo Harmonic worlds (`flat`, `terrain`, `rough`, `stairs`, `slippery`), ros_gz bridges, `sim.launch.xml`, `validate.launch.xml`, `scenario_runner`, `robustness_campaign` |
 | `hyperdog_teleop` | gamepad teleop (`/joy` -> `/cmd_vel` + `/hyperdog/command`), mapping in `config/joy_xbox.yaml` |
 | `hyperdog_bringup` | real-robot launch (`robot.launch.xml`), robot parameter overrides |
 
@@ -59,6 +59,7 @@ Each package has its own README describing its files.
 | RGB-D camera | `/hyperdog/camera/{image,depth_image,points,camera_info}` | `use_camera:=true` (needs rendering) |
 | joint encoders / torques | `/joint_states`, `/bldc_controller/motor_states` | motor current, power, winding temperature, saturation |
 | state estimate | `/odom`, TF `odom -> base_link`, `/hyperdog/state` | from the kinematic Kalman filter |
+| controller visualisation | `/hyperdog/markers` | feet (red: contact), foot targets, support polygon, ground reaction forces (RViz `MarkerArray`) |
 | ground truth | `/hyperdog/ground_truth` | simulation only (validation) |
 
 ## Requirements
@@ -79,7 +80,8 @@ colcon test --packages-select hyperdog_bldc_control hyperdog_locomotion && colco
 ## Run the simulation
 ```bash
 ros2 launch hyperdog_gazebo sim.launch.xml                       # flat world, GUI, lidar + camera
-ros2 launch hyperdog_gazebo sim.launch.xml world:=terrain         # ramps and small steps
+ros2 launch hyperdog_gazebo sim.launch.xml world:=terrain         # ramps and a plateau
+ros2 launch hyperdog_gazebo sim.launch.xml world:=rough           # 1-3 cm random slabs (also: stairs, slippery)
 ros2 launch hyperdog_gazebo sim.launch.xml headless:=true use_lidar:=false use_camera:=false
 ```
 The robot spawns crouched, stands up automatically and waits for velocity commands.
@@ -139,12 +141,21 @@ Everything is in [`hyperdog_locomotion/config/locomotion.yaml`](hyperdog_locomot
 - `estimation.attitude_source` (`imu_orientation` | `mahony`), `estimation.contact_source` (`sensor` | `torque` | `schedule`)
 - joint gains for stand-up, stance and swing, swing cartesian impedance, MPC weights, Kalman filter noise
 - `safety.fall_protection` / `fall_angle`, `debug_log_file` (per-tick CSV for tuning)
+- `self_righting.*`: after a fall the robot waits until it is at rest, rolls itself back onto its
+  belly with the legs, stands up and resumes the commanded mode (or stays in damping mode when
+  `enabled: false` or after `max_attempts`)
+
+Numeric parameters accept integers as well (`kp: 80` or `kp: 80.0`).
 
 ## Validation in simulation
 ```bash
 ros2 launch hyperdog_gazebo validate.launch.xml scenario:=full                    # default
 ros2 launch hyperdog_gazebo validate.launch.xml scenario:=stress
 ros2 launch hyperdog_gazebo validate.launch.xml scenario:=terrain world:=terrain
+ros2 launch hyperdog_gazebo validate.launch.xml scenario:=fall                    # self-righting
+# randomized robustness campaign: payload, foot friction, IMU noise, motor current / torque
+# constant / friction and command latency are sampled per run
+ros2 run hyperdog_gazebo robustness_campaign --runs 10 --seed 1 --scenario robust --out campaign
 ```
 The `scenario_runner` drives the robot, applies pushes through Gazebo's `ApplyLinkWrench`
 system and grades the run against the simulator ground truth. It then writes a markdown
@@ -153,9 +164,14 @@ report and a CSV time series, and exits non-zero on failure. Results of the curr
 
 | scenario | checks | result |
 |---|---|---|
-| [`full`](docs/validation/full.md) | stand, 40 N lateral and 50 N frontal pushes (0.2 s) while standing, trot 0.4 m/s, 40 N push while trotting, sideways 0.2 m/s, turn 0.8 rad/s, walk gait, backward, stop | **PASS** (max tilt 10 deg) |
-| [`stress`](docs/validation/stress.md) | 70 N lateral and 80 N diagonal pushes (0.2 s) while standing, fast trot, 50 N push while trotting, trot + turn | **PASS** |
+| [`full`](docs/validation/full.md) | stand, 40 N lateral and 50 N frontal pushes (0.2 s) while standing, trot 0.4 m/s, 40 N push while trotting, sideways 0.2 m/s, turn 0.8 rad/s, walk gait, backward, stop | **PASS** (max tilt 15 deg) |
+| [`stress`](docs/validation/stress.md) | 70 N lateral and 80 N diagonal pushes (0.2 s) while standing, fast trot 0.6 m/s, 50 N push while trotting, trot + turn | **PASS** (2 of 3 runs, see limitations) |
+| [`speed`](docs/validation/speed.md) | trot at 0.3 / 0.4 / 0.5 / 0.6 / 0.7 m/s, stop | **PASS** (0.7 m/s commanded -> 0.67 m/s) |
 | [`terrain`](docs/validation/terrain.md) | trot over an 8 deg ramp, 0.28 m plateau and ramp down | **PASS** |
+| [`rough`](docs/validation/rough.md) | trot 6 m over randomly placed 1-3 cm slabs | **PASS** |
+| [`slippery`](docs/validation/slippery.md) | trot across a 3 m patch with friction coefficient 0.3 | **PASS** |
+| [`fall`](docs/validation/fall.md) | knocked over by a roll torque, dropped on its side: self-right, stand up, trot again | **PASS** |
+| [`robust` campaign](docs/validation/robustness.md) | 10 randomized robots (payload 0-1.5 kg off-centre, foot mu 0.5-1.2, 1-3x IMU noise, motor current -20 %, Kt +-10 %, friction, 0-6 ms latency): 40 N push, trot, trot + turn, stop | **10 / 10 PASS** |
 
 ## Development
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the code organisation and conventions. `colcon test` runs
@@ -175,15 +191,26 @@ drivers close the current loop), attitude comes from a Mahony filter and contact
 the motor torques (`hyperdog_bringup/config/robot_overrides.yaml`). The robot waits for `START` on the
 gamepad before standing up.
 
+Bring the robot up in stages with the [hardware bring-up guide](docs/hardware_bringup.md): single
+motor on the bench (`mit_can_probe` - scan, read, zero, low-gain hold), one joint at a time on a
+stand (`joint_test` - sine tracking and torque step with current / saturation / temperature
+summary), the whole robot in the air, then on the ground.
+
 ## Known limitations
-- Validated speed envelope: about 0.4 m/s trotting. Commands are clamped to 0.5 m/s, and above roughly
-  0.45 m/s the achieved speed saturates (0.55 m/s commanded gives 0.42 m/s in the stress test) because
-  the single-rigid-body MPC ignores the heavy legs (about 60 % of the mass).
-- The 80 N diagonal push in the `stress` scenario is at the limit of what the controller recovers from
-  (passed 5 of 6 runs). The simulation is not bit-for-bit deterministic, because ROS nodes and Gazebo
-  run asynchronously, so results near the limits can vary between runs.
-- The `MitCanSystem` hardware interface is compiled and loads, but it has not been tested on hardware yet.
-  Check directions, offsets and current limits with the robot lifted off the ground.
+- Validated speed envelope: 0.7 m/s trotting (commands are clamped there). Tracking is looser at
+  0.6 m/s (0.49 m/s achieved) than at 0.5 or 0.7 m/s.
+- The 80 N diagonal push while standing in the `stress` scenario is at the limit of what the controller
+  recovers from (passed 8 of 9 runs; in the failing run the body tilted 47 deg, beyond the 46 deg
+  threshold of the scenario). The simulation is not bit-for-bit deterministic, because ROS nodes and
+  Gazebo run asynchronously, so results near the limits can vary between runs.
+- Self-righting works from the side and from the belly-down tumbles a push produces. Lying exactly on
+  its back, the +-1 rad hip range lets HyperDog kick itself onto its side, but it comes to rest leaning
+  back and does not complete the roll (`scenario:=fall_back`). After `max_attempts` it stays in
+  damping mode.
+- `stairs` world (4 cm steps): blind locomotion drifts sideways and fails; footholds need terrain
+  perception (planned).
+- The `MitCanSystem` hardware interface and `mit_can_probe` are compiled and load, but they have not
+  been tested on hardware yet. Follow the staged [hardware bring-up guide](docs/hardware_bringup.md).
 - Lidar and camera need a render engine (GPU, or Mesa software rendering for headless use). The
   validation scenarios disable them.
 

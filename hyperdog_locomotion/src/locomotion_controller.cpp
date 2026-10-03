@@ -30,6 +30,7 @@ const char * to_string(Mode m)
     case Mode::BALANCE: return "BALANCE";
     case Mode::LOCOMOTION: return "LOCOMOTION";
     case Mode::SIT: return "SIT";
+    case Mode::SELF_RIGHT: return "SELF_RIGHT";
   }
   return "UNKNOWN";
 }
@@ -70,6 +71,7 @@ LocomotionController::LocomotionController(const ControllerConfig & cfg)
   ground_(cfg.estimation.ground_plane_filter),
   gait_(cfg.gaits),
   disturbance_(cfg.recovery),
+  righting_(cfg.self_righting),
   height_ref_(cfg.locomotion.body_height),
   step_height_(cfg.locomotion.step_height)
 {
@@ -103,6 +105,9 @@ MotorCommand LocomotionController::step(const SensorData & s)
       break;
     case Mode::SIT:
       sit(s, out);
+      break;
+    case Mode::SELF_RIGHT:
+      self_right(s, out);
       break;
     case Mode::BALANCE:
     case Mode::LOCOMOTION:
@@ -197,10 +202,20 @@ void LocomotionController::handle_mode(const SensorData & s)
   if (cfg_.safety.fall_protection && active &&
     (std::abs(rpy_.x()) > cfg_.safety.fall_angle || std::abs(rpy_.y()) > cfg_.safety.fall_angle))
   {
-    events_.emplace_back(time_, "fall detected -> damping");
-    set_mode(Mode::PASSIVE);
-    cmd_.mode = Mode::PASSIVE;
+    if (cfg_.self_righting.enabled) {
+      events_.emplace_back(time_, "fall detected -> self-righting");
+      righting_.start(s.q);
+      set_mode(Mode::SELF_RIGHT);
+    } else {
+      events_.emplace_back(time_, "fall detected -> damping");
+      set_mode(Mode::PASSIVE);
+      cmd_.mode = Mode::PASSIVE;
+    }
     return;
+  }
+  if (mode_ == Mode::SELF_RIGHT) {
+    if (req == Mode::PASSIVE || req == Mode::SIT) {set_mode(Mode::PASSIVE);}
+    return;   // the self-righting sequence decides when it is done
   }
   const bool wants_up = req == Mode::BALANCE || req == Mode::LOCOMOTION;
   const bool is_down = mode_ == Mode::PASSIVE || mode_ == Mode::SIT;
@@ -278,6 +293,24 @@ void LocomotionController::sit(const SensorData & s, MotorCommand & out)
   out.kd = tile(cfg_.posture.stand_up_kd);
   out.tau = (1 - a) * gravity_feedforward(s);
   if (mode_time_ > T + 0.3) {
+    set_mode(Mode::PASSIVE);
+    cmd_.mode = Mode::PASSIVE;
+  }
+}
+
+void LocomotionController::self_right(const SensorData & s, MotorCommand & out)
+{
+  const auto phase = righting_.step(dt_, rpy_, s.gyro, s.q, joint_pose(kCrouchHeight), out);
+  if (phase == SelfRighting::Phase::DONE) {
+    events_.emplace_back(time_, "self-righting succeeded");
+    if (cmd_.mode == Mode::BALANCE || cmd_.mode == Mode::LOCOMOTION) {
+      start_q_ = s.q;
+      set_mode(Mode::STAND_UP);
+    } else {
+      set_mode(Mode::PASSIVE);
+    }
+  } else if (phase == SelfRighting::Phase::FAILED) {
+    events_.emplace_back(time_, "self-righting failed -> damping");
     set_mode(Mode::PASSIVE);
     cmd_.mode = Mode::PASSIVE;
   }

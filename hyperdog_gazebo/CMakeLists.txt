@@ -21,7 +21,9 @@ add_executable(scenario_runner
 )
 ament_target_dependencies(scenario_runner rclcpp geometry_msgs nav_msgs hyperdog_msgs ros_gz_interfaces)
 
-install(TARGETS scenario_runner DESTINATION lib/${PROJECT_NAME})
+add_executable(robustness_campaign src/robustness_campaign.cpp)
+
+install(TARGETS scenario_runner robustness_campaign DESTINATION lib/${PROJECT_NAME})
 install(DIRECTORY config launch rviz worlds DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)

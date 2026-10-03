@@ -22,7 +22,8 @@
 //   -> LegController: per joint MIT-mode commands for the BLDC actuators
 //
 // Finite state machine: PASSIVE -> STAND_UP -> BALANCE <-> LOCOMOTION,
-// SIT -> PASSIVE, with fall protection (-> PASSIVE / damping).
+// SIT -> PASSIVE, with fall protection: SELF_RIGHT (roll back over, then STAND_UP)
+// or PASSIVE (damping) when self-righting is disabled or fails.
 
 #ifndef HYPERDOG_LOCOMOTION__LOCOMOTION_CONTROLLER_HPP_
 #define HYPERDOG_LOCOMOTION__LOCOMOTION_CONTROLLER_HPP_
@@ -36,6 +37,7 @@
 #include "hyperdog_locomotion/control/convex_mpc.hpp"
 #include "hyperdog_locomotion/control/leg_controller.hpp"
 #include "hyperdog_locomotion/control/qp_balance_controller.hpp"
+#include "hyperdog_locomotion/control/self_righting.hpp"
 #include "hyperdog_locomotion/controller_config.hpp"
 #include "hyperdog_locomotion/controller_types.hpp"
 #include "hyperdog_locomotion/estimation/attitude_filter.hpp"
@@ -79,6 +81,7 @@ private:
   Vec12 gravity_feedforward(const SensorData & s) const;
   void stand_up(const SensorData & s, MotorCommand & out);
   void sit(const SensorData & s, MotorCommand & out);
+  void self_right(const SensorData & s, MotorCommand & out);
   void init_balance(const SensorData & s);
 
   // --- locomotion pipeline
@@ -104,6 +107,7 @@ private:
   GroundPlaneEstimator ground_;
   GaitScheduler gait_;
   DisturbanceMonitor disturbance_;
+  SelfRighting righting_;
 
   // finite state machine
   Mode mode_{Mode::PASSIVE};
