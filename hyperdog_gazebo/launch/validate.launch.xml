@@ -19,13 +19,15 @@
   <arg name="extra_controller_params" default=""/>
   <arg name="motors_file" default="$(find-pkg-share hyperdog_description)/config/bldc_motors.yaml"/>
   <arg name="controllers_file" default="$(find-pkg-share hyperdog_description)/config/controllers.yaml"/>
+  <arg name="perception" default="false" description="enable the depth camera and the terrain height map"/>
   <arg name="scenario" default="full" description="full | push | walk | stress | speed | robust | fall | fall_back (flat); terrain | rough | stairs | slippery (matching world)"/>
 
   <include file="$(find-pkg-share hyperdog_gazebo)/launch/sim.launch.xml">
     <arg name="world" value="$(var world)"/>
     <arg name="headless" value="$(var headless)"/>
     <arg name="use_lidar" value="false"/>
-    <arg name="use_camera" value="false"/>
+    <arg name="use_camera" value="$(var perception)"/>
+    <arg name="perception" value="$(var perception)"/>
     <arg name="locomotion_params" value="$(var locomotion_params)"/>
     <arg name="payload_mass" value="$(var payload_mass)"/>
     <arg name="payload_x" value="$(var payload_x)"/>

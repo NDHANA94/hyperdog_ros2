@@ -27,6 +27,7 @@ rosidl_generate_interfaces(hyperdog_msgs
   "msg/MotorStates.msg"
   "msg/LocomotionCommand.msg"
   "msg/LocomotionState.msg"
+  "msg/HeightMap.msg"
   DEPENDENCIES builtin_interfaces std_msgs geometry_msgs
 )
 

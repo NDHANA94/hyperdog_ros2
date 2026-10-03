@@ -64,6 +64,14 @@ public:
   Mode mode() const {return mode_;}
   /// Events since the last call (mode changes, disturbances, falls) as (time, text).
   std::vector<std::pair<double, std::string>> take_events();
+  /// Terrain elevation map in the odometry frame (perception); footholds use it while set.
+  void set_terrain(TerrainMap map)
+  {
+    terrain_ = std::move(map);
+    terrain_.set_offset(terrain_offset_);
+  }
+  void clear_terrain() {terrain_ = TerrainMap();}
+  bool has_terrain() const {return !terrain_.empty();}
   double dt() const {return dt_;}
 
 private:
@@ -88,6 +96,8 @@ private:
   void locomotion(const SensorData & s, MotorCommand & out);
   Vec3 update_velocity_command();
   void select_gait(const Vec3 & target);
+  void register_terrain(const Vec3 & stance_foot);
+  void update_speed_integrator();
   Bool4 update_leg_phases();
   Vec3 update_body_reference();
   void update_footholds(const Bool4 & stance);
@@ -108,6 +118,10 @@ private:
   GaitScheduler gait_;
   DisturbanceMonitor disturbance_;
   SelfRighting righting_;
+  TerrainMap terrain_;
+  Vec3 terrain_offset_{Vec3::Zero()};       // map registration (see TerrainMap::set_offset)
+  std::vector<Vec3> terrain_samples_;       // terrain surface under the last stance feet
+  Vec3 logged_terrain_offset_{Vec3::Zero()};
 
   // finite state machine
   Mode mode_{Mode::PASSIVE};
@@ -128,6 +142,7 @@ private:
   // references
   Vec3 v_des_{Vec3::Zero()};         // ramped body frame vx, vy, wz
   Vec3 v_des_world_{Vec3::Zero()};   // ramped velocity in the world frame (z = 0)
+  Eigen::Vector2d v_int_{Eigen::Vector2d::Zero()};   // speed tracking correction (body x, y)
   Vec3 p_ref_{Vec3::Zero()};
   double yaw_ref_{0.0};
   double height_ref_;

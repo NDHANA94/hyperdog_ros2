@@ -27,6 +27,7 @@
 #include "hyperdog_locomotion/common/math.hpp"
 #include "hyperdog_locomotion/controller_types.hpp"
 #include "hyperdog_locomotion/kinematics/leg_kinematics.hpp"
+#include "hyperdog_locomotion/planning/swing_trajectory.hpp"
 
 namespace hyperdog_locomotion
 {
@@ -63,6 +64,7 @@ struct LegControlInput
   std::array<double, 4> progress{0, 0, 0, 0};  // swing progress [0, 1]
   double swing_time{0.2};
   double step_height{0.06};
+  std::array<SwingShape, 4> swing_shape{};   // terrain dependent swing shapes
   Vec12 forces{Vec12::Zero()};         // ground reaction forces (world, on the robot)
 };
 

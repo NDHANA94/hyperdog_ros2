@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<!--
+  Nav2 for HyperDog (odometry frame, lidar obstacles, omnidirectional MPPI).
+  Velocity commands: controller / behaviors -> cmd_vel_nav -> velocity_smoother -> cmd_vel
+  (consumed by hyperdog_locomotion).
+
+  ros2 launch hyperdog_navigation navigation.launch.xml [use_sim_time:=true] [params_file:=...]
+-->
+<launch>
+  <arg name="use_sim_time" default="true"/>
+  <arg name="params_file" default="$(find-pkg-share hyperdog_navigation)/config/nav2.yaml"/>
+
+  <node pkg="nav2_controller" exec="controller_server" name="controller_server" output="screen">
+    <param from="$(var params_file)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <remap from="cmd_vel" to="cmd_vel_nav"/>
+  </node>
+  <node pkg="nav2_planner" exec="planner_server" name="planner_server" output="screen">
+    <param from="$(var params_file)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+  <node pkg="nav2_behaviors" exec="behavior_server" name="behavior_server" output="screen">
+    <param from="$(var params_file)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <remap from="cmd_vel" to="cmd_vel_nav"/>
+  </node>
+  <node pkg="nav2_bt_navigator" exec="bt_navigator" name="bt_navigator" output="screen">
+    <param from="$(var params_file)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+  <node pkg="nav2_velocity_smoother" exec="velocity_smoother" name="velocity_smoother" output="screen">
+    <param from="$(var params_file)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+    <remap from="cmd_vel" to="cmd_vel_nav"/>
+    <remap from="cmd_vel_smoothed" to="cmd_vel"/>
+  </node>
+  <node pkg="nav2_lifecycle_manager" exec="lifecycle_manager" name="lifecycle_manager_navigation" output="screen">
+    <param from="$(var params_file)"/>
+    <param name="use_sim_time" value="$(var use_sim_time)"/>
+  </node>
+</launch>

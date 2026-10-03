@@ -122,6 +122,8 @@ ControllerConfig load_controller_config(rclcpp::Node & node)
   r.get("locomotion.max_velocity", l.max_velocity);
   r.get("locomotion.max_acceleration", l.max_acceleration);
   r.get("locomotion.idle_time_to_stand", l.idle_time_to_stand);
+  r.get("locomotion.speed_integral_gain", l.speed_integral_gain);
+  r.get("locomotion.max_speed_correction", l.max_speed_correction);
   r.get("locomotion.terrain_adaptation", l.terrain_adaptation);
   r.get("locomotion.stand_up_time", l.stand_up_time);
   r.get("locomotion.sit_down_time", l.sit_down_time);
@@ -217,12 +219,28 @@ ControllerConfig load_controller_config(rclcpp::Node & node)
   r.get("estimation.swing_noise_scale", e.kalman.swing_noise_scale);
   r.get("estimation.max_acceleration", e.kalman.max_acceleration);
   r.get("estimation.velocity_innovation_gate", e.kalman.velocity_innovation_gate);
+  r.get("estimation.foot_rolling", e.kalman.foot_rolling);
   r.get("estimation.ground_plane_filter", e.ground_plane_filter);
 
   // safety
   r.get("safety.fall_protection", c.safety.fall_protection);
   r.get("safety.fall_angle", c.safety.fall_angle);
   r.get("safety.max_joint_torque", c.safety.max_joint_torque);
+
+  // terrain perception
+  auto & tr = c.terrain;
+  r.get("terrain.enabled", tr.enabled);
+  r.get("terrain.timeout", tr.timeout);
+  r.get("terrain.search_radius", tr.search_radius);
+  r.get("terrain.edge_radius", tr.edge_radius);
+  r.get("terrain.edge_threshold", tr.edge_threshold);
+  r.get("terrain.support_radius", tr.support_radius);
+  r.get("terrain.terrain_swing", tr.terrain_swing);
+  r.get("terrain.register_with_feet", tr.register_with_feet);
+  r.get("terrain.max_registration_shift", tr.max_registration_shift);
+  r.get("terrain.registration_step", tr.registration_step);
+  r.get("terrain.max_registration_rate", tr.max_registration_rate);
+  r.get("terrain.registration_prior_weight", tr.registration_prior_weight);
 
   // self-righting
   auto & sr = c.self_righting;

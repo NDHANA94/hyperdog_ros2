@@ -57,6 +57,14 @@ void LegKinematics::frames(
   axes = {axes_[0], R0 * axes_[1], R1 * axes_[2]};
 }
 
+Vec3 LegKinematics::foot_angular_velocity(const Vec3 & q, const Vec3 & dq) const
+{
+  std::array<Vec3, 3> p, a;
+  Vec3 f;
+  frames(q, p, a, f);
+  return a[0] * dq[0] + a[1] * dq[1] + a[2] * dq[2];
+}
+
 Vec3 LegKinematics::forward(const Vec3 & q) const
 {
   std::array<Vec3, 3> p, a;

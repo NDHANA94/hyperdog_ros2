@@ -47,6 +47,9 @@ struct Step
   // a fall is provoked in this step: falling is not a failure, the step passes when the
   // robot is standing upright again at its end (self-righting)
   bool allow_fall{false};
+  // act like an operator keeping the robot on the line y = 0, heading 0 (the courses of the
+  // terrain worlds): lateral and yaw corrections are added to the command
+  bool hold_line{false};
   // at the step start, drop the robot from `place_height` with this roll angle [rad]
   // at its current x, y (Gazebo set_pose); NaN: do not move the robot
   double place_roll{std::nan("")};

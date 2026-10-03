@@ -46,7 +46,7 @@ Mat43 LegController::compute(const LegControlInput & in, MotorCommand & out) con
     } else {
       const SwingSample sw = swing_trajectory(
         in.liftoff.row(i).transpose(), in.foothold.row(i).transpose(), in.step_height,
-        in.progress[i], in.swing_time, p_.touchdown_depth);
+        in.progress[i], in.swing_time, p_.touchdown_depth, in.swing_shape[i]);
       targets.row(i) = sw.pos.transpose();
       p_b = RT * (sw.pos - in.p);
       v_b = RT * (sw.vel - in.v) - in.omega_body.cross(p_b);

@@ -41,6 +41,9 @@ struct KalmanParams
   // [m/s] legs whose kinematic velocity differs more than this from the prediction are
   // ignored for the update (slip / impact rejection; <= 0 disables)
   double velocity_innovation_gate{0.5};
+  // the spherical foot rolls during stance: its centre moves with omega_shank x (r z)
+  // (without this, leg odometry under-estimates the distance by r * shank rotation per step)
+  bool foot_rolling{false};
 };
 
 class KinematicKalmanFilter
@@ -51,11 +54,13 @@ public:
 
   KinematicKalmanFilter(const KalmanParams & p, double dt);
   void reset(const Vec3 & base_pos, const Mat43 & feet_world);
-  /// trust[i] in [0, 1] = confidence that foot i is a static stance foot.
+  /// trust[i] in [0, 1] = confidence that foot i is a stance foot (static contact point).
+  /// feet_roll_vel: velocity of the foot centres in the world frame caused by rolling on the
+  /// ground (zero for point feet).
   void update(
     const Mat3 & R, const Vec3 & omega_body, const Vec3 & accel_body,
     const Mat43 & feet_body, const Mat43 & feet_vel_body, const std::array<double, 4> & trust,
-    const std::array<double, 4> & foot_ground_z);
+    const std::array<double, 4> & foot_ground_z, const Mat43 & feet_roll_vel = Mat43::Zero());
 
   Vec3 position() const {return x_.segment<3>(0);}
   Vec3 velocity() const {return x_.segment<3>(3);}

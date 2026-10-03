@@ -17,6 +17,8 @@
 #ifndef HYPERDOG_LOCOMOTION__PLANNING__SWING_TRAJECTORY_HPP_
 #define HYPERDOG_LOCOMOTION__PLANNING__SWING_TRAJECTORY_HPP_
 
+#include <limits>
+
 #include "hyperdog_locomotion/common/math.hpp"
 
 namespace hyperdog_locomotion
@@ -29,11 +31,21 @@ struct SwingSample
   Vec3 acc{Vec3::Zero()};
 };
 
+/// Terrain dependent shape of a swing.
+struct SwingShape
+{
+  /// absolute apex height of the foot; NaN: `height` above the higher end point
+  double apex_z{std::numeric_limits<double>::quiet_NaN()};
+  /// stepping over a terrain step: lift first, move while up, lower last (instead of moving
+  /// horizontally during the whole swing)
+  bool step_over{false};
+};
+
 /// Min-jerk swing from p0 to pf with an apex `height` above the higher end point.
 /// The trajectory ends `touchdown_depth` below pf to guarantee ground contact.
 SwingSample swing_trajectory(
   const Vec3 & p0, const Vec3 & pf, double height, double s, double duration,
-  double touchdown_depth);
+  double touchdown_depth, const SwingShape & shape = SwingShape());
 
 }  // namespace hyperdog_locomotion
 

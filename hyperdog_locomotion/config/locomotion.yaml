@@ -38,6 +38,8 @@ locomotion_controller:
       max_acceleration: [1.5, 1.0, 3.0] # ramps applied to /cmd_vel
       command_timeout: 0.5              # [s] older /cmd_vel is treated as zero
       idle_time_to_stand: 0.8           # [s] stop stepping without velocity command
+      speed_integral_gain: 0.0          # [1/s] integral speed tracking, 0: off (experimental)
+      max_speed_correction: 0.2         # [m/s] limit of the integral correction per axis
       terrain_adaptation: true          # align body + friction cones with the estimated ground plane
       stand_up_time: 1.5                # [s]
       sit_down_time: 1.2                # [s]
@@ -124,12 +126,29 @@ locomotion_controller:
       swing_noise_scale: 10000.0
       max_acceleration: 20.0            # [m/s^2] IMU acceleration clamp (rejects foot impact spikes)
       velocity_innovation_gate: 0.5     # [m/s] reject leg velocity measurements this far from the prediction
+      foot_rolling: false               # model the rolling of the spherical feet in the leg odometry: ~10x lower
+                                        # velocity error (recommended with terrain perception), but the gait
+                                        # gains are tuned without it (trot envelope ~0.5 m/s instead of 0.7)
       ground_plane_filter: 0.02
 
     safety:
       fall_protection: true             # react when the body tilts beyond fall_angle (self-right or damping)
       fall_angle: 1.0                   # [rad]
       max_joint_torque: [20.0, 20.0, 20.0]  # [Nm] clip of feed-forward torques (BLDC limits applied downstream)
+
+    terrain:                            # terrain perception (hyperdog/height_map from hyperdog_perception)
+      enabled: true                     # use the height map when one is published
+      timeout: 0.5                      # [s] older maps are dropped (fallback: stance feet plane)
+      search_radius: 0.12               # [m] how far a foothold may move off a step edge
+      edge_radius: 0.08                 # [m] keep-out around step edges: foot radius + touchdown / odometry error
+      edge_threshold: 0.02              # [m] height range in that neighbourhood that marks an edge
+      support_radius: 0.015             # [m] the foot rests on the highest point within this radius
+      terrain_swing: true               # swing apex above the terrain along the path; lift - move - lower over steps
+      register_with_feet: false         # experimental: align the map to the odometry with the heights the feet measure
+      max_registration_shift: 0.1       # [m] search range in x / y
+      registration_step: 0.01           # [m]
+      max_registration_rate: 0.02       # [m] largest change per step
+      registration_prior_weight: 0.01   # tie-break towards the current shift
 
     self_righting:                      # after a fall (safety.fall_protection must be on)
       enabled: true                     # false: stay in damping mode after a fall

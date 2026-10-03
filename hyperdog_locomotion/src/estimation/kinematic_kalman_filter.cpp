@@ -46,7 +46,7 @@ void KinematicKalmanFilter::reset(const Vec3 & base_pos, const Mat43 & feet_worl
 void KinematicKalmanFilter::update(
   const Mat3 & R, const Vec3 & omega_body, const Vec3 & accel_body,
   const Mat43 & feet_body, const Mat43 & feet_vel_body, const std::array<double, 4> & trust,
-  const std::array<double, 4> & foot_ground_z)
+  const std::array<double, 4> & foot_ground_z, const Mat43 & feet_roll_vel)
 {
   const double dt = dt_;
   Vec3 a_world = R * accel_body - Vec3(0.0, 0.0, kGravity);
@@ -56,6 +56,9 @@ void KinematicKalmanFilter::update(
   }
   // predict
   x_ = A_ * x_ + B_ * a_world;
+  for (int i = 0; i < 4; ++i) {
+    x_.segment<3>(6 + 3 * i) += trust[i] * feet_roll_vel.row(i).transpose() * dt;
+  }
   Mat18 Q = Mat18::Zero();
   Q.block<3, 3>(0, 0) = Mat3::Identity() * p_.process_noise_position * dt;
   Q.block<3, 3>(3, 3) = Mat3::Identity() * p_.process_noise_velocity * dt * kGravity;
@@ -75,12 +78,13 @@ void KinematicKalmanFilter::update(
     double scale = 1.0 + (1.0 - trust[i]) * p_.swing_noise_scale;
     // outlier gating: a leg whose velocity measurement disagrees strongly with the
     // prediction (slipping or impacting foot) is ignored for this update
-    const double innovation = (-v_rel - x_.segment<3>(3)).norm();
+    const Vec3 v_meas = trust[i] * feet_roll_vel.row(i).transpose() - v_rel;
+    const double innovation = (v_meas - x_.segment<3>(3)).norm();
     if (p_.velocity_innovation_gate > 0.0 && innovation > p_.velocity_innovation_gate) {
       scale = 1.0 + p_.swing_noise_scale;
     }
     y.segment<3>(3 * i) = -p_rel;
-    y.segment<3>(12 + 3 * i) = -v_rel;
+    y.segment<3>(12 + 3 * i) = v_meas;
     y(24 + i) = foot_ground_z[i];
     r_diag.segment<3>(3 * i).setConstant(p_.measurement_noise_position);
     r_diag.segment<3>(12 + 3 * i).setConstant(p_.measurement_noise_velocity * scale);

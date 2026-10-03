@@ -4,7 +4,7 @@
   locomotion controller.
 
   ros2 launch hyperdog_gazebo sim.launch.xml [world:=flat|terrain] [headless:=false]
-        [use_lidar:=true] [use_camera:=true] [rviz:=false]
+        [use_lidar:=true] [use_camera:=true] [perception:=false] [rviz:=false]
         [locomotion_params:=<file>] [motors_file:=<file>]
 -->
 <launch>
@@ -12,6 +12,8 @@
   <arg name="headless" default="false" description="run the Gazebo server only"/>
   <arg name="use_lidar" default="true" description="simulate the 3D lidar (needs GPU rendering)"/>
   <arg name="use_camera" default="true" description="simulate the RGB-D camera (needs GPU rendering)"/>
+  <arg name="perception" default="false" description="terrain height map from the depth camera (needs use_camera)"/>
+  <arg name="perception_params" default="$(find-pkg-share hyperdog_perception)/config/perception.yaml"/>
   <arg name="rviz" default="false"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
@@ -80,7 +82,16 @@
         if="$(var start_controller)">
     <param from="$(var locomotion_params)"/>
     <param name="use_sim_time" value="true"/>
+    <!-- accurate leg odometry matters more than top speed when footholds come from the map -->
+    <param name="estimation.foot_rolling" value="$(var perception)"/>
     <remap from="imu" to="/hyperdog/imu"/>
+  </node>
+
+  <!-- terrain perception: depth camera -> height map -> footholds -->
+  <node pkg="hyperdog_perception" exec="height_map_node" name="height_map" output="screen"
+        if="$(var perception)">
+    <param from="$(var perception_params)"/>
+    <param name="use_sim_time" value="true"/>
   </node>
 
   <node pkg="rviz2" exec="rviz2" args="-d $(find-pkg-share hyperdog_gazebo)/rviz/hyperdog.rviz" if="$(var rviz)">

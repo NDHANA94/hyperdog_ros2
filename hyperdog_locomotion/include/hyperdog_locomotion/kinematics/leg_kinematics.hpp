@@ -56,6 +56,8 @@ public:
 
   Vec3 forward(const Vec3 & q) const;
   Mat3 jacobian(const Vec3 & q) const;
+  /// Angular velocity of the lower leg (and foot) in the body frame.
+  Vec3 foot_angular_velocity(const Vec3 & q, const Vec3 & dq) const;
   /// Analytic IK; unreachable targets are projected onto the workspace. Returns reachability.
   bool inverse(const Vec3 & p_foot, Vec3 & q) const;
   /// Foot right below the thigh joint for a base height (body frame).

@@ -90,6 +90,8 @@ public:
     startup_timeout_ = declare_parameter("startup_timeout", 60.0);
     fall_tilt_ = declare_parameter("fall_tilt", 0.8);
     fall_height_ = declare_parameter("fall_height", 0.12);
+    line_gain_y_ = declare_parameter("line_gain_y", 1.0);       // [1/s] hold_line steps
+    line_gain_yaw_ = declare_parameter("line_gain_yaw", 1.5);   // [1/s]
     build_scenario();
 
     cmd_pub_ = create_publisher<geometry_msgs::msg::Twist>("cmd_vel", 10);
@@ -218,6 +220,13 @@ private:
     cmd.linear.x = s.vx;
     cmd.linear.y = s.vy;
     cmd.angular.z = s.wz;
+    if (s.hold_line) {
+      // operator: steer back to the line y = 0 with heading 0
+      const double y_err = gt_.pose.pose.position.y;
+      const double yaw_err = yaw_of(gt_.pose.pose.orientation);
+      cmd.linear.y -= std::clamp(line_gain_y_ * y_err, -0.15, 0.15);
+      cmd.angular.z -= std::clamp(line_gain_yaw_ * yaw_err, -0.4, 0.4);
+    }
     cmd_pub_->publish(cmd);
     if (gait_sent_ != s.gait) {
       hyperdog_msgs::msg::LocomotionCommand c;
@@ -400,6 +409,7 @@ public:
 private:
   std::string report_file_, scenario_;
   double startup_timeout_, fall_tilt_, fall_height_;
+  double line_gain_y_{1.0}, line_gain_yaw_{1.5};
   std::vector<Step> steps_;
   std::vector<Stats> stats_;
   size_t step_{0};

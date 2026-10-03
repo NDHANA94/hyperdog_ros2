@@ -37,3 +37,49 @@ jobs:
           source /opt/ros/jazzy/setup.bash
           colcon test --event-handlers console_cohesion+
           colcon test-result --verbose
+
+  # closed-loop validation in Gazebo (headless): stand, pushes, trot, turn, walk, stop
+  simulation:
+    needs: build-and-test
+    runs-on: ubuntu-24.04
+    container: ros:jazzy-ros-base
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: src/hyperdog_ros2
+
+      - name: Install dependencies
+        run: |
+          apt-get update
+          # software OpenGL / EGL for Gazebo's headless rendering
+          apt-get install -y --no-install-recommends libegl1 libgl1-mesa-dri libglx-mesa0
+          rosdep update --rosdistro jazzy
+          rosdep install -y --rosdistro jazzy --ignore-src \
+            --from-paths $(ls -d src/hyperdog_ros2/hyperdog_* | grep -v navigation)
+
+      - name: Build
+        run: |
+          source /opt/ros/jazzy/setup.bash
+          colcon build --event-handlers console_cohesion+ --packages-up-to hyperdog_gazebo \
+            --cmake-args -DCMAKE_BUILD_TYPE=Release
+
+      - name: Validation scenario 'full'
+        run: |
+          source install/setup.bash
+          # the launch exit code is not reliable: the report decides
+          timeout -s INT 900 ros2 launch hyperdog_gazebo validate.launch.xml scenario:=full \
+            report:=$PWD/validation_full.md > validation_full.log 2>&1 || true
+          tail -n 40 validation_full.log
+          cat validation_full.md
+          grep -q "Overall: PASS" validation_full.md
+
+      - name: Upload the report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: validation-full
+          path: |
+            validation_full.md
+            validation_full.md.csv
+            validation_full.log

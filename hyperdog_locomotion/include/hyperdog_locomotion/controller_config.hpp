@@ -31,6 +31,7 @@
 #include "hyperdog_locomotion/kinematics/leg_kinematics.hpp"
 #include "hyperdog_locomotion/planning/disturbance_monitor.hpp"
 #include "hyperdog_locomotion/planning/foothold_planner.hpp"
+#include "hyperdog_locomotion/planning/terrain_map.hpp"
 #include "hyperdog_locomotion/planning/gait_scheduler.hpp"
 
 namespace hyperdog_locomotion
@@ -53,6 +54,10 @@ struct LocomotionParams
   Vec3 max_velocity{0.7, 0.3, 1.2};       // vx, vy, wz
   Vec3 max_acceleration{1.5, 1.0, 3.0};
   double idle_time_to_stand{0.8};         // [s]
+  // speed tracking: integral of the (estimated) body velocity error added to the reference
+  // while walking, removes the steady-state lag at high speed
+  double speed_integral_gain{0.0};        // [1/s], 0 disables (experimental)
+  double max_speed_correction{0.2};       // [m/s] per axis
   bool terrain_adaptation{true};
   double stand_up_time{1.5};              // [s]
   double sit_down_time{1.2};              // [s]
@@ -102,6 +107,7 @@ struct ControllerConfig
   LocomotionParams locomotion;
   std::map<std::string, Gait> gaits{default_gaits()};
   FootholdParams foothold;
+  TerrainParams terrain;
   BalanceParams balance;
   DisturbanceRecoveryParams recovery;
   PostureGains posture;

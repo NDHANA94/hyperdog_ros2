@@ -33,6 +33,7 @@ add_library(${PROJECT_NAME}_core SHARED
   src/planning/foothold_planner.cpp
   src/planning/swing_trajectory.cpp
   src/planning/disturbance_monitor.cpp
+  src/planning/terrain_map.cpp
   src/control/qp_solver.cpp
   src/control/force_control_common.cpp
   src/control/qp_balance_controller.cpp

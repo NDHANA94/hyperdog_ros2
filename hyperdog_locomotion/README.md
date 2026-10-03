@@ -18,6 +18,7 @@ include/hyperdog_locomotion/
     foothold_planner.hpp             Raibert + capture point foot placement
     swing_trajectory.hpp             min-jerk swing trajectories
     disturbance_monitor.hpp          push detection -> automatic stepping
+    terrain_map.hpp                  perceived terrain: foothold refinement, swing clearance
   control/
     qp_solver.hpp                    dense ADMM QP solver
     force_control_common.hpp         body state, friction pyramids
@@ -49,6 +50,7 @@ monitor -> gait scheduler -> body reference -> footholds -> ground reaction forc
 | in | `hyperdog/foot_contact/{FR,FL,BR,BL}` | `ros_gz_interfaces/Contacts` |
 | in | `cmd_vel` | `geometry_msgs/Twist` |
 | in | `hyperdog/command` | `hyperdog_msgs/LocomotionCommand` |
+| in | `hyperdog/height_map` (optional) | `hyperdog_msgs/HeightMap` |
 | out | `bldc_controller/commands` | `hyperdog_msgs/MotorCommands` |
 | out | `hyperdog/state` | `hyperdog_msgs/LocomotionState` |
 | out | `odom`, TF `odom -> base_link` | `nav_msgs/Odometry` |

@@ -160,14 +160,20 @@ void LocomotionController::estimate_state(const SensorData & s)
   update_contacts(s);
   const auto trust = contacts_.trust(gait_.contact(), gait_.progress());
   const auto J = kin_.jacobians(s.q);
-  Mat43 feet_vel;
+  Mat43 feet_vel, roll_vel = Mat43::Zero();
   std::array<double, 4> ground_z;
+  const Vec3 r_z(0.0, 0.0, cfg_.geometry.foot_radius);
   for (int i = 0; i < 4; ++i) {
     feet_vel.row(i) = (J[i] * s.dq.segment<3>(3 * i)).transpose();
+    if (cfg_.estimation.kalman.foot_rolling) {
+      const Vec3 w_foot = R_ * (omega_body_ + kin_.leg(i).foot_angular_velocity(
+          s.q.segment<3>(3 * i), s.dq.segment<3>(3 * i)));
+      roll_vel.row(i) = w_foot.cross(r_z).transpose();
+    }
     const Vec3 f = kf_.foot(i);
     ground_z[i] = ground_.height(f.x(), f.y()) + cfg_.geometry.foot_radius;
   }
-  kf_.update(R_, omega_body_, s.accel, feet_body_, feet_vel, trust, ground_z);
+  kf_.update(R_, omega_body_, s.accel, feet_body_, feet_vel, trust, ground_z, roll_vel);
   const Vec3 p = kf_.position();
   for (int i = 0; i < 4; ++i) {
     feet_world_.row(i) = (p + R_ * feet_body_.row(i).transpose()).transpose();
@@ -355,7 +361,8 @@ void LocomotionController::locomotion(const SensorData & s, MotorCommand & out)
 {
   const Vec3 target = update_velocity_command();
   estimate_state(s);
-  v_des_world_ = rot_z(rpy_.z()) * Vec3(v_des_.x(), v_des_.y(), 0.0);
+  update_speed_integrator();
+  v_des_world_ = rot_z(rpy_.z()) * Vec3(v_des_.x() + v_int_.x(), v_des_.y() + v_int_.y(), 0.0);
 
   select_gait(target);
   gait_.step(dt_);
@@ -381,6 +388,19 @@ void LocomotionController::locomotion(const SensorData & s, MotorCommand & out)
   in.progress = gait_.progress();
   in.swing_time = gait_.current().swing_time();
   in.step_height = step_height_;
+  if (cfg_.terrain.enabled && cfg_.terrain.terrain_swing && !terrain_.empty()) {
+    // clear the highest terrain along the swing path; step over terrain steps
+    const double r = cfg_.geometry.foot_radius;
+    for (int i = 0; i < 4; ++i) {
+      if (stance[i]) {continue;}
+      const Vec3 p0 = liftoff_.row(i).transpose(), pf = foothold_.row(i).transpose();
+      double z_max;
+      if (!terrain_.max_along(p0, pf, r + 0.01, z_max)) {continue;}
+      z_max += r;   // foot centre above the terrain
+      in.swing_shape[i].apex_z = std::max({z_max, p0.z(), pf.z()}) + step_height_;
+      in.swing_shape[i].step_over = z_max - std::min(p0.z(), pf.z()) > cfg_.terrain.edge_threshold;
+    }
+  }
   in.forces = f_des_;
   for (int i = 0; i < 4; ++i) {
     if (!stance[i]) {in.forces.segment<3>(3 * i).setZero();}
@@ -403,6 +423,20 @@ Vec3 LocomotionController::update_velocity_command()
   }
   if (cmd_.step_height > 0.0) {step_height_ = std::clamp(cmd_.step_height, 0.02, 0.12);}
   return target;
+}
+
+void LocomotionController::update_speed_integrator()
+{
+  const auto & lc = cfg_.locomotion;
+  const bool active = lc.speed_integral_gain > 0.0 && mode_ == Mode::LOCOMOTION &&
+    !gait_.is_standing() && !disturbance_.recovering() && v_des_.head<2>().norm() > 0.1;
+  if (active) {
+    const Vec3 v_body = rot_z(-rpy_.z()) * kf_.velocity();
+    v_int_ += lc.speed_integral_gain * (v_des_.head<2>() - v_body.head<2>()) * dt_;
+    v_int_ = v_int_.cwiseMax(-lc.max_speed_correction).cwiseMin(lc.max_speed_correction);
+  } else {
+    v_int_ *= std::max(0.0, 1.0 - dt_ / 0.3);   // fade out
+  }
 }
 
 void LocomotionController::select_gait(const Vec3 & target)
@@ -435,13 +469,33 @@ void LocomotionController::select_gait(const Vec3 & target)
   }
 }
 
+void LocomotionController::register_terrain(const Vec3 & stance_foot)
+{
+  // the foot was on the ground for the whole stance: a sample of the terrain surface
+  terrain_samples_.push_back(stance_foot - Vec3(0.0, 0.0, cfg_.geometry.foot_radius));
+  if (terrain_samples_.size() > 8) {terrain_samples_.erase(terrain_samples_.begin());}
+  if (!cfg_.terrain.enabled || !cfg_.terrain.register_with_feet || terrain_.empty()) {return;}
+  const Vec3 o = terrain_.estimate_offset(terrain_samples_, terrain_offset_, cfg_.terrain);
+  if ((o - logged_terrain_offset_).head<2>().norm() > 0.02) {
+    events_.emplace_back(
+      time_, "terrain map registration: shift (" + std::to_string(o.x()).substr(0, 6) + ", " +
+      std::to_string(o.y()).substr(0, 6) + ") m");
+    logged_terrain_offset_ = o;
+  }
+  terrain_offset_ = o;
+  terrain_.set_offset(o);
+}
+
 Bool4 LocomotionController::update_leg_phases()
 {
   const Bool4 sched = gait_.contact();
   const Bool4 early = contacts_.early();
   Bool4 stance;
   for (int i = 0; i < 4; ++i) {
-    if (prev_sched_[i] && !sched[i]) {liftoff_.row(i) = feet_world_.row(i);}
+    if (prev_sched_[i] && !sched[i]) {
+      liftoff_.row(i) = feet_world_.row(i);
+      register_terrain(feet_world_.row(i).transpose());
+    }
     if ((!prev_sched_[i] && sched[i]) || (early[i] && !stance_[i])) {
       anchor_.row(i) = feet_world_.row(i);
     }
@@ -504,7 +558,12 @@ void LocomotionController::update_footholds(const Bool4 & stance)
       Vec3 f = plan_foothold(
         cfg_.foothold, nominal, p, rpy_.z(), v, v_des_world_, v_des_.z(),
         gait_.swing_remaining(i), t_stance, height_ref_);
-      f.z() = ground_.height(f.x(), f.y()) + cfg_.geometry.foot_radius;
+      f.z() = ground_.height(f.x(), f.y());
+      if (cfg_.terrain.enabled && !terrain_.empty()) {
+        // perceived terrain: move off step edges, height from the map
+        terrain_.refine_foothold(cfg_.terrain, f);
+      }
+      f.z() += cfg_.geometry.foot_radius;
       foothold_.row(i) = f.transpose();
     }
   }

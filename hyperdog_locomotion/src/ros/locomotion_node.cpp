@@ -20,6 +20,7 @@
 //   foot contact topics     ros_gz_interfaces/Contacts (one per foot, optional)
 //   cmd_vel                 geometry_msgs/Twist        (body frame vx, vy, wz)
 //   hyperdog/command        hyperdog_msgs/LocomotionCommand
+//   hyperdog/height_map     hyperdog_msgs/HeightMap (terrain perception, optional)
 // Publications
 //   bldc_controller/commands  hyperdog_msgs/MotorCommands (MIT mode)
 //   hyperdog/state            hyperdog_msgs/LocomotionState
@@ -30,7 +31,9 @@
 #include <map>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "geometry_msgs/msg/transform_stamped.hpp"
@@ -39,6 +42,7 @@
 #include "markers.hpp"
 #include "parameter_loader.hpp"
 #include "visualization_msgs/msg/marker_array.hpp"
+#include "hyperdog_msgs/msg/height_map.hpp"
 #include "hyperdog_msgs/msg/locomotion_command.hpp"
 #include "hyperdog_msgs/msg/locomotion_state.hpp"
 #include "hyperdog_msgs/msg/motor_commands.hpp"
@@ -165,6 +169,25 @@ public:
         auto_start_ = false;   // an explicit command overrides the auto start
       });
 
+    if (cfg_.terrain.enabled) {
+      terrain_sub_ = create_subscription<hyperdog_msgs::msg::HeightMap>(
+        "hyperdog/height_map", 2, [this](hyperdog_msgs::msg::HeightMap::ConstSharedPtr m) {
+          if (m->header.frame_id != odom_frame_) {
+            RCLCPP_WARN_THROTTLE(
+              get_logger(), *get_clock(), 5000, "height map in '%s', expected '%s': ignored",
+              m->header.frame_id.c_str(), odom_frame_.c_str());
+            return;
+          }
+          hl::TerrainMap map;
+          map.set(
+            m->origin_x, m->origin_y, m->resolution, static_cast<int>(m->width),
+            static_cast<int>(m->height), m->data);
+          std::lock_guard<std::mutex> lk(mtx_);
+          pending_terrain_ = std::move(map);
+          last_terrain_ = rclcpp::Time(m->header.stamp, get_clock()->get_clock_type());
+        });
+    }
+
     motor_pub_ = create_publisher<hyperdog_msgs::msg::MotorCommands>(
       "bldc_controller/commands",
       10);
@@ -218,6 +241,16 @@ private:
         }
       }
       cmd = command_;
+      if (pending_terrain_) {
+        controller_->set_terrain(std::move(*pending_terrain_));
+        pending_terrain_.reset();
+      }
+      if (last_terrain_ && (t - *last_terrain_).seconds() > cfg_.terrain.timeout &&
+        controller_->has_terrain())
+      {
+        controller_->clear_terrain();
+        RCLCPP_WARN(get_logger(), "height map is stale: footholds without terrain perception");
+      }
     }
     controller_->set_command(cmd);
     const hl::MotorCommand out = controller_->step(s);
@@ -354,6 +387,9 @@ private:
   std::vector<rclcpp::Subscription<ros_gz_interfaces::msg::Contacts>::SharedPtr> contact_subs_;
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
   rclcpp::Subscription<hyperdog_msgs::msg::LocomotionCommand>::SharedPtr hl_cmd_sub_;
+  rclcpp::Subscription<hyperdog_msgs::msg::HeightMap>::SharedPtr terrain_sub_;
+  std::optional<hl::TerrainMap> pending_terrain_;
+  std::optional<rclcpp::Time> last_terrain_;
   rclcpp::Publisher<hyperdog_msgs::msg::MotorCommands>::SharedPtr motor_pub_;
   rclcpp::Publisher<hyperdog_msgs::msg::LocomotionState>::SharedPtr state_pub_;
   rclcpp::Publisher<nav_msgs::msg::Odometry>::SharedPtr odom_pub_;

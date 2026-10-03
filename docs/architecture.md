@@ -3,16 +3,17 @@
 ## Layers and rates
 | layer | package | rate | runs in |
 |---|---|---|---|
-| teleop / navigation | `hyperdog_teleop` (or any `/cmd_vel` source) | event driven | ROS node |
+| teleop / navigation | `hyperdog_teleop`, Nav2 (`hyperdog_navigation`) or any `/cmd_vel` source | event driven / 20 Hz | ROS nodes |
+| terrain perception | `hyperdog_perception` (`height_map_node`) | camera rate, map 10 Hz | ROS node |
 | locomotion controller | `hyperdog_locomotion` | 500 Hz (MPC re-solve 100 Hz) | ROS node, sim time in Gazebo |
 | actuator impedance loop + BLDC model | `hyperdog_bldc_control` | 1 kHz | ros2_control controller manager |
 | physics / hardware | Gazebo Harmonic (DART 1 kHz) or `MitCanSystem` | 1 kHz | Gazebo / CAN |
 
 ## Data flow
 ```
-/cmd_vel, /hyperdog/command
-        |
-        v
+/cmd_vel, /hyperdog/command        depth camera / lidar -> height_map_node
+        |                                     | /hyperdog/height_map (odom frame)
+        v                                     v
  locomotion_node ---------------------------------------------+
    SensorData (joint_states, imu, foot contacts)              |
    LocomotionController::step()                               |  /odom, TF, /hyperdog/state
@@ -20,6 +21,7 @@
                   KinematicKalmanFilter | GroundPlaneEstimator|
      planning:    DisturbanceMonitor -> GaitScheduler ->      |
                   body reference -> plan_foothold             |
+                  (-> TerrainMap: edge avoidance, heights)    |
      control:     ConvexMPC / QPBalanceController -> forces   |
                   LegController -> MotorCommand               |
         |  /bldc_controller/commands (MotorCommands)          |

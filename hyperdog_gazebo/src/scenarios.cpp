@@ -137,7 +137,8 @@ std::vector<Step> build_scenario(const std::string & name)
     // stairs.sdf: 5 steps up (4 cm rise, 35 cm run) from x = 1.5 m, landing, 5 steps down
     Step s;
     s.name = "trot up and down 4 cm stairs at 0.25 m/s";
-    s.duration = 26.0; s.vx = 0.25; s.track_from = 2.0; s.vx_tol = 0.15; s.vy_tol = 0.15;
+    s.duration = 34.0; s.vx = 0.25; s.track_from = 2.0; s.vx_tol = 0.15; s.vy_tol = 0.15;
+    s.hold_line = true;   // the stairs are 2 m wide
     steps.push_back(s);
     s = stand("stop and stand", 4.0);
     s.expect_rest_at_end = true;

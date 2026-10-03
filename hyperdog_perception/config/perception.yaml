@@ -1,0 +1,24 @@
+# hyperdog_perception: height_map_node parameters
+height_map:
+  ros__parameters:
+    # inputs: point cloud topics; Gazebo's depth camera publishes x-forward points with the
+    # optical frame id, hence the override (use "" on the robot or for correctly framed clouds)
+    cloud_topics: ["/hyperdog/camera/points"]
+    cloud_frame_overrides: ["camera_link"]
+    decimation: 4                 # use every n-th point
+    max_range: 3.0                # [m] from the sensor
+    map_frame: "odom"
+    base_frame: "base_link"
+    min_z: -1.0                   # [m] points below / above the base outside these are dropped
+    max_z: 0.3
+    self_filter_box: [-0.35, 0.35, -0.2, 0.2, -0.18, 0.2]   # [m] body box in the base frame
+
+    # map
+    resolution: 0.02              # [m]
+    length_x: 2.4                 # [m] map size around the robot
+    length_y: 2.4
+    fusion_alpha: 0.3             # low-pass gain of repeated measurements
+    replace_threshold: 0.04       # [m] larger disagreements replace the cell
+    inpaint_radius: 1             # [cells] fill small holes
+    publish_rate: 10.0            # [Hz]
+    publish_cloud: true           # hyperdog/height_map/cloud for RViz

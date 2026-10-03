@@ -47,6 +47,8 @@ All code in this branch is C++; configuration is done with YAML parameter files 
 | `hyperdog_gazebo` | Gazebo Harmonic worlds (`flat`, `terrain`, `rough`, `stairs`, `slippery`), ros_gz bridges, `sim.launch.xml`, `validate.launch.xml`, `scenario_runner`, `robustness_campaign` |
 | `hyperdog_teleop` | gamepad teleop (`/joy` -> `/cmd_vel` + `/hyperdog/command`), mapping in `config/joy_xbox.yaml` |
 | `hyperdog_bringup` | real-robot launch (`robot.launch.xml`), robot parameter overrides |
+| `hyperdog_perception` | terrain elevation map from the depth camera / lidar (`height_map_node`) for foothold selection |
+| `hyperdog_navigation` | Nav2 configuration (lidar costmaps, omnidirectional MPPI), simulation launch, goal test |
 
 Each package has its own README describing its files.
 
@@ -147,6 +149,27 @@ Everything is in [`hyperdog_locomotion/config/locomotion.yaml`](hyperdog_locomot
 
 Numeric parameters accept integers as well (`kp: 80` or `kp: 80.0`).
 
+## Terrain perception
+```bash
+ros2 launch hyperdog_gazebo sim.launch.xml world:=stairs use_camera:=true perception:=true
+```
+`height_map_node` (package `hyperdog_perception`) fuses the depth camera point cloud into a
+robot-centric elevation map (2 cm cells, 2.4 m x 2.4 m) in the odometry frame and publishes it on
+`hyperdog/height_map`. The locomotion controller then takes foothold heights from the map, moves
+footholds away from step edges, lifts the swing foot above the highest terrain along its path and
+uses a lift - move - lower swing over steps (`terrain.*` in `locomotion.yaml`). With perception the
+launch file also enables `estimation.foot_rolling` (leg odometry that models the rolling of the
+spherical feet), because odometry drift directly shifts footholds relative to the map.
+
+## Navigation (Nav2)
+```bash
+ros2 launch hyperdog_navigation sim_navigation.launch.xml headless:=true
+ros2 run hyperdog_navigation navigate_test --ros-args -p use_sim_time:=true -p goal_x:=5.0
+```
+Navigation runs in the odometry frame with rolling costmaps built from the 3D lidar, the NavFn
+planner and the MPPI controller with the omnidirectional motion model; its velocity commands go
+through the velocity smoother to `/cmd_vel`. See [hyperdog_navigation](hyperdog_navigation/README.md).
+
 ## Validation in simulation
 ```bash
 ros2 launch hyperdog_gazebo validate.launch.xml scenario:=full                    # default
@@ -176,7 +199,8 @@ report and a CSV time series, and exits non-zero on failure. Results of the curr
 ## Development
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the code organisation and conventions. `colcon test` runs
 the unit tests and the linters (`ament_uncrustify`, `ament_cpplint`, `ament_lint_cmake`,
-`ament_xmllint`). GitHub Actions builds and tests every push to `latest`.
+`ament_xmllint`). GitHub Actions builds and tests every push to `latest` and then runs the `full`
+validation scenario headless in Gazebo (the report is attached to the workflow run).
 
 ## Real robot
 ```bash
@@ -207,8 +231,16 @@ summary), the whole robot in the air, then on the ground.
   its back, the +-1 rad hip range lets HyperDog kick itself onto its side, but it comes to rest leaning
   back and does not complete the roll (`scenario:=fall_back`). After `max_attempts` it stays in
   damping mode.
-- `stairs` world (4 cm steps): blind locomotion drifts sideways and fails; footholds need terrain
-  perception (planned).
+- Stairs (`stairs` world, 4 cm rise, 35 cm run) are experimental. Blind, the robot fails at the
+  first step. With terrain perception, 1 of 5 runs went up and down the whole staircase, 2 reached
+  the top landing and 2 fell on the first steps. The remaining error is odometry drift on the steps
+  (3-7 cm): it misplaces footholds relative to the map. Registering the map with the foot contacts
+  (`terrain.register_with_feet`) is implemented but not yet stable, so it is off by default.
+- Leg odometry with the default `estimation.foot_rolling: false` under-estimates the travelled
+  distance by about 10 % (the spherical feet roll). `foot_rolling: true` removes this bias, but the
+  gait gains were tuned without it and the trot envelope then drops to about 0.5 m/s; the
+  integral speed tracking meant to compensate (`locomotion.speed_integral_gain`) destabilised the
+  trot at 0.5 m/s and is off. Retuning the gait for the unbiased estimator is open work.
 - The `MitCanSystem` hardware interface and `mit_can_probe` are compiled and load, but they have not
   been tested on hardware yet. Follow the staged [hardware bring-up guide](docs/hardware_bringup.md).
 - Lidar and camera need a render engine (GPU, or Mesa software rendering for headless use). The
