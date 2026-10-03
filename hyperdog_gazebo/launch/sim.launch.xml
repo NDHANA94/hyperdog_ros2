@@ -14,6 +14,8 @@
   <arg name="use_camera" default="true" description="simulate the RGB-D camera (needs GPU rendering)"/>
   <arg name="perception" default="false" description="terrain height map from the depth camera (needs use_camera)"/>
   <arg name="perception_params" default="$(find-pkg-share hyperdog_perception)/config/perception.yaml"/>
+  <arg name="foot_rolling" default="$(var perception)"
+       description="leg odometry with rolling feet: accurate odometry (perception, navigation), trot envelope ~0.5 m/s"/>
   <arg name="rviz" default="false"/>
   <arg name="x" default="0.0"/>
   <arg name="y" default="0.0"/>
@@ -82,8 +84,8 @@
         if="$(var start_controller)">
     <param from="$(var locomotion_params)"/>
     <param name="use_sim_time" value="true"/>
-    <!-- accurate leg odometry matters more than top speed when footholds come from the map -->
-    <param name="estimation.foot_rolling" value="$(var perception)"/>
+    <!-- accurate leg odometry matters more than top speed for perception and navigation -->
+    <param name="estimation.foot_rolling" value="$(var foot_rolling)"/>
     <remap from="imu" to="/hyperdog/imu"/>
   </node>
 

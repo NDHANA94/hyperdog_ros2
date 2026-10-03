@@ -188,12 +188,14 @@ report and a CSV time series, and exits non-zero on failure. Results of the curr
 | scenario | checks | result |
 |---|---|---|
 | [`full`](docs/validation/full.md) | stand, 40 N lateral and 50 N frontal pushes (0.2 s) while standing, trot 0.4 m/s, 40 N push while trotting, sideways 0.2 m/s, turn 0.8 rad/s, walk gait, backward, stop | **PASS** (max tilt 15 deg) |
-| [`stress`](docs/validation/stress.md) | 70 N lateral and 80 N diagonal pushes (0.2 s) while standing, fast trot 0.6 m/s, 50 N push while trotting, trot + turn | **PASS** (2 of 3 runs, see limitations) |
+| [`stress`](docs/validation/stress.md) | 70 N lateral and 80 N diagonal pushes (0.2 s) while standing, fast trot 0.6 m/s, 50 N push while trotting, trot + turn | **PASS** (9 of 11 runs, see limitations) |
 | [`speed`](docs/validation/speed.md) | trot at 0.3 / 0.4 / 0.5 / 0.6 / 0.7 m/s, stop | **PASS** (0.7 m/s commanded -> 0.67 m/s) |
 | [`terrain`](docs/validation/terrain.md) | trot over an 8 deg ramp, 0.28 m plateau and ramp down | **PASS** |
 | [`rough`](docs/validation/rough.md) | trot 6 m over randomly placed 1-3 cm slabs | **PASS** |
 | [`slippery`](docs/validation/slippery.md) | trot across a 3 m patch with friction coefficient 0.3 | **PASS** |
 | [`fall`](docs/validation/fall.md) | knocked over by a roll torque, dropped on its side: self-right, stand up, trot again | **PASS** |
+| [`navigation`](docs/validation/navigation.md) | Nav2 goal 5 m away through an obstacle course (lidar costmaps, MPPI) | **PASS** (true final error 0.10 m) |
+| [`stairs`](docs/validation/stairs.md) (perception) | 5 steps up (4 cm), landing, 5 steps down | experimental: 1 of 5 runs complete |
 | [`robust` campaign](docs/validation/robustness.md) | 10 randomized robots (payload 0-1.5 kg off-centre, foot mu 0.5-1.2, 1-3x IMU noise, motor current -20 %, Kt +-10 %, friction, 0-6 ms latency): 40 N push, trot, trot + turn, stop | **10 / 10 PASS** |
 
 ## Development
@@ -224,8 +226,8 @@ summary), the whole robot in the air, then on the ground.
 - Validated speed envelope: 0.7 m/s trotting (commands are clamped there). Tracking is looser at
   0.6 m/s (0.49 m/s achieved) than at 0.5 or 0.7 m/s.
 - The 80 N diagonal push while standing in the `stress` scenario is at the limit of what the controller
-  recovers from (passed 8 of 9 runs; in the failing run the body tilted 47 deg, beyond the 46 deg
-  threshold of the scenario). The simulation is not bit-for-bit deterministic, because ROS nodes and
+  recovers from (passed 9 of 11 runs; in the failing runs the body tilted 47-48 deg, beyond the
+  46 deg threshold of the scenario). The simulation is not bit-for-bit deterministic, because ROS nodes and
   Gazebo run asynchronously, so results near the limits can vary between runs.
 - Self-righting works from the side and from the belly-down tumbles a push produces. Lying exactly on
   its back, the +-1 rad hip range lets HyperDog kick itself onto its side, but it comes to rest leaning

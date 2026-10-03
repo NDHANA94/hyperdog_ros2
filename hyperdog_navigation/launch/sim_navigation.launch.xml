@@ -6,8 +6,7 @@
   then send a goal in the odom frame, e.g.
   ros2 action send_goal /navigate_to_pose nav2_msgs/action/NavigateToPose \
     "{pose: {header: {frame_id: odom}, pose: {position: {x: 5.0}, orientation: {w: 1.0}}}}"
-  or run the automated check:
-  ros2 run hyperdog_navigation navigate_test --ros-args -p use_sim_time:=true -p goal_x:=5.0
+  or run the automated check (see the package README): navigate_test with use_sim_time true
 -->
 <launch>
   <arg name="world" default="obstacles"/>
@@ -21,6 +20,7 @@
     <arg name="use_lidar" value="true"/>
     <arg name="use_camera" value="$(var perception)"/>
     <arg name="perception" value="$(var perception)"/>
+    <arg name="foot_rolling" value="true"/>
     <arg name="rviz" value="$(var rviz)"/>
   </include>
   <include file="$(find-pkg-share hyperdog_navigation)/launch/navigation.launch.xml">
